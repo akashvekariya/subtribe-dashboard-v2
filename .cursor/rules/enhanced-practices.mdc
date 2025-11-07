@@ -1,0 +1,41 @@
+---
+description: Enhanced practices for production-ready applications
+globs: ["**/*.{ts,tsx}"]
+alwaysApply: false
+---
+
+# Enhanced Development Practices
+
+Reference: @core-nextjs.mdc
+
+## Error Handling & Security
+- Prioritize error handling and edge cases early in functions; use guard clauses for clarity.
+- Use early returns for error conditions; place the happy path last.
+- Implement structured error logging with user-friendly messages in UI and detailed logs in server.
+- Model expected errors as typed return values in Server Actions (e.g., `Result<T, Error>` patterns).
+- Sanitize inputs and escape outputs to prevent XSS and injection attacks.
+- Validate all API endpoints with Zod or equivalent schema validation.
+
+## Form & Validation Patterns
+- Use React Hook Form with Zod for form state and schema validation.
+- Prefer controlled components for consistent, real-time validation feedback.
+- Implement both client-side and server-side validation; server is the source of truth.
+- Use guard clauses for invalid states and preconditions.
+- Provide clear, accessible error messages and success states.
+
+## State Management & Architecture
+- **Global state**: use Zustand for shared client state when required.
+- **Server state**: prefer server state as the source of truth; hydrate client with SWR or React Query when needed.
+- Always implement explicit loading, empty, and error states in UI.
+- Extract reusable logic into custom hooks for clarity and reuse.
+- Use `React.memo` or `useMemo` selectively for expensive computations or large lists; avoid premature optimization.
+
+## Advanced Performance
+- Avoid unnecessary inline function definitions in render if they cause child re-renders.  
+  - Use `useCallback` or lift stable functions outside render scope.  
+  - **Exception**: small inline handlers are acceptable if no performance impact.
+- Implement route-based code splitting and lazy loading for non-critical components.
+- Prefer composition over inheritance for component flexibility.
+- Use `children` prop or render props where it improves reusability, but prefer React composition over render props for most new code.
+- Use `Suspense` boundaries strategically to improve loading states and streaming.
+- Profile critical recruiter dashboard pages (jobs list, candidate scoring) to monitor real-world performance.

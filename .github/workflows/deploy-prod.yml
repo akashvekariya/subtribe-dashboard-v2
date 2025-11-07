@@ -1,0 +1,211 @@
+name: Deploy to Production (Manual)
+
+# ONLY manual trigger (no automatic deployment to Production)
+# Requires typing "deploy-to-production" to confirm deployment
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy-to-production" to confirm'
+        required: true
+        default: ""
+
+# Required for semantic versioning (create tags and releases)
+permissions:
+  contents: write
+
+env:
+  # GCP Configuration
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  REGION: asia-south1 # Mumbai region
+  SERVICE_NAME: subtribe-frontend-prod
+  IMAGE_NAME: subtribe-frontend
+
+jobs:
+  # ============================================================================
+  # Job 1: Lint & Test (runs before Production deployment)
+  # ============================================================================
+  lint-test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js with pnpm
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Step 2.5: Install pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+          run_install: false
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Step 4: Run ESLint
+      - name: Lint with ESLint
+        run: |
+          echo "🔍 Running ESLint..."
+          pnpm run lint
+        continue-on-error: false
+
+      # Step 5: Auto-format code (safety check, should already be formatted by pre-commit)
+      - name: Auto-format code with Prettier
+        run: |
+          echo "✨ Auto-formatting code..."
+          pnpm run format
+        continue-on-error: false
+
+      # Step 6: Type check with TypeScript
+      - name: Type check with TypeScript
+        run: |
+          echo "🔎 Running TypeScript type checker..."
+          pnpm run typecheck
+        continue-on-error: false
+
+      # Step 7: Summary
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ All checks passed!"
+          echo "   - Code linting ✓"
+          echo "   - Code formatting ✓"
+          echo "   - Type checking ✓"
+
+  # ============================================================================
+  # Job 2: Deploy to Production (manual trigger only, after lint-test succeeds)
+  # ============================================================================
+  deploy-prod:
+    name: Build & Deploy to Cloud Run (Production)
+    runs-on: ubuntu-latest
+    needs: lint-test # Wait for lint-test to pass
+    # Use GitHub Environment for environment-specific secrets/variables
+    environment: Production
+    # Safety check: Only deploy if user typed confirmation
+    if: github.event.inputs.confirm == 'deploy-to-production'
+
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for versioning
+
+      # Step 2: Bump version and create tag (PRODUCTION ONLY)
+      # Creates semantic version tags (v1.0.0, v1.0.1, etc.)
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch # Default to patch if no conventional commit
+          release_branches: main
+          tag_prefix: v
+
+      # Step 3: Create GitHub Release (PRODUCTION ONLY)
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+
+      # Step 4: Authenticate with Google Cloud
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # Step 5: Set up Cloud SDK
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      # Step 6: Configure Docker to use gcloud as credential helper
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      # Step 7: Build Docker image with Production build args
+      - name: Build Docker image
+        run: |
+          VERSION_TAG="${{ steps.tag_version.outputs.new_tag }}"
+          echo "🔨 Building Docker image for Production..."
+          echo "📦 Version: $VERSION_TAG"
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }} \
+            --build-arg NEXT_PUBLIC_BASE_URL=${{ vars.NEXT_PUBLIC_BASE_URL }} \
+            --build-arg NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }} \
+            --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.SERVICE_NAME }}:$VERSION_TAG \
+            --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.SERVICE_NAME }}:latest \
+            --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+            .
+
+      # Step 8: Push Docker image to Artifact Registry
+      - name: Push Docker image
+        run: |
+          VERSION_TAG="${{ steps.tag_version.outputs.new_tag }}"
+          echo "📦 Pushing Docker image with version $VERSION_TAG to Artifact Registry..."
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.SERVICE_NAME }}:$VERSION_TAG
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.SERVICE_NAME }}:latest
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+
+      # Step 9: Deploy to Cloud Run (Production)
+      - name: Deploy to Cloud Run (Production)
+        run: |
+          VERSION_TAG="${{ steps.tag_version.outputs.new_tag }}"
+          echo "🚀 Deploying version $VERSION_TAG to Cloud Run (Production)..."
+          echo "🎯 Service: ${{ env.SERVICE_NAME }}"
+          echo "🌍 Environment: Production"
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.SERVICE_NAME }}:$VERSION_TAG \
+            --region=${{ env.REGION }} \
+            --project=${{ env.PROJECT_ID }} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --set-env-vars="NODE_ENV=Production,NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }},NEXT_PUBLIC_BASE_URL=${{ vars.NEXT_PUBLIC_BASE_URL }},NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}" \
+            --memory=512Mi \
+            --cpu=1 \
+            --timeout=60s \
+            --concurrency=80 \
+            --max-instances=2 \
+            --min-instances=0
+
+      # Step 10: Get service URL
+      - name: Get service URL
+        run: |
+          VERSION_TAG="${{ steps.tag_version.outputs.new_tag }}"
+          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+            --region=${{ env.REGION }} \
+            --project=${{ env.PROJECT_ID }} \
+            --format='value(status.url)')
+          echo "✅ Deployment successful!"
+          echo "🌐 Service URL: $SERVICE_URL"
+          echo "🎯 Service: ${{ env.SERVICE_NAME }}"
+          echo "🌍 Environment: Production"
+          echo "📦 Version: $VERSION_TAG"
+
+      # Step 11: Run smoke test
+      - name: Smoke test
+        run: |
+          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+            --region=${{ env.REGION }} \
+            --project=${{ env.PROJECT_ID }} \
+            --format='value(status.url)')
+          echo "🔍 Running smoke test..."
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $SERVICE_URL)
+          # Accept 200 (OK) or 307 (redirect to /dashboard or /sign-in)
+          if [ $HTTP_CODE -eq 200 ] || [ $HTTP_CODE -eq 307 ]; then
+            echo "✅ Smoke test passed (HTTP $HTTP_CODE)"
+          else
+            echo "❌ Smoke test failed (HTTP $HTTP_CODE)"
+            exit 1
+          fi

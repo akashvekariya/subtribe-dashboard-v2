@@ -1,0 +1,89 @@
+---
+description: Core Next.js TypeScript React foundation for Recruiter Dashboard
+globs: ["**/*.{ts,tsx}"]
+alwaysApply: false
+---
+
+# Next.js React TypeScript Core Rules
+
+You are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, Radix UI, and Tailwind.
+
+## Code Style and Structure
+- Write concise, production-quality TypeScript code with accurate, maintainable examples.
+- Use functional and declarative programming patterns; avoid class components.
+- Prefer iteration, modularization, and reusability over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., `isLoading`, `hasError`).
+- Structure files in this order: exported component, subcomponents, helpers, static content, and types.
+- Source files must be `.ts` or `.tsx`. Do not commit `.js` or `.jsx` source files.
+
+## Naming Conventions
+- Use lowercase with dashes for directories (e.g., `components/auth-wizard/`).
+- Use **PascalCase filenames** for React component files (e.g., `SignInForm.tsx`).
+- Export client components from PascalCase functions in `.tsx`; prefix hooks with `use`.
+- Use camelCase for variables and functions; reserve SCREAMING_SNAKE_CASE for constants.
+- Favor named exports for reusable components.  
+  - **Exception**: follow Next.js conventions (`page.tsx`, `layout.tsx`, `error.tsx`) which require default exports.
+
+## TypeScript Usage
+- Use TypeScript for all code; `tsconfig.json` must set `strict: true`.
+- Prefer `interface` for object shapes. Use `type` for unions, mapped types, or `as const` objects.
+- Avoid enums. Prefer union string literal types or `const` objects with `as const`.
+- Use functional components with strongly typed props.
+- Remove `any` and `@ts-ignore`; if unavoidable, document with a clear reason.
+
+## Syntax and Formatting
+- Use named `function` declarations for exported functions/components (better stack traces).
+- Allow arrow functions for inline handlers and small helpers.
+- Always include curly braces in conditionals, even for single statements.
+- Write declarative TSX with explicit prop types.
+- Configure ESLint + Prettier to enforce style and formatting. Treat implicit `any` as an error.
+
+## UI and Styling
+- Use Shadcn UI, Radix, and Tailwind for components and styling.
+- Follow a mobile-first responsive design approach with Tailwind CSS.
+- Wrap Radix primitives in reusable components for consistency.
+- Ensure accessibility: follow `eslint-plugin-jsx-a11y`, use proper ARIA roles, and support full keyboard navigation.
+
+## React and Next.js Conventions
+- **Server-first**: prefer React Server Components (RSC) for data fetching and rendering.
+- Add `"use client"` only when browser APIs, local state, or effects are required.
+- Keep client components small and focused; colocate state and effects only where necessary.
+- Use Next.js App Router conventions for data fetching (`fetch`, `revalidate`, caching).
+- Use `Suspense` for async boundaries and lazy-loaded chunks, not for every client component.
+- For URL state, use `useSearchParams()` or the approved shared library (documented in the repo).
+
+## Performance Optimization
+- Optimize images with `next/image`; prefer AVIF/WebP formats. Always define `sizes`, `priority`, and lazy loading where applicable.
+- Minimize hydration by keeping most components server-side.
+- Use streaming SSR for improved perceived performance.
+- Track and optimize Web Vitals (LCP, CLS, INP) using monitoring tools.
+- Define caching and revalidation policies (`revalidate`, `cache-control`, or ISR) for APIs and pages.
+
+## State Management
+- Server state should be the single source of truth where possible.
+- For client-side cache + revalidation, prefer SWR or React Query.
+- For global client state, prefer Zustand over heavy solutions unless necessary.
+- For local UI state, keep it in the component using React hooks.
+
+## Security and Environment
+- Never commit secrets or API keys. Store all sensitive values in environment variables.
+- Enforce security headers in `next.config.js` (CSP, HSTS, X-Frame-Options).
+- Validate all API inputs and sanitize user data.
+- Enable dependency scanning in CI/CD.
+
+## Testing
+- Unit tests: use Jest + React Testing Library for components and hooks.
+- E2E tests: use Playwright for critical recruiter dashboard flows.
+- Enforce coverage thresholds on critical modules.
+- Run type checking, linting, and tests in CI on every PR.
+
+## Developer Workflow
+- Use `pnpm` (or yarn) with a lockfile for reproducible installs.
+- Add scripts: `dev`, `build`, `lint`, `typecheck`, `test`, `e2e`.
+- Use `lint-staged` + `husky` for pre-commit checks.
+- PRs must pass linting, type checks, tests, and security scans before merge.
+
+## Documentation
+- Maintain a `CONTRIBUTING.md` with these rules and examples.
+- Add a `STYLEGUIDE.md` showing naming conventions, file structure, and example code.
+- Document architectural decisions in `docs/adr/` when introducing significant changes.
