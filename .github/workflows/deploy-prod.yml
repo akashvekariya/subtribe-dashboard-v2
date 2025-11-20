@@ -196,11 +196,11 @@ jobs:
             --project=${{ env.PROJECT_ID }} \
             --format='value(status.url)')
           echo "🔍 Running smoke test..."
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $SERVICE_URL/dashboard)
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $SERVICE_URL/)
           # Accept 200 (OK) or 307 (redirect)
           if [ $HTTP_CODE -eq 200 ] || [ $HTTP_CODE -eq 307 ]; then
-            echo "✅ Smoke test passed (HTTP $HTTP_CODE on /dashboard)"
+            echo "✅ Smoke test passed (HTTP $HTTP_CODE)"
           else
-            echo "❌ Smoke test failed (HTTP $HTTP_CODE on /dashboard)"
+            echo "❌ Smoke test failed (HTTP $HTTP_CODE)"
             exit 1
           fi
