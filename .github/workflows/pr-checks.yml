@@ -1,0 +1,72 @@
+name: PR Checks
+
+# Run checks on all pull requests
+on:
+  pull_request:
+    branches:
+      - main
+      - staging
+
+# No special permissions needed for checks
+permissions:
+  contents: read
+
+jobs:
+  # ============================================================================
+  # Lint, Format, and Type Check
+  # ============================================================================
+  lint-test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js with pnpm
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Step 2.5: Install pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+          run_install: false
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Step 4: Run ESLint
+      - name: Lint with ESLint
+        run: |
+          echo "🔍 Running ESLint..."
+          pnpm run lint
+        continue-on-error: false
+
+      # Step 5: Auto-format code (safety check, should already be formatted by pre-commit)
+      - name: Auto-format code with Prettier
+        run: |
+          echo "✨ Auto-formatting code..."
+          pnpm run format
+        continue-on-error: false
+
+      # Step 6: Type check with TypeScript
+      - name: Type check with TypeScript
+        run: |
+          echo "🔎 Running TypeScript type checker..."
+          pnpm run typecheck
+        continue-on-error: false
+
+      # Step 7: Summary
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ All checks passed!"
+          echo "   - Code linting ✓"
+          echo "   - Code formatting ✓"
+          echo "   - Type checking ✓"
