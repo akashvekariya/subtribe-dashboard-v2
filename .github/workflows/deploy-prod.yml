@@ -1,14 +1,11 @@
-name: Deploy to Production (Manual)
+name: Deploy to Production
 
-# ONLY manual trigger (no automatic deployment to Production)
-# Requires typing "deploy-to-production" to confirm deployment
+# Automatic deployment to Production on merges to main branch
 on:
-  workflow_dispatch:
-    inputs:
-      confirm:
-        description: 'Type "deploy-to-production" to confirm'
-        required: true
-        default: ""
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allow manual triggering if needed
 
 # Required for semantic versioning (create tags and releases)
 permissions:
@@ -18,8 +15,8 @@ env:
   # GCP Configuration
   PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
   REGION: asia-south1 # Mumbai region
-  SERVICE_NAME: subtribe-frontend-prod
-  IMAGE_NAME: subtribe-frontend
+  SERVICE_NAME: subtribe-dashboard-prod
+  ARTIFACT_REGISTRY_REPO: subtribe # Shared repo for all services
 
 jobs:
   # ============================================================================
@@ -90,8 +87,6 @@ jobs:
     needs: lint-test # Wait for lint-test to pass
     # Use GitHub Environment for environment-specific secrets/variables
     environment: Production
-    # Safety check: Only deploy if user typed confirmation
-    if: github.event.inputs.confirm == 'deploy-to-production'
 
     steps:
       # Step 1: Checkout code
@@ -144,9 +139,9 @@ jobs:
             --build-arg NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }} \
             --build-arg NEXT_PUBLIC_BASE_URL=${{ vars.NEXT_PUBLIC_BASE_URL }} \
             --build-arg NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }} \
-            --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.SERVICE_NAME }}:$VERSION_TAG \
-            --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.SERVICE_NAME }}:latest \
-            --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+            --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/${{ env.SERVICE_NAME }}:$VERSION_TAG \
+            --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/${{ env.SERVICE_NAME }}:latest \
+            --tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
             .
 
       # Step 8: Push Docker image to Artifact Registry
@@ -154,9 +149,9 @@ jobs:
         run: |
           VERSION_TAG="${{ steps.tag_version.outputs.new_tag }}"
           echo "📦 Pushing Docker image with version $VERSION_TAG to Artifact Registry..."
-          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.SERVICE_NAME }}:$VERSION_TAG
-          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.SERVICE_NAME }}:latest
-          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/${{ env.SERVICE_NAME }}:$VERSION_TAG
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/${{ env.SERVICE_NAME }}:latest
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
 
       # Step 9: Deploy to Cloud Run (Production)
       - name: Deploy to Cloud Run (Production)
@@ -166,7 +161,7 @@ jobs:
           echo "🎯 Service: ${{ env.SERVICE_NAME }}"
           echo "🌍 Environment: Production"
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.IMAGE_NAME }}/${{ env.SERVICE_NAME }}:$VERSION_TAG \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPO }}/${{ env.SERVICE_NAME }}:$VERSION_TAG \
             --region=${{ env.REGION }} \
             --project=${{ env.PROJECT_ID }} \
             --platform=managed \
@@ -201,11 +196,11 @@ jobs:
             --project=${{ env.PROJECT_ID }} \
             --format='value(status.url)')
           echo "🔍 Running smoke test..."
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $SERVICE_URL)
-          # Accept 200 (OK) or 307 (redirect to /dashboard or /sign-in)
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" $SERVICE_URL/dashboard)
+          # Accept 200 (OK) or 307 (redirect)
           if [ $HTTP_CODE -eq 200 ] || [ $HTTP_CODE -eq 307 ]; then
-            echo "✅ Smoke test passed (HTTP $HTTP_CODE)"
+            echo "✅ Smoke test passed (HTTP $HTTP_CODE on /dashboard)"
           else
-            echo "❌ Smoke test failed (HTTP $HTTP_CODE)"
+            echo "❌ Smoke test failed (HTTP $HTTP_CODE on /dashboard)"
             exit 1
           fi
