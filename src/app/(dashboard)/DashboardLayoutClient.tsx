@@ -14,6 +14,7 @@ export default function DashboardLayoutClient({
 }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     const validateAuth = async () => {
@@ -67,7 +68,10 @@ export default function DashboardLayoutClient({
 
         <div className="flex h-screen">
           {/* Sidebar */}
-          <Sidebar />
+          <Sidebar
+            collapsed={sidebarCollapsed}
+            onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          />
 
           {/* Main content area */}
           <div className="flex-1 flex flex-col overflow-hidden">
