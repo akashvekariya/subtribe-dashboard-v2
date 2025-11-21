@@ -21,6 +21,8 @@ import {
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 
+type TabType = "overview" | "applications";
+
 export default function JobDetailPage() {
   const params = useParams();
   const jobId = params.jobId as string;
@@ -30,7 +32,7 @@ export default function JobDetailPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("");
-  const [showStats, setShowStats] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [stats, setStats] = useState<JobStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [showMetricsInfo, setShowMetricsInfo] = useState(false);
@@ -41,6 +43,8 @@ export default function JobDetailPage() {
         try {
           const jobData = await getJobById(jobId);
           setJob(jobData);
+          // Load stats automatically
+          loadStats();
         } catch (error) {
           if (
             error instanceof Error &&
@@ -114,13 +118,6 @@ export default function JobDetailPage() {
     }
   };
 
-  const handleStatsToggle = () => {
-    if (!showStats && !stats) {
-      loadStats();
-    }
-    setShowStats(!showStats);
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -184,11 +181,6 @@ export default function JobDetailPage() {
         </div>
 
         <div className="flex items-center space-x-3">
-          <Button onClick={handleStatsToggle} variant="outline">
-            <ChartBarIcon className="h-4 w-4 mr-2" />
-            {showStats ? "Hide Stats" : "Show Stats"}
-          </Button>
-
           <Link href={`/jobs/${job.id}/edit`}>
             <Button variant="outline">
               <PencilIcon className="h-4 w-4 mr-2" />
@@ -198,9 +190,35 @@ export default function JobDetailPage() {
         </div>
       </div>
 
-      {/* Job Statistics Section */}
-      {showStats && (
-        <div className="space-y-6 animate-in fade-in duration-300">
+      {/* Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`${
+              activeTab === "overview"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab("applications")}
+            className={`${
+              activeTab === "applications"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
+          >
+            Applications ({candidates.length})
+          </button>
+        </nav>
+      </div>
+
+      {/* Overview Tab */}
+      {activeTab === "overview" && (
+        <div className="space-y-6">
           {statsLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -521,6 +539,123 @@ export default function JobDetailPage() {
               <p className="text-sm text-red-700">Failed to load statistics</p>
             </div>
           )}
+
+          {/* Job Details */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Job Description */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="p-4">
+                  <h3 className="text-base font-semibold text-gray-900 mb-3">
+                    Job Description
+                  </h3>
+                  {job.description ? (
+                    <MarkdownRenderer
+                      content={job.description}
+                      className="prose max-w-none text-sm text-gray-700"
+                    />
+                  ) : (
+                    <p className="text-sm text-gray-500">No description provided</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Quick Stats */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="p-4">
+                  <h3 className="text-base font-semibold text-gray-900 mb-3">
+                    Quick Stats
+                  </h3>
+                  <dl className="space-y-3">
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Applications
+                      </dt>
+                      <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                        {candidates.length}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">
+                        New Today
+                      </dt>
+                      <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                        {
+                          candidates.filter((c) => {
+                            const createdDate = c.created_at || c.applied_at;
+                            return (
+                              createdDate &&
+                              new Date(createdDate).toDateString() ===
+                                new Date().toDateString()
+                            );
+                          }).length
+                        }
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">Status</dt>
+                      <dd className="mt-1">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                            job.status === "active"
+                              ? "bg-green-100 text-green-800"
+                              : job.status === "draft"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {job.status === "active"
+                            ? "Active"
+                            : job.status === "draft"
+                              ? "Draft"
+                              : "Closed"}
+                        </span>
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+
+              {/* Public Link */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="p-4">
+                  <h3 className="text-base font-semibold text-gray-900 mb-3">
+                    Public Application Link
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="p-2.5 bg-gray-50 rounded border border-gray-200">
+                      <p className="text-xs text-gray-600 break-all">{publicUrl}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(publicUrl);
+                          showToast.success("Link copied to clipboard!");
+                        }}
+                      >
+                        Copy Link
+                      </Button>
+                      <a
+                        href={publicUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <Button size="sm" variant="outline" className="w-full">
+                          Preview
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -658,124 +793,8 @@ export default function JobDetailPage() {
         </div>
       )}
 
-      {/* Job Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Job Description */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="p-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-3">
-                Job Description
-              </h3>
-              {job.description ? (
-                <MarkdownRenderer
-                  content={job.description}
-                  className="prose max-w-none text-sm text-gray-700"
-                />
-              ) : (
-                <p className="text-sm text-gray-500">No description provided</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Quick Stats */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="p-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-3">
-                Quick Stats
-              </h3>
-              <dl className="space-y-3">
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">
-                    Applications
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    {candidates.length}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">
-                    New Today
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    {
-                      candidates.filter((c) => {
-                        const createdDate = c.created_at || c.applied_at;
-                        return (
-                          createdDate &&
-                          new Date(createdDate).toDateString() ===
-                            new Date().toDateString()
-                        );
-                      }).length
-                    }
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Status</dt>
-                  <dd className="mt-1">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        job.status === "active"
-                          ? "bg-green-100 text-green-800"
-                          : job.status === "draft"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {job.status === "active"
-                        ? "Active"
-                        : job.status === "draft"
-                          ? "Draft"
-                          : "Closed"}
-                    </span>
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-
-          {/* Public Link */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="p-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-3">
-                Public Application Link
-              </h3>
-              <div className="space-y-3">
-                <div className="p-2.5 bg-gray-50 rounded border border-gray-200">
-                  <p className="text-xs text-gray-600 break-all">{publicUrl}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      navigator.clipboard.writeText(publicUrl);
-                      showToast.success("Link copied to clipboard!");
-                    }}
-                  >
-                    Copy Link
-                  </Button>
-                  <a
-                    href={publicUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block"
-                  >
-                    <Button size="sm" variant="outline" className="w-full">
-                      Preview
-                    </Button>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Candidates Section */}
+      {/* Applications Tab */}
+      {activeTab === "applications" && (
       <div className="bg-white shadow rounded-lg">
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
@@ -874,6 +893,7 @@ export default function JobDetailPage() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }
