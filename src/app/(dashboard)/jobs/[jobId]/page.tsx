@@ -8,7 +8,6 @@ import { getJobById } from "@/lib/jobs";
 import { getCandidatesByJobId, updateCandidateStatus } from "@/lib/candidates";
 import { CandidateCard } from "@/components/shared/CandidateCard";
 import { Button } from "@/components/ui/Button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
 import { ApplicationDetailsDrawer } from "@/components/applications/ApplicationDetailsDrawer";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import showToast from "@/lib/toast";
@@ -21,6 +20,8 @@ import {
   CalendarIcon,
   ChartBarIcon,
   InformationCircleIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 
 type TabType = "overview" | "applications";
@@ -41,6 +42,8 @@ export default function JobDetailPage() {
     string | null
   >(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>("overview");
+  const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -128,6 +131,13 @@ export default function JobDetailPage() {
     }
   };
 
+  // Auto-expand left sidebar when drawer closes
+  useEffect(() => {
+    if (!isDrawerOpen) {
+      setIsLeftSidebarCollapsed(false);
+    }
+  }, [isDrawerOpen]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -160,25 +170,26 @@ export default function JobDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/jobs">
-            <Button variant="outline" size="sm">
-              <ArrowLeftIcon className="h-4 w-4 mr-2" />
-              Back to Jobs
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold leading-7 text-gray-900">
-              {job.title}
-            </h1>
-            <div className="mt-1 flex items-center text-sm text-gray-500">
-              <CalendarIcon className="h-4 w-4 mr-1" />
-              Created {new Date(job.created_at).toLocaleDateString()}
-              <span className="mx-2">•</span>
+      {/* Header with Tabs */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex items-center justify-between gap-6">
+          {/* Left side: Back button + Title + Status */}
+          <div className="flex items-center gap-4">
+            <Link href="/jobs">
+              <button className="group flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white hover:w-auto hover:px-3 hover:rounded-xl transition-all duration-200 overflow-hidden">
+                <ArrowLeftIcon className="h-4 w-4 text-gray-600 flex-shrink-0" />
+                <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-200 whitespace-nowrap">
+                  <span className="ml-2 text-sm font-medium text-gray-700">
+                    Back
+                  </span>
+                </span>
+              </button>
+            </Link>
+
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold text-gray-900">{job.title}</h1>
               <span
-                className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${
                   job.status === "active"
                     ? "bg-green-100 text-green-800"
                     : "bg-gray-100 text-gray-800"
@@ -188,638 +199,668 @@ export default function JobDetailPage() {
               </span>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center space-x-3">
+          {/* Center: Tabs */}
+          <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab("overview")}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                activeTab === "overview"
+                  ? "bg-white border border-[var(--color-primary)] text-gray-900"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Overview
+            </button>
+            <button
+              onClick={() => setActiveTab("applications")}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                activeTab === "applications"
+                  ? "bg-white border border-[var(--color-primary)] text-gray-900"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Applications ({candidates.length})
+            </button>
+          </div>
+
+          {/* Right side: Edit button */}
           <Link href={`/jobs/${job.id}/edit`}>
-            <Button variant="outline">
-              <PencilIcon className="h-4 w-4 mr-2" />
-              Edit Job
-            </Button>
+            <button className="group flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white hover:w-auto hover:px-3 hover:rounded-xl transition-all duration-200 overflow-hidden">
+              <PencilIcon className="h-4 w-4 text-gray-600 flex-shrink-0" />
+              <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-200 whitespace-nowrap">
+                <span className="ml-2 text-sm font-medium text-gray-700">
+                  Edit
+                </span>
+              </span>
+            </button>
           </Link>
         </div>
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="bg-gray-100">
-          <TabsTrigger
-            value="overview"
-            className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-[var(--color-primary)]"
-          >
-            Overview
-          </TabsTrigger>
-          <TabsTrigger
-            value="applications"
-            className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-[var(--color-primary)]"
-          >
-            Applications ({candidates.length})
-          </TabsTrigger>
-        </TabsList>
+      {/* Tab Content */}
+      {activeTab === "overview" && (
+        <div className="space-y-6">
+          {statsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+          ) : stats ? (
+            <>
+              {/* Applications Metrics Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Hero Card - Total Applications */}
+                <div className="bg-white border border-gray-200 rounded-xl p-6 lg:col-span-1">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-medium text-gray-700">
+                      Total applications
+                    </span>
+                  </div>
+                  <div className="text-6xl font-semibold text-gray-900 mb-2">
+                    {stats.applications.total}
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    All-time applications for this position
+                  </p>
+                </div>
 
-        <TabsContent value="overview" className="mt-6">
-          <div className="space-y-6">
-            {statsLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-              </div>
-            ) : stats ? (
-              <>
-                {/* Applications Metrics Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Hero Card - Total Applications */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-6 lg:col-span-1">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-gray-700">
-                        Total applications
-                      </span>
+                {/* Smaller Cards Grid */}
+                <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {/* Today */}
+                  <div className="bg-white border border-gray-200 rounded-xl p-6">
+                    <span className="text-sm font-medium text-gray-700">
+                      New today
+                    </span>
+                    <div className="text-4xl font-semibold text-gray-900 mt-3">
+                      {stats.applications.today}
                     </div>
-                    <div className="text-6xl font-semibold text-gray-900 mb-2">
-                      {stats.applications.total}
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      All-time applications for this position
-                    </p>
                   </div>
 
-                  {/* Smaller Cards Grid */}
-                  <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {/* Today */}
-                    <div className="bg-white border border-gray-200 rounded-xl p-6">
-                      <span className="text-sm font-medium text-gray-700">
-                        New today
-                      </span>
-                      <div className="text-4xl font-semibold text-gray-900 mt-3">
-                        {stats.applications.today}
-                      </div>
+                  {/* This Week */}
+                  <div className="bg-white border border-gray-200 rounded-xl p-6">
+                    <span className="text-sm font-medium text-gray-700">
+                      This week
+                    </span>
+                    <div className="text-4xl font-semibold text-gray-900 mt-3">
+                      {stats.applications.this_week}
                     </div>
+                  </div>
 
-                    {/* This Week */}
-                    <div className="bg-white border border-gray-200 rounded-xl p-6">
-                      <span className="text-sm font-medium text-gray-700">
-                        This week
-                      </span>
-                      <div className="text-4xl font-semibold text-gray-900 mt-3">
-                        {stats.applications.this_week}
-                      </div>
+                  {/* This Month */}
+                  <div className="bg-white border border-gray-200 rounded-xl p-6">
+                    <span className="text-sm font-medium text-gray-700">
+                      This month
+                    </span>
+                    <div className="text-4xl font-semibold text-gray-900 mt-3">
+                      {stats.applications.this_month}
                     </div>
+                  </div>
 
-                    {/* This Month */}
-                    <div className="bg-white border border-gray-200 rounded-xl p-6">
-                      <span className="text-sm font-medium text-gray-700">
-                        This month
-                      </span>
-                      <div className="text-4xl font-semibold text-gray-900 mt-3">
-                        {stats.applications.this_month}
-                      </div>
-                    </div>
-
-                    {/* Views */}
-                    <div className="bg-white border border-gray-200 rounded-xl p-6">
-                      <span className="text-sm font-medium text-gray-700">
-                        Total views
-                      </span>
-                      <div className="text-4xl font-semibold text-blue-600 mt-3">
-                        {stats.views.total}
-                      </div>
+                  {/* Views */}
+                  <div className="bg-white border border-gray-200 rounded-xl p-6">
+                    <span className="text-sm font-medium text-gray-700">
+                      Total views
+                    </span>
+                    <div className="text-4xl font-semibold text-blue-600 mt-3">
+                      {stats.views.total}
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Hiring Funnel */}
-                <div className="bg-white border border-gray-200 rounded-xl p-8">
-                  <div className="flex items-center gap-2 mb-8">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Hiring Funnel
-                    </h3>
-                    <button
-                      onClick={() => setShowMetricsInfo(true)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                      title="View metrics information"
-                    >
-                      <InformationCircleIcon className="h-5 w-5" />
-                    </button>
-                  </div>
+              {/* Hiring Funnel */}
+              <div className="bg-white border border-gray-200 rounded-xl p-8">
+                <div className="flex items-center gap-2 mb-8">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Hiring Funnel
+                  </h3>
+                  <button
+                    onClick={() => setShowMetricsInfo(true)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    title="View metrics information"
+                  >
+                    <InformationCircleIcon className="h-5 w-5" />
+                  </button>
+                </div>
 
-                  {(() => {
-                    // Calculate max value for y-axis scaling
-                    const values = [
-                      stats.views.total,
-                      stats.applications.total,
-                      stats.applications.by_status.screening,
-                      stats.applications.by_status.interviewing,
-                      stats.applications.by_status.offer,
-                      stats.applications.by_status.hired,
-                    ];
-                    const maxValue = Math.max(...values, 1);
-                    const chartHeight = 300; // Fixed chart height in pixels
+                {(() => {
+                  // Calculate max value for y-axis scaling
+                  const values = [
+                    stats.views.total,
+                    stats.applications.total,
+                    stats.applications.by_status.screening,
+                    stats.applications.by_status.interviewing,
+                    stats.applications.by_status.offer,
+                    stats.applications.by_status.hired,
+                  ];
+                  const maxValue = Math.max(...values, 1);
+                  const chartHeight = 300; // Fixed chart height in pixels
 
-                    const stages = [
-                      {
-                        label: "Views",
-                        count: stats.views.total,
-                        color: "bg-blue-100",
-                        textColor: "text-gray-900",
-                        percentage: 100.0,
-                      },
-                      {
-                        label: "Applied",
-                        count: stats.applications.total,
-                        color: "bg-blue-200",
-                        textColor: "text-gray-900",
-                        percentage: stats.quality.application_rate,
-                      },
-                      {
-                        label: "Screening",
-                        count: stats.applications.by_status.screening,
-                        color: "bg-blue-300",
-                        textColor: "text-gray-900",
-                        percentage: stats.quality.screening_rate,
-                      },
-                      {
-                        label: "Interviewing",
-                        count: stats.applications.by_status.interviewing,
-                        color: "bg-blue-400",
-                        textColor: "text-gray-900",
-                        percentage: stats.quality.interview_rate,
-                      },
-                      {
-                        label: "Offer",
-                        count: stats.applications.by_status.offer,
-                        color: "bg-blue-500",
-                        textColor: "text-white",
-                        percentage: stats.quality.offer_rate,
-                      },
-                      {
-                        label: "Hired",
-                        count: stats.applications.by_status.hired,
-                        color: "bg-blue-600",
-                        textColor: "text-white",
-                        percentage: stats.quality.hire_rate,
-                      },
-                    ];
+                  const stages = [
+                    {
+                      label: "Views",
+                      count: stats.views.total,
+                      color: "bg-blue-100",
+                      textColor: "text-gray-900",
+                      percentage: 100.0,
+                    },
+                    {
+                      label: "Applied",
+                      count: stats.applications.total,
+                      color: "bg-blue-200",
+                      textColor: "text-gray-900",
+                      percentage: stats.quality.application_rate,
+                    },
+                    {
+                      label: "Screening",
+                      count: stats.applications.by_status.screening,
+                      color: "bg-blue-300",
+                      textColor: "text-gray-900",
+                      percentage: stats.quality.screening_rate,
+                    },
+                    {
+                      label: "Interviewing",
+                      count: stats.applications.by_status.interviewing,
+                      color: "bg-blue-400",
+                      textColor: "text-gray-900",
+                      percentage: stats.quality.interview_rate,
+                    },
+                    {
+                      label: "Offer",
+                      count: stats.applications.by_status.offer,
+                      color: "bg-blue-500",
+                      textColor: "text-white",
+                      percentage: stats.quality.offer_rate,
+                    },
+                    {
+                      label: "Hired",
+                      count: stats.applications.by_status.hired,
+                      color: "bg-blue-600",
+                      textColor: "text-white",
+                      percentage: stats.quality.hire_rate,
+                    },
+                  ];
 
-                    return (
-                      <div className="space-y-6">
-                        {/* Chart Area */}
-                        <div
-                          className="relative"
-                          style={{ height: `${chartHeight + 60}px` }}
-                        >
-                          {/* Y-axis labels */}
-                          <div className="absolute left-0 top-0 bottom-14 flex flex-col justify-between text-xs text-gray-500 pr-2">
-                            {[
-                              maxValue,
-                              Math.ceil(maxValue * 0.75),
-                              Math.ceil(maxValue * 0.5),
-                              Math.ceil(maxValue * 0.25),
-                              0,
-                            ].map((val, idx) => (
-                              <span key={idx}>{val}</span>
-                            ))}
-                          </div>
+                  return (
+                    <div className="space-y-6">
+                      {/* Chart Area */}
+                      <div
+                        className="relative"
+                        style={{ height: `${chartHeight + 60}px` }}
+                      >
+                        {/* Y-axis labels */}
+                        <div className="absolute left-0 top-0 bottom-14 flex flex-col justify-between text-xs text-gray-500 pr-2">
+                          {[
+                            maxValue,
+                            Math.ceil(maxValue * 0.75),
+                            Math.ceil(maxValue * 0.5),
+                            Math.ceil(maxValue * 0.25),
+                            0,
+                          ].map((val, idx) => (
+                            <span key={idx}>{val}</span>
+                          ))}
+                        </div>
 
-                          {/* Chart bars container */}
-                          <div className="ml-12 h-full flex items-end justify-between gap-4 pr-4">
-                            {stages.map((stage) => {
-                              const barHeight =
-                                (stage.count / maxValue) * chartHeight;
-                              const minBarHeight =
-                                stage.count > 0 ? Math.max(barHeight, 20) : 0;
+                        {/* Chart bars container */}
+                        <div className="ml-12 h-full flex items-end justify-between gap-4 pr-4">
+                          {stages.map((stage) => {
+                            const barHeight =
+                              (stage.count / maxValue) * chartHeight;
+                            const minBarHeight =
+                              stage.count > 0 ? Math.max(barHeight, 20) : 0;
 
-                              return (
+                            return (
+                              <div
+                                key={stage.label}
+                                className="flex-1 flex flex-col items-center group"
+                              >
+                                {/* Bar */}
                                 <div
-                                  key={stage.label}
-                                  className="flex-1 flex flex-col items-center group"
+                                  className={`${stage.color} rounded-t-lg w-full transition-all hover:opacity-80 relative flex flex-col justify-end`}
+                                  style={{
+                                    height: `${minBarHeight}px`,
+                                    minHeight: stage.count > 0 ? "20px" : "0px",
+                                  }}
                                 >
-                                  {/* Bar */}
-                                  <div
-                                    className={`${stage.color} rounded-t-lg w-full transition-all hover:opacity-80 relative flex flex-col justify-end`}
-                                    style={{
-                                      height: `${minBarHeight}px`,
-                                      minHeight:
-                                        stage.count > 0 ? "20px" : "0px",
-                                    }}
-                                  >
-                                    {/* Count label on bar */}
-                                    {stage.count > 0 && (
-                                      <div
-                                        className={`absolute -top-6 left-1/2 transform -translate-x-1/2 ${stage.textColor} text-sm font-semibold whitespace-nowrap`}
-                                      >
-                                        {stage.count}
-                                      </div>
-                                    )}
-                                  </div>
+                                  {/* Count label on bar */}
+                                  {stage.count > 0 && (
+                                    <div
+                                      className={`absolute -top-6 left-1/2 transform -translate-x-1/2 ${stage.textColor} text-sm font-semibold whitespace-nowrap`}
+                                    >
+                                      {stage.count}
+                                    </div>
+                                  )}
+                                </div>
 
-                                  {/* X-axis label */}
-                                  <div className="mt-4 text-center">
-                                    <div className="text-sm font-medium text-gray-700">
-                                      {stage.label}
-                                    </div>
-                                    <div className="text-xs text-gray-500 mt-1">
-                                      {stage.percentage.toFixed(1)}%
-                                    </div>
+                                {/* X-axis label */}
+                                <div className="mt-4 text-center">
+                                  <div className="text-sm font-medium text-gray-700">
+                                    {stage.label}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    {stage.percentage.toFixed(1)}%
                                   </div>
                                 </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Summary Stats */}
-                  <div className="mt-8 pt-6 border-t border-gray-200">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                      <div>
-                        <div className="text-sm text-gray-600 mb-1">
-                          Conversion Rate
-                        </div>
-                        <div className="text-2xl font-semibold text-gray-900">
-                          {stats.pipeline.conversion_rate.toFixed(1)}%
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-600 mb-1">
-                          Avg Time to Hire
-                        </div>
-                        <div className="text-2xl font-semibold text-gray-900">
-                          {stats.pipeline.avg_time_to_hire_days
-                            ? `${Math.round(stats.pipeline.avg_time_to_hire_days)}d`
-                            : "—"}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-600 mb-1">
-                          Total Rejected
-                        </div>
-                        <div className="text-2xl font-semibold text-red-600">
-                          {stats.applications.by_status.rejected}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-600 mb-1">
-                          Success Rate
-                        </div>
-                        <div className="text-2xl font-semibold text-green-600">
-                          {stats.applications.total > 0
-                            ? (
-                                (stats.applications.by_status.hired /
-                                  stats.applications.total) *
-                                100
-                              ).toFixed(1)
-                            : "0.0"}
-                          %
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  );
+                })()}
 
-                {/* Activity & Pipeline Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {/* Days Since Published */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
-                    <span className="text-sm font-medium text-gray-700">
-                      Days since published
-                    </span>
-                    <div className="text-4xl font-semibold text-gray-900 mt-3">
-                      {stats.activity.days_since_published}
+                {/* Summary Stats */}
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">
+                        Conversion Rate
+                      </div>
+                      <div className="text-2xl font-semibold text-gray-900">
+                        {stats.pipeline.conversion_rate.toFixed(1)}%
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Days Since Last Application */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
-                    <span className="text-sm font-medium text-gray-700">
-                      Days since last app
-                    </span>
-                    <div className="text-4xl font-semibold text-gray-900 mt-3">
-                      {stats.activity.days_since_last_application ?? "—"}
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">
+                        Avg Time to Hire
+                      </div>
+                      <div className="text-2xl font-semibold text-gray-900">
+                        {stats.pipeline.avg_time_to_hire_days
+                          ? `${Math.round(stats.pipeline.avg_time_to_hire_days)}d`
+                          : "—"}
+                      </div>
                     </div>
-                    {stats.activity.is_recently_active && (
-                      <span className="inline-flex mt-2 px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                        Recently Active
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Conversion Rate */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
-                    <span className="text-sm font-medium text-gray-700">
-                      Conversion rate
-                    </span>
-                    <div className="w-full bg-gray-100 rounded-full h-1.5 my-4">
-                      <div
-                        className="h-1.5 rounded-full bg-green-600 transition-all"
-                        style={{
-                          width: `${Math.min(stats.pipeline.conversion_rate, 100)}%`,
-                        }}
-                      />
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">
+                        Total Rejected
+                      </div>
+                      <div className="text-2xl font-semibold text-red-600">
+                        {stats.applications.by_status.rejected}
+                      </div>
                     </div>
-                    <div className="text-3xl font-semibold text-gray-900">
-                      {stats.pipeline.conversion_rate.toFixed(1)}%
+                    <div>
+                      <div className="text-sm text-gray-600 mb-1">
+                        Success Rate
+                      </div>
+                      <div className="text-2xl font-semibold text-green-600">
+                        {stats.applications.total > 0
+                          ? (
+                              (stats.applications.by_status.hired /
+                                stats.applications.total) *
+                              100
+                            ).toFixed(1)
+                          : "0.0"}
+                        %
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Avg Time to Hire */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
-                    <span className="text-sm font-medium text-gray-700">
-                      Avg time to hire
-                    </span>
-                    <div className="text-4xl font-semibold text-gray-900 mt-3">
-                      {stats.pipeline.avg_time_to_hire_days
-                        ? `${Math.round(stats.pipeline.avg_time_to_hire_days)}d`
-                        : "—"}
-                    </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-sm text-red-700">
-                  Failed to load statistics
-                </p>
-              </div>
-            )}
-
-            {/* Job Details */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Main Content */}
-              <div className="lg:col-span-2 space-y-6">
-                {/* Job Description */}
-                <div className="bg-white shadow rounded-lg">
-                  <div className="p-4">
-                    <h3 className="text-base font-semibold text-gray-900 mb-3">
-                      Job Description
-                    </h3>
-                    {job.description ? (
-                      <MarkdownRenderer
-                        content={job.description}
-                        className="prose max-w-none text-sm text-gray-700"
-                      />
-                    ) : (
-                      <p className="text-sm text-gray-500">
-                        No description provided
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Sidebar */}
-              <div className="space-y-6">
-                {/* Quick Stats */}
-                <div className="bg-white shadow rounded-lg">
-                  <div className="p-4">
-                    <h3 className="text-base font-semibold text-gray-900 mb-3">
-                      Quick Stats
-                    </h3>
-                    <dl className="space-y-3">
-                      <div>
-                        <dt className="text-sm font-medium text-gray-500">
-                          Applications
-                        </dt>
-                        <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                          {candidates.length}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-gray-500">
-                          New Today
-                        </dt>
-                        <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                          {
-                            candidates.filter((c) => {
-                              const createdDate = c.created_at || c.applied_at;
-                              return (
-                                createdDate &&
-                                new Date(createdDate).toDateString() ===
-                                  new Date().toDateString()
-                              );
-                            }).length
-                          }
-                        </dd>
-                      </div>
-                      <div>
-                        <dt className="text-sm font-medium text-gray-500">
-                          Status
-                        </dt>
-                        <dd className="mt-1">
-                          <span
-                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                              job.status === "active"
-                                ? "bg-green-100 text-green-800"
-                                : job.status === "draft"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-gray-100 text-gray-800"
-                            }`}
-                          >
-                            {job.status === "active"
-                              ? "Active"
+              {/* Activity & Pipeline Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Days Since Published */}
+                <div className="bg-white border border-gray-200 rounded-xl p-6">
+                  <span className="text-sm font-medium text-gray-700">
+                    Days since published
+                  </span>
+                  <div className="text-4xl font-semibold text-gray-900 mt-3">
+                    {stats.activity.days_since_published}
+                  </div>
+                </div>
+
+                {/* Days Since Last Application */}
+                <div className="bg-white border border-gray-200 rounded-xl p-6">
+                  <span className="text-sm font-medium text-gray-700">
+                    Days since last app
+                  </span>
+                  <div className="text-4xl font-semibold text-gray-900 mt-3">
+                    {stats.activity.days_since_last_application ?? "—"}
+                  </div>
+                  {stats.activity.is_recently_active && (
+                    <span className="inline-flex mt-2 px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                      Recently Active
+                    </span>
+                  )}
+                </div>
+
+                {/* Conversion Rate */}
+                <div className="bg-white border border-gray-200 rounded-xl p-6">
+                  <span className="text-sm font-medium text-gray-700">
+                    Conversion rate
+                  </span>
+                  <div className="w-full bg-gray-100 rounded-full h-1.5 my-4">
+                    <div
+                      className="h-1.5 rounded-full bg-green-600 transition-all"
+                      style={{
+                        width: `${Math.min(stats.pipeline.conversion_rate, 100)}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="text-3xl font-semibold text-gray-900">
+                    {stats.pipeline.conversion_rate.toFixed(1)}%
+                  </div>
+                </div>
+
+                {/* Avg Time to Hire */}
+                <div className="bg-white border border-gray-200 rounded-xl p-6">
+                  <span className="text-sm font-medium text-gray-700">
+                    Avg time to hire
+                  </span>
+                  <div className="text-4xl font-semibold text-gray-900 mt-3">
+                    {stats.pipeline.avg_time_to_hire_days
+                      ? `${Math.round(stats.pipeline.avg_time_to_hire_days)}d`
+                      : "—"}
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">Failed to load statistics</p>
+            </div>
+          )}
+
+          {/* Job Details */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Job Description */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="p-4">
+                  <h3 className="text-base font-semibold text-gray-900 mb-3">
+                    Job Description
+                  </h3>
+                  {job.description ? (
+                    <MarkdownRenderer
+                      content={job.description}
+                      className="prose max-w-none text-sm text-gray-700"
+                    />
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      No description provided
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Quick Stats */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="p-4">
+                  <h3 className="text-base font-semibold text-gray-900 mb-3">
+                    Quick Stats
+                  </h3>
+                  <dl className="space-y-3">
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Applications
+                      </dt>
+                      <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                        {candidates.length}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">
+                        New Today
+                      </dt>
+                      <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                        {
+                          candidates.filter((c) => {
+                            const createdDate = c.created_at || c.applied_at;
+                            return (
+                              createdDate &&
+                              new Date(createdDate).toDateString() ===
+                                new Date().toDateString()
+                            );
+                          }).length
+                        }
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Status
+                      </dt>
+                      <dd className="mt-1">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                            job.status === "active"
+                              ? "bg-green-100 text-green-800"
                               : job.status === "draft"
-                                ? "Draft"
-                                : "Closed"}
-                          </span>
-                        </dd>
-                      </div>
-                    </dl>
-                  </div>
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {job.status === "active"
+                            ? "Active"
+                            : job.status === "draft"
+                              ? "Draft"
+                              : "Closed"}
+                        </span>
+                      </dd>
+                    </div>
+                  </dl>
                 </div>
+              </div>
 
-                {/* Public Link */}
-                <div className="bg-white shadow rounded-lg">
-                  <div className="p-4">
-                    <h3 className="text-base font-semibold text-gray-900 mb-3">
-                      Public Application Link
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="p-2.5 bg-gray-50 rounded border border-gray-200">
-                        <p className="text-xs text-gray-600 break-all">
-                          {publicUrl}
-                        </p>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            navigator.clipboard.writeText(publicUrl);
-                            showToast.success("Link copied to clipboard!");
-                          }}
-                        >
-                          Copy Link
+              {/* Public Link */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="p-4">
+                  <h3 className="text-base font-semibold text-gray-900 mb-3">
+                    Public Application Link
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="p-2.5 bg-gray-50 rounded border border-gray-200">
+                      <p className="text-xs text-gray-600 break-all">
+                        {publicUrl}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(publicUrl);
+                          showToast.success("Link copied to clipboard!");
+                        }}
+                      >
+                        Copy Link
+                      </Button>
+                      <a
+                        href={publicUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <Button size="sm" variant="outline" className="w-full">
+                          Preview
                         </Button>
-                        <a
-                          href={publicUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block"
-                        >
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full"
-                          >
-                            Preview
-                          </Button>
-                        </a>
-                      </div>
+                      </a>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Metrics Info Modal */}
-        {showMetricsInfo && (
+      {/* Metrics Info Modal */}
+      {showMetricsInfo && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          onClick={() => setShowMetricsInfo(false)}
+        >
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-            onClick={() => setShowMetricsInfo(false)}
+            className="w-full max-w-2xl rounded-lg p-6 max-h-[90vh] overflow-y-auto"
+            style={{
+              backgroundColor: "var(--color-bg-surface)",
+              boxShadow: "var(--shadow-xl)",
+            }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className="w-full max-w-2xl rounded-lg p-6 max-h-[90vh] overflow-y-auto"
-              style={{
-                backgroundColor: "var(--color-bg-surface)",
-                boxShadow: "var(--shadow-xl)",
-              }}
-              onClick={(e) => e.stopPropagation()}
+            <h3
+              className="text-xl font-semibold mb-3"
+              style={{ color: "var(--color-text-primary)" }}
             >
-              <h3
-                className="text-xl font-semibold mb-3"
-                style={{ color: "var(--color-text-primary)" }}
-              >
-                Hiring Metrics Explained
-              </h3>
+              Hiring Metrics Explained
+            </h3>
 
-              <div className="space-y-4">
-                {/* Key Metrics */}
-                <div>
-                  <h4
-                    className="text-sm font-semibold mb-3"
-                    style={{ color: "var(--color-text-primary)" }}
-                  >
-                    Key Metrics
-                  </h4>
-                  <div className="space-y-3">
-                    <div>
-                      <p
-                        className="text-sm font-medium mb-1"
-                        style={{ color: "var(--color-text-primary)" }}
-                      >
-                        Conversion Rate
-                      </p>
-                      <p
-                        className="text-sm"
-                        style={{ color: "var(--color-text-secondary)" }}
-                      >
-                        Percentage of applicants who were hired. Calculated as
-                        (Hired / Total Applications) × 100. Higher is better.
-                      </p>
-                    </div>
-
-                    <div>
-                      <p
-                        className="text-sm font-medium mb-1"
-                        style={{ color: "var(--color-text-primary)" }}
-                      >
-                        Average Time to Hire
-                      </p>
-                      <p
-                        className="text-sm"
-                        style={{ color: "var(--color-text-secondary)" }}
-                      >
-                        Average number of days from application to hire. Lower
-                        is generally better for efficiency.
-                      </p>
-                    </div>
-
-                    <div>
-                      <p
-                        className="text-sm font-medium mb-1"
-                        style={{ color: "var(--color-text-primary)" }}
-                      >
-                        Success Rate
-                      </p>
-                      <p
-                        className="text-sm"
-                        style={{ color: "var(--color-text-secondary)" }}
-                      >
-                        Percentage of applications that result in a hire.
-                        Indicates the quality of your candidate pipeline.
-                      </p>
-                    </div>
-
-                    <div>
-                      <p
-                        className="text-sm font-medium mb-1"
-                        style={{ color: "var(--color-text-primary)" }}
-                      >
-                        Total Rejected
-                      </p>
-                      <p
-                        className="text-sm"
-                        style={{ color: "var(--color-text-secondary)" }}
-                      >
-                        Total number of candidates who were rejected at any
-                        stage of the hiring process.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Stage Percentages */}
-                <div
-                  className="pt-4 border-t"
-                  style={{ borderColor: "var(--color-border)" }}
+            <div className="space-y-4">
+              {/* Key Metrics */}
+              <div>
+                <h4
+                  className="text-sm font-semibold mb-3"
+                  style={{ color: "var(--color-text-primary)" }}
                 >
-                  <h4
-                    className="text-sm font-semibold mb-2"
-                    style={{ color: "var(--color-text-primary)" }}
-                  >
-                    Stage Percentages
-                  </h4>
-                  <div
-                    className="text-sm"
-                    style={{ color: "var(--color-text-secondary)" }}
-                  >
-                    <p>
-                      Each funnel stage shows a percentage indicating the
-                      conversion rate from the previous stage. These help
-                      identify where candidates are dropping off in your hiring
-                      process.
+                  Key Metrics
+                </h4>
+                <div className="space-y-3">
+                  <div>
+                    <p
+                      className="text-sm font-medium mb-1"
+                      style={{ color: "var(--color-text-primary)" }}
+                    >
+                      Conversion Rate
+                    </p>
+                    <p
+                      className="text-sm"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      Percentage of applicants who were hired. Calculated as
+                      (Hired / Total Applications) × 100. Higher is better.
+                    </p>
+                  </div>
+
+                  <div>
+                    <p
+                      className="text-sm font-medium mb-1"
+                      style={{ color: "var(--color-text-primary)" }}
+                    >
+                      Average Time to Hire
+                    </p>
+                    <p
+                      className="text-sm"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      Average number of days from application to hire. Lower is
+                      generally better for efficiency.
+                    </p>
+                  </div>
+
+                  <div>
+                    <p
+                      className="text-sm font-medium mb-1"
+                      style={{ color: "var(--color-text-primary)" }}
+                    >
+                      Success Rate
+                    </p>
+                    <p
+                      className="text-sm"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      Percentage of applications that result in a hire.
+                      Indicates the quality of your candidate pipeline.
+                    </p>
+                  </div>
+
+                  <div>
+                    <p
+                      className="text-sm font-medium mb-1"
+                      style={{ color: "var(--color-text-primary)" }}
+                    >
+                      Total Rejected
+                    </p>
+                    <p
+                      className="text-sm"
+                      style={{ color: "var(--color-text-secondary)" }}
+                    >
+                      Total number of candidates who were rejected at any stage
+                      of the hiring process.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-6">
-                <Button
-                  onClick={() => setShowMetricsInfo(false)}
-                  className="flex-1"
+              {/* Stage Percentages */}
+              <div
+                className="pt-4 border-t"
+                style={{ borderColor: "var(--color-border)" }}
+              >
+                <h4
+                  className="text-sm font-semibold mb-2"
+                  style={{ color: "var(--color-text-primary)" }}
                 >
-                  Got it
-                </Button>
+                  Stage Percentages
+                </h4>
+                <div
+                  className="text-sm"
+                  style={{ color: "var(--color-text-secondary)" }}
+                >
+                  <p>
+                    Each funnel stage shows a percentage indicating the
+                    conversion rate from the previous stage. These help identify
+                    where candidates are dropping off in your hiring process.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
 
-        <TabsContent value="applications" className="mt-6">
+            <div className="flex gap-3 mt-6">
+              <Button
+                onClick={() => setShowMetricsInfo(false)}
+                className="flex-1"
+              >
+                Got it
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "applications" && (
+        <div className="flex gap-4 h-[calc(100vh-250px)]">
+          {/* Applications List */}
           <div
-            className={`flex gap-4 ${isDrawerOpen ? "h-[calc(100vh-250px)]" : ""}`}
+            className={`bg-white shadow rounded-lg transition-all duration-300 h-full ${
+              isLeftSidebarCollapsed
+                ? "w-12"
+                : isDrawerOpen
+                  ? "w-[35%]"
+                  : "w-full"
+            }`}
           >
-            {/* Applications List */}
-            <div
-              className={`bg-white shadow rounded-lg transition-all ${isDrawerOpen ? "w-[35%]" : "w-full"}`}
-            >
+            {isLeftSidebarCollapsed ? (
+              // Collapsed state - show expand button
+              <div className="h-full flex items-center justify-center">
+                <button
+                  onClick={() => setIsLeftSidebarCollapsed(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Expand sidebar"
+                >
+                  <ChevronRightIcon className="h-5 w-5 text-gray-600" />
+                </button>
+              </div>
+            ) : (
               <div className="p-4 h-full flex flex-col">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-base font-semibold text-gray-900">
-                    Applications ({candidates.length})
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    {isDrawerOpen && (
+                      <button
+                        onClick={() => setIsLeftSidebarCollapsed(true)}
+                        className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Collapse sidebar"
+                      >
+                        <ChevronLeftIcon className="h-4 w-4 text-gray-600" />
+                      </button>
+                    )}
+                    <h3 className="text-base font-semibold text-gray-900">
+                      Applications ({candidates.length})
+                    </h3>
+                  </div>
                   <div className="flex items-center space-x-2">
                     <select
                       className="h-8 text-sm border border-gray-300 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -864,7 +905,7 @@ export default function JobDetailPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+                    <div className="flex-1 overflow-y-auto space-y-4">
                       {candidates
                         .sort((a, b) => (b.ai_score || 0) - (a.ai_score || 0))
                         .map((candidate) => (
@@ -873,6 +914,7 @@ export default function JobDetailPage() {
                             candidate={candidate}
                             onStatusChange={handleCandidateStatusChange}
                             onClick={() => handleViewApplication(candidate.id)}
+                            isSelected={selectedApplicationId === candidate.id}
                           />
                         ))}
                     </div>
@@ -916,50 +958,46 @@ export default function JobDetailPage() {
                   </>
                 )}
               </div>
-            </div>
-
-            {/* Application Details Panel */}
-            {isDrawerOpen && selectedApplicationId && (
-              <div className="w-[65%] bg-white shadow rounded-lg overflow-hidden">
-                <div className="h-full flex flex-col">
-                  <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Application Details
-                    </h3>
-                    <button
-                      onClick={() => {
-                        setIsDrawerOpen(false);
-                        setSelectedApplicationId(null);
-                      }}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      <svg
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="flex-1 overflow-hidden">
-                    <ApplicationDetailsDrawer
-                      applicationId={selectedApplicationId}
-                      onStatusChange={handleCandidateStatusChange}
-                    />
-                  </div>
-                </div>
-              </div>
             )}
           </div>
-        </TabsContent>
-      </Tabs>
+
+          {/* Application Details Panel */}
+          {isDrawerOpen && selectedApplicationId && (
+            <div
+              className={`h-full bg-white shadow rounded-lg overflow-y-auto relative transition-all duration-300 ${
+                isLeftSidebarCollapsed ? "w-[calc(100%-3rem-1rem)]" : "w-[65%]"
+              }`}
+            >
+              <button
+                onClick={() => {
+                  setIsDrawerOpen(false);
+                  setSelectedApplicationId(null);
+                  setIsLeftSidebarCollapsed(false);
+                }}
+                className="absolute top-4 right-4 z-20 p-2 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors shadow-sm"
+              >
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+              <ApplicationDetailsDrawer
+                applicationId={selectedApplicationId}
+                onStatusChange={handleCandidateStatusChange}
+              />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -277,7 +277,7 @@ export function ApplicationDetailsDrawer({
   return (
     <div className="h-full overflow-y-auto">
       {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 z-10">
+      <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 pr-20 z-10">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-gray-900">{candidateName}</h2>
@@ -289,7 +289,7 @@ export function ApplicationDetailsDrawer({
             </p>
           </div>
           <span
-            className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${currentStatus?.color || "bg-gray-100 text-gray-800"}`}
+            className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${currentStatus?.color || "bg-gray-100 text-gray-800"} mr-2`}
           >
             {currentStatus?.label || application.status}
           </span>
@@ -342,166 +342,176 @@ export function ApplicationDetailsDrawer({
           </TabsContent>
 
           <TabsContent value="overview" className="mt-6 space-y-6">
-            {/* Contact Information */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">
-                Contact Information
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <EnvelopeIcon className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <dt className="text-xs font-medium text-gray-500">Email</dt>
-                    <dd className="text-sm text-gray-900">
-                      <a
-                        href={`mailto:${application.email}`}
-                        className="text-blue-600 hover:underline"
-                      >
-                        {application.email}
-                      </a>
-                    </dd>
-                  </div>
-                </div>
-                {application.phone && (
+            {/* Row 1: Contact Information + Professional Links */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Contact Information */}
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <h3 className="text-base font-semibold text-gray-900 mb-4">
+                  Contact Information
+                </h3>
+                <div className="space-y-3">
                   <div className="flex items-center space-x-3">
-                    <PhoneIcon className="h-5 w-5 text-gray-400" />
+                    <EnvelopeIcon className="h-5 w-5 text-gray-400" />
                     <div>
                       <dt className="text-xs font-medium text-gray-500">
-                        Phone
+                        Email
                       </dt>
                       <dd className="text-sm text-gray-900">
-                        {application.phone}
+                        <a
+                          href={`mailto:${application.email}`}
+                          className="text-blue-600 hover:underline"
+                        >
+                          {application.email}
+                        </a>
                       </dd>
                     </div>
                   </div>
-                )}
+                  {application.phone && (
+                    <div className="flex items-center space-x-3">
+                      <PhoneIcon className="h-5 w-5 text-gray-400" />
+                      <div>
+                        <dt className="text-xs font-medium text-gray-500">
+                          Phone
+                        </dt>
+                        <dd className="text-sm text-gray-900">
+                          {application.phone}
+                        </dd>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Professional Links */}
-            {(application.linkedin_url ||
-              application.github_url ||
-              application.portfolio_url) && (
+              {/* Professional Links */}
               <div className="bg-white border border-gray-200 rounded-lg p-4">
                 <h3 className="text-base font-semibold text-gray-900 mb-4">
                   Professional Links
                 </h3>
-                <div className="space-y-3">
-                  {application.linkedin_url && (
-                    <div>
-                      <Label className="text-xs">LinkedIn</Label>
-                      <a
-                        href={application.linkedin_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block text-sm text-blue-600 hover:underline truncate"
-                      >
-                        {application.linkedin_url}
-                      </a>
-                    </div>
-                  )}
-                  {application.github_url && (
-                    <div>
-                      <Label className="text-xs">GitHub</Label>
-                      <a
-                        href={application.github_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block text-sm text-blue-600 hover:underline truncate"
-                      >
-                        {application.github_url}
-                      </a>
-                    </div>
-                  )}
-                  {application.portfolio_url && (
-                    <div>
-                      <Label className="text-xs">Portfolio</Label>
-                      <a
-                        href={application.portfolio_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block text-sm text-blue-600 hover:underline truncate"
-                      >
-                        {application.portfolio_url}
-                      </a>
-                    </div>
-                  )}
-                </div>
+                {application.linkedin_url ||
+                application.github_url ||
+                application.portfolio_url ? (
+                  <div className="space-y-3">
+                    {application.linkedin_url && (
+                      <div>
+                        <Label className="text-xs">LinkedIn</Label>
+                        <a
+                          href={application.linkedin_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-sm text-blue-600 hover:underline truncate"
+                        >
+                          {application.linkedin_url}
+                        </a>
+                      </div>
+                    )}
+                    {application.github_url && (
+                      <div>
+                        <Label className="text-xs">GitHub</Label>
+                        <a
+                          href={application.github_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-sm text-blue-600 hover:underline truncate"
+                        >
+                          {application.github_url}
+                        </a>
+                      </div>
+                    )}
+                    {application.portfolio_url && (
+                      <div>
+                        <Label className="text-xs">Portfolio</Label>
+                        <a
+                          href={application.portfolio_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-sm text-blue-600 hover:underline truncate"
+                        >
+                          {application.portfolio_url}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">No links provided</p>
+                )}
               </div>
-            )}
+            </div>
 
-            {/* Compensation & Availability */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">
-                Compensation & Availability
-              </h3>
-              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {application.current_ctc && (
-                  <div>
-                    <dt className="text-xs font-medium text-gray-500">
-                      Current CTC
-                    </dt>
-                    <dd className="mt-1 text-sm text-gray-900">
-                      ₹{application.current_ctc.toLocaleString()}
-                    </dd>
-                  </div>
-                )}
-                {application.expected_ctc && (
-                  <div>
-                    <dt className="text-xs font-medium text-gray-500">
-                      Expected CTC
-                    </dt>
-                    <dd className="mt-1 text-sm text-gray-900">
-                      ₹{application.expected_ctc.toLocaleString()}
-                    </dd>
-                  </div>
-                )}
-                {application.notice_period_days !== undefined &&
-                  application.notice_period_days !== null && (
+            {/* Row 2: Compensation & Availability + Resume */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Compensation & Availability */}
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <h3 className="text-base font-semibold text-gray-900 mb-4">
+                  Compensation & Availability
+                </h3>
+                <dl className="grid grid-cols-1 gap-3">
+                  {application.current_ctc && (
                     <div>
                       <dt className="text-xs font-medium text-gray-500">
-                        Notice Period
+                        Current CTC
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900">
-                        {application.notice_period_days} days
+                        ₹{application.current_ctc.toLocaleString()}
                       </dd>
                     </div>
                   )}
-              </dl>
-            </div>
-
-            {/* Resume Actions */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">
-                Resume
-              </h3>
-              <div className="flex flex-col gap-2">
-                <Button
-                  onClick={handleViewResume}
-                  disabled={isLoadingResume}
-                  size="sm"
-                  variant="outline"
-                  className="w-full justify-start"
-                >
-                  <DocumentTextIcon className="h-4 w-4 mr-2" />
-                  Open Resume in New Tab
-                </Button>
-                <Button
-                  onClick={handleDownloadResume}
-                  disabled={isLoadingResume}
-                  size="sm"
-                  variant="outline"
-                  className="w-full justify-start"
-                >
-                  <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
-                  Download Resume
-                </Button>
+                  {application.expected_ctc && (
+                    <div>
+                      <dt className="text-xs font-medium text-gray-500">
+                        Expected CTC
+                      </dt>
+                      <dd className="mt-1 text-sm text-gray-900">
+                        ₹{application.expected_ctc.toLocaleString()}
+                      </dd>
+                    </div>
+                  )}
+                  {application.notice_period_days !== undefined &&
+                    application.notice_period_days !== null && (
+                      <div>
+                        <dt className="text-xs font-medium text-gray-500">
+                          Notice Period
+                        </dt>
+                        <dd className="mt-1 text-sm text-gray-900">
+                          {application.notice_period_days} days
+                        </dd>
+                      </div>
+                    )}
+                </dl>
               </div>
-              {application.resume_filename && (
-                <p className="text-xs text-gray-500 mt-2">
-                  {application.resume_filename}
-                </p>
-              )}
+
+              {/* Resume Actions */}
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <h3 className="text-base font-semibold text-gray-900 mb-4">
+                  Resume
+                </h3>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    onClick={handleViewResume}
+                    disabled={isLoadingResume}
+                    size="sm"
+                    variant="outline"
+                    className="w-full justify-start"
+                  >
+                    <DocumentTextIcon className="h-4 w-4 mr-2" />
+                    Open Resume in New Tab
+                  </Button>
+                  <Button
+                    onClick={handleDownloadResume}
+                    disabled={isLoadingResume}
+                    size="sm"
+                    variant="outline"
+                    className="w-full justify-start"
+                  >
+                    <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+                    Download Resume
+                  </Button>
+                </div>
+                {application.resume_filename && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    {application.resume_filename}
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Screening Answers */}
@@ -530,19 +540,36 @@ export function ApplicationDetailsDrawer({
               )}
 
             {/* Status Update */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">
-                Application Status
-              </h3>
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-5 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <svg
+                  className="h-5 w-5 text-blue-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <h3 className="text-lg font-bold text-gray-900">
+                  Application Status
+                </h3>
+              </div>
               <div>
-                <Label>Status</Label>
+                <Label className="text-sm font-semibold text-gray-700">
+                  Change Status
+                </Label>
                 <select
                   value={application.status}
                   onChange={(e) =>
                     handleStatusChange(e.target.value as ApplicationStatus)
                   }
                   disabled={isUpdatingStatus}
-                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="mt-2 w-full px-4 py-3 text-base font-medium border-2 border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 >
                   {APPLICATION_STATUSES.map((status) => (
                     <option key={status.value} value={status.value}>
@@ -550,24 +577,28 @@ export function ApplicationDetailsDrawer({
                     </option>
                   ))}
                 </select>
+                <p className="mt-2 text-xs text-gray-600 italic">
+                  Changing status may trigger additional questions to help
+                  improve candidate matching
+                </p>
               </div>
             </div>
 
             {/* Status History */}
             {statusHistory.length > 0 && (
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="text-base font-semibold text-gray-900 mb-4">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 opacity-60">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
                   Status History
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {statusHistory.map((entry) => (
                     <div
                       key={entry.id}
-                      className="flex items-start space-x-3 pb-3 border-b border-gray-100 last:border-0"
+                      className="flex items-start space-x-2 pb-2 border-b border-gray-200 last:border-0"
                     >
-                      <ClockIcon className="h-5 w-5 text-gray-400 mt-0.5" />
+                      <ClockIcon className="h-4 w-4 text-gray-400 mt-0.5" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-900">
+                        <p className="text-xs text-gray-700">
                           Changed to{" "}
                           <span className="font-medium">
                             {
