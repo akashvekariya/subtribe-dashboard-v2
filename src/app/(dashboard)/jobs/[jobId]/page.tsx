@@ -8,6 +8,7 @@ import { getJobById } from "@/lib/jobs";
 import { getCandidatesByJobId, updateCandidateStatus } from "@/lib/candidates";
 import { CandidateCard } from "@/components/shared/CandidateCard";
 import { Button } from "@/components/ui/Button";
+import { ApplicationDetailsDrawer } from "@/components/applications/ApplicationDetailsDrawer";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import showToast from "@/lib/toast";
 import { api } from "@/lib/api-client";
@@ -19,7 +20,11 @@ import {
   CalendarIcon,
   ChartBarIcon,
   InformationCircleIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/outline";
+
+type TabType = "overview" | "applications";
 
 export default function JobDetailPage() {
   const params = useParams();
@@ -30,10 +35,15 @@ export default function JobDetailPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("");
-  const [showStats, setShowStats] = useState(false);
   const [stats, setStats] = useState<JobStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [showMetricsInfo, setShowMetricsInfo] = useState(false);
+  const [selectedApplicationId, setSelectedApplicationId] = useState<
+    string | null
+  >(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>("overview");
+  const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -41,6 +51,8 @@ export default function JobDetailPage() {
         try {
           const jobData = await getJobById(jobId);
           setJob(jobData);
+          // Load stats automatically
+          loadStats();
         } catch (error) {
           if (
             error instanceof Error &&
@@ -100,6 +112,11 @@ export default function JobDetailPage() {
     }
   };
 
+  const handleViewApplication = (applicationId: string) => {
+    setSelectedApplicationId(applicationId);
+    setIsDrawerOpen(true);
+  };
+
   const loadStats = async () => {
     if (!jobId || statsLoading) return;
     setStatsLoading(true);
@@ -114,12 +131,12 @@ export default function JobDetailPage() {
     }
   };
 
-  const handleStatsToggle = () => {
-    if (!showStats && !stats) {
-      loadStats();
+  // Auto-expand left sidebar when drawer closes
+  useEffect(() => {
+    if (!isDrawerOpen) {
+      setIsLeftSidebarCollapsed(false);
     }
-    setShowStats(!showStats);
-  };
+  }, [isDrawerOpen]);
 
   if (isLoading) {
     return (
@@ -153,25 +170,26 @@ export default function JobDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/jobs">
-            <Button variant="outline" size="sm">
-              <ArrowLeftIcon className="h-4 w-4 mr-2" />
-              Back to Jobs
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold leading-7 text-gray-900">
-              {job.title}
-            </h1>
-            <div className="mt-1 flex items-center text-sm text-gray-500">
-              <CalendarIcon className="h-4 w-4 mr-1" />
-              Created {new Date(job.created_at).toLocaleDateString()}
-              <span className="mx-2">•</span>
+      {/* Header with Tabs */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex items-center justify-between gap-6">
+          {/* Left side: Back button + Title + Status */}
+          <div className="flex items-center gap-4">
+            <Link href="/jobs">
+              <button className="group flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white hover:w-auto hover:px-3 hover:rounded-xl transition-all duration-200 overflow-hidden">
+                <ArrowLeftIcon className="h-4 w-4 text-gray-600 flex-shrink-0" />
+                <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-200 whitespace-nowrap">
+                  <span className="ml-2 text-sm font-medium text-gray-700">
+                    Back
+                  </span>
+                </span>
+              </button>
+            </Link>
+
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold text-gray-900">{job.title}</h1>
               <span
-                className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${
                   job.status === "active"
                     ? "bg-green-100 text-green-800"
                     : "bg-gray-100 text-gray-800"
@@ -181,26 +199,48 @@ export default function JobDetailPage() {
               </span>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center space-x-3">
-          <Button onClick={handleStatsToggle} variant="outline">
-            <ChartBarIcon className="h-4 w-4 mr-2" />
-            {showStats ? "Hide Stats" : "Show Stats"}
-          </Button>
+          {/* Center: Tabs */}
+          <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab("overview")}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                activeTab === "overview"
+                  ? "bg-white border border-[var(--color-primary)] text-gray-900"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Overview
+            </button>
+            <button
+              onClick={() => setActiveTab("applications")}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                activeTab === "applications"
+                  ? "bg-white border border-[var(--color-primary)] text-gray-900"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Applications ({candidates.length})
+            </button>
+          </div>
 
+          {/* Right side: Edit button */}
           <Link href={`/jobs/${job.id}/edit`}>
-            <Button variant="outline">
-              <PencilIcon className="h-4 w-4 mr-2" />
-              Edit Job
-            </Button>
+            <button className="group flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white hover:w-auto hover:px-3 hover:rounded-xl transition-all duration-200 overflow-hidden">
+              <PencilIcon className="h-4 w-4 text-gray-600 flex-shrink-0" />
+              <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-200 whitespace-nowrap">
+                <span className="ml-2 text-sm font-medium text-gray-700">
+                  Edit
+                </span>
+              </span>
+            </button>
           </Link>
         </div>
       </div>
 
-      {/* Job Statistics Section */}
-      {showStats && (
-        <div className="space-y-6 animate-in fade-in duration-300">
+      {/* Tab Content */}
+      {activeTab === "overview" && (
+        <div className="space-y-6">
           {statsLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -521,6 +561,129 @@ export default function JobDetailPage() {
               <p className="text-sm text-red-700">Failed to load statistics</p>
             </div>
           )}
+
+          {/* Job Details */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Job Description */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="p-4">
+                  <h3 className="text-base font-semibold text-gray-900 mb-3">
+                    Job Description
+                  </h3>
+                  {job.description ? (
+                    <MarkdownRenderer
+                      content={job.description}
+                      className="prose max-w-none text-sm text-gray-700"
+                    />
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      No description provided
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Quick Stats */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="p-4">
+                  <h3 className="text-base font-semibold text-gray-900 mb-3">
+                    Quick Stats
+                  </h3>
+                  <dl className="space-y-3">
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Applications
+                      </dt>
+                      <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                        {candidates.length}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">
+                        New Today
+                      </dt>
+                      <dd className="mt-1 text-2xl font-semibold text-gray-900">
+                        {
+                          candidates.filter((c) => {
+                            const createdDate = c.created_at || c.applied_at;
+                            return (
+                              createdDate &&
+                              new Date(createdDate).toDateString() ===
+                                new Date().toDateString()
+                            );
+                          }).length
+                        }
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Status
+                      </dt>
+                      <dd className="mt-1">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                            job.status === "active"
+                              ? "bg-green-100 text-green-800"
+                              : job.status === "draft"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {job.status === "active"
+                            ? "Active"
+                            : job.status === "draft"
+                              ? "Draft"
+                              : "Closed"}
+                        </span>
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+
+              {/* Public Link */}
+              <div className="bg-white shadow rounded-lg">
+                <div className="p-4">
+                  <h3 className="text-base font-semibold text-gray-900 mb-3">
+                    Public Application Link
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="p-2.5 bg-gray-50 rounded border border-gray-200">
+                      <p className="text-xs text-gray-600 break-all">
+                        {publicUrl}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(publicUrl);
+                          showToast.success("Link copied to clipboard!");
+                        }}
+                      >
+                        Copy Link
+                      </Button>
+                      <a
+                        href={publicUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <Button size="sm" variant="outline" className="w-full">
+                          Preview
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -658,222 +821,183 @@ export default function JobDetailPage() {
         </div>
       )}
 
-      {/* Job Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Job Description */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="p-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-3">
-                Job Description
-              </h3>
-              {job.description ? (
-                <MarkdownRenderer
-                  content={job.description}
-                  className="prose max-w-none text-sm text-gray-700"
-                />
-              ) : (
-                <p className="text-sm text-gray-500">No description provided</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Quick Stats */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="p-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-3">
-                Quick Stats
-              </h3>
-              <dl className="space-y-3">
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">
-                    Applications
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    {candidates.length}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">
-                    New Today
-                  </dt>
-                  <dd className="mt-1 text-2xl font-semibold text-gray-900">
-                    {
-                      candidates.filter((c) => {
-                        const createdDate = c.created_at || c.applied_at;
-                        return (
-                          createdDate &&
-                          new Date(createdDate).toDateString() ===
-                            new Date().toDateString()
-                        );
-                      }).length
-                    }
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Status</dt>
-                  <dd className="mt-1">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        job.status === "active"
-                          ? "bg-green-100 text-green-800"
-                          : job.status === "draft"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {job.status === "active"
-                        ? "Active"
-                        : job.status === "draft"
-                          ? "Draft"
-                          : "Closed"}
-                    </span>
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-
-          {/* Public Link */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="p-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-3">
-                Public Application Link
-              </h3>
-              <div className="space-y-3">
-                <div className="p-2.5 bg-gray-50 rounded border border-gray-200">
-                  <p className="text-xs text-gray-600 break-all">{publicUrl}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      navigator.clipboard.writeText(publicUrl);
-                      showToast.success("Link copied to clipboard!");
-                    }}
-                  >
-                    Copy Link
-                  </Button>
-                  <a
-                    href={publicUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block"
-                  >
-                    <Button size="sm" variant="outline" className="w-full">
-                      Preview
-                    </Button>
-                  </a>
-                </div>
+      {activeTab === "applications" && (
+        <div className="flex gap-4 h-[calc(100vh-250px)]">
+          {/* Applications List */}
+          <div
+            className={`bg-white shadow rounded-lg transition-all duration-300 h-full ${
+              isLeftSidebarCollapsed
+                ? "w-12"
+                : isDrawerOpen
+                  ? "w-[35%]"
+                  : "w-full"
+            }`}
+          >
+            {isLeftSidebarCollapsed ? (
+              // Collapsed state - show expand button
+              <div className="h-full flex items-center justify-center">
+                <button
+                  onClick={() => setIsLeftSidebarCollapsed(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Expand sidebar"
+                >
+                  <ChevronRightIcon className="h-5 w-5 text-gray-600" />
+                </button>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Candidates Section */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold text-gray-900">
-              Applications ({candidates.length})
-            </h3>
-            <div className="flex items-center space-x-2">
-              <select
-                className="h-8 text-sm border border-gray-300 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
-              >
-                <option value="">All Statuses</option>
-                <option value="applied">Applied</option>
-                <option value="screening">Screening</option>
-                <option value="interviewing">Interviewing</option>
-                <option value="offer">Offer</option>
-                <option value="hired">Hired</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
-          </div>
-
-          {candidates.length === 0 ? (
-            <div className="text-center py-12">
-              <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <h4 className="mt-2 text-sm font-semibold text-gray-900">
-                No applications yet
-              </h4>
-              <p className="mt-1 text-sm text-gray-500">
-                Applications will appear here once candidates start applying to
-                this job.
-              </p>
-              <div className="mt-4">
-                <a href={publicUrl} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="sm">
-                    Share Job Posting
-                  </Button>
-                </a>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="space-y-4">
-                {candidates
-                  .sort((a, b) => (b.ai_score || 0) - (a.ai_score || 0))
-                  .map((candidate) => (
-                    <CandidateCard
-                      key={candidate.id}
-                      candidate={candidate}
-                      onStatusChange={handleCandidateStatusChange}
-                      onClick={() => {
-                        window.location.href = `/applications/${candidate.id}`;
+            ) : (
+              <div className="p-4 h-full flex flex-col">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    {isDrawerOpen && (
+                      <button
+                        onClick={() => setIsLeftSidebarCollapsed(true)}
+                        className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                        title="Collapse sidebar"
+                      >
+                        <ChevronLeftIcon className="h-4 w-4 text-gray-600" />
+                      </button>
+                    )}
+                    <h3 className="text-base font-semibold text-gray-900">
+                      Applications ({candidates.length})
+                    </h3>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <select
+                      className="h-8 text-sm border border-gray-300 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={statusFilter}
+                      onChange={(e) => {
+                        setStatusFilter(e.target.value);
+                        setCurrentPage(1);
                       }}
-                    />
-                  ))}
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
-                  <div className="flex items-center">
-                    <p className="text-sm text-gray-700">
-                      Page <span className="font-medium">{currentPage}</span> of{" "}
-                      <span className="font-medium">{totalPages}</span>
-                    </p>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.max(1, prev - 1))
-                      }
-                      disabled={currentPage === 1}
                     >
-                      Previous
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                      }
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                    </Button>
+                      <option value="">All Statuses</option>
+                      <option value="applied">Applied</option>
+                      <option value="screening">Screening</option>
+                      <option value="interviewing">Interviewing</option>
+                      <option value="offer">Offer</option>
+                      <option value="hired">Hired</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
                   </div>
                 </div>
-              )}
-            </>
+
+                {candidates.length === 0 ? (
+                  <div className="text-center py-12">
+                    <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
+                    <h4 className="mt-2 text-sm font-semibold text-gray-900">
+                      No applications yet
+                    </h4>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Applications will appear here once candidates start
+                      applying to this job.
+                    </p>
+                    <div className="mt-4">
+                      <a
+                        href={publicUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="outline" size="sm">
+                          Share Job Posting
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex-1 overflow-y-auto space-y-4">
+                      {candidates
+                        .sort((a, b) => (b.ai_score || 0) - (a.ai_score || 0))
+                        .map((candidate) => (
+                          <CandidateCard
+                            key={candidate.id}
+                            candidate={candidate}
+                            onStatusChange={handleCandidateStatusChange}
+                            onClick={() => handleViewApplication(candidate.id)}
+                            isSelected={selectedApplicationId === candidate.id}
+                          />
+                        ))}
+                    </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <div className="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
+                        <div className="flex items-center">
+                          <p className="text-sm text-gray-700">
+                            Page{" "}
+                            <span className="font-medium">{currentPage}</span>{" "}
+                            of <span className="font-medium">{totalPages}</span>
+                          </p>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setCurrentPage((prev) => Math.max(1, prev - 1))
+                            }
+                            disabled={currentPage === 1}
+                          >
+                            Previous
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setCurrentPage((prev) =>
+                                Math.min(totalPages, prev + 1)
+                              )
+                            }
+                            disabled={currentPage === totalPages}
+                          >
+                            Next
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Application Details Panel */}
+          {isDrawerOpen && selectedApplicationId && (
+            <div
+              className={`h-full bg-white shadow rounded-lg overflow-y-auto relative transition-all duration-300 ${
+                isLeftSidebarCollapsed ? "w-[calc(100%-3rem-1rem)]" : "w-[65%]"
+              }`}
+            >
+              <button
+                onClick={() => {
+                  setIsDrawerOpen(false);
+                  setSelectedApplicationId(null);
+                  setIsLeftSidebarCollapsed(false);
+                }}
+                className="absolute top-4 right-4 z-20 p-2 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors shadow-sm"
+              >
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+              <ApplicationDetailsDrawer
+                applicationId={selectedApplicationId}
+                onStatusChange={handleCandidateStatusChange}
+              />
+            </div>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
