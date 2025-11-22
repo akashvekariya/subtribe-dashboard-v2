@@ -171,25 +171,25 @@ export default function JobDetailPage() {
   return (
     <div className="space-y-6">
       {/* Header with Tabs */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="flex items-center justify-between gap-6">
+      <div className="bg-white rounded-lg shadow px-4 py-2">
+        <div className="flex items-center justify-between gap-3">
           {/* Left side: Back button + Title + Status */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
             <Link href="/jobs">
-              <button className="group flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white hover:w-auto hover:px-3 hover:rounded-xl transition-all duration-200 overflow-hidden">
-                <ArrowLeftIcon className="h-4 w-4 text-gray-600 flex-shrink-0" />
-                <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-200 whitespace-nowrap">
-                  <span className="ml-2 text-sm font-medium text-gray-700">
-                    Back
-                  </span>
-                </span>
+              <button
+                className="flex items-center justify-center w-8 h-8 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+                title="Back to jobs"
+              >
+                <ArrowLeftIcon className="h-3.5 w-3.5 text-gray-600" />
               </button>
             </Link>
 
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-gray-900">{job.title}</h1>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h1 className="text-base font-semibold text-gray-900 truncate">
+                {job.title}
+              </h1>
               <span
-                className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${
+                className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full flex-shrink-0 ${
                   job.status === "active"
                     ? "bg-green-100 text-green-800"
                     : "bg-gray-100 text-gray-800"
@@ -200,41 +200,40 @@ export default function JobDetailPage() {
             </div>
           </div>
 
-          {/* Center: Tabs */}
-          <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                activeTab === "overview"
-                  ? "bg-white border border-[var(--color-primary)] text-gray-900"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => setActiveTab("applications")}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                activeTab === "applications"
-                  ? "bg-white border border-[var(--color-primary)] text-gray-900"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Applications ({candidates.length})
-            </button>
-          </div>
+          {/* Right side: Tabs + Edit button */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
+              <button
+                onClick={() => setActiveTab("overview")}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  activeTab === "overview"
+                    ? "bg-white shadow-sm text-gray-900"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveTab("applications")}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  activeTab === "applications"
+                    ? "bg-white shadow-sm text-gray-900"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Applications ({candidates.length})
+              </button>
+            </div>
 
-          {/* Right side: Edit button */}
-          <Link href={`/jobs/${job.id}/edit`}>
-            <button className="group flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white hover:w-auto hover:px-3 hover:rounded-xl transition-all duration-200 overflow-hidden">
-              <PencilIcon className="h-4 w-4 text-gray-600 flex-shrink-0" />
-              <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-200 whitespace-nowrap">
-                <span className="ml-2 text-sm font-medium text-gray-700">
-                  Edit
-                </span>
-              </span>
-            </button>
-          </Link>
+            <Link href={`/jobs/${job.id}/edit`}>
+              <button
+                className="flex items-center justify-center w-8 h-8 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+                title="Edit job"
+              >
+                <PencilIcon className="h-3.5 w-3.5 text-gray-600" />
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -248,9 +247,9 @@ export default function JobDetailPage() {
           ) : stats ? (
             <>
               {/* Applications Metrics Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Hero Card - Total Applications */}
-                <div className="bg-white border border-gray-200 rounded-xl p-6 lg:col-span-1">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 lg:col-span-1">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-medium text-gray-700">
                       Total applications
@@ -265,9 +264,9 @@ export default function JobDetailPage() {
                 </div>
 
                 {/* Smaller Cards Grid */}
-                <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Today */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
+                  <div className="bg-white border border-gray-200 rounded-xl p-4">
                     <span className="text-sm font-medium text-gray-700">
                       New today
                     </span>
@@ -277,7 +276,7 @@ export default function JobDetailPage() {
                   </div>
 
                   {/* This Week */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
+                  <div className="bg-white border border-gray-200 rounded-xl p-4">
                     <span className="text-sm font-medium text-gray-700">
                       This week
                     </span>
@@ -287,7 +286,7 @@ export default function JobDetailPage() {
                   </div>
 
                   {/* This Month */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
+                  <div className="bg-white border border-gray-200 rounded-xl p-4">
                     <span className="text-sm font-medium text-gray-700">
                       This month
                     </span>
@@ -297,7 +296,7 @@ export default function JobDetailPage() {
                   </div>
 
                   {/* Views */}
-                  <div className="bg-white border border-gray-200 rounded-xl p-6">
+                  <div className="bg-white border border-gray-200 rounded-xl p-4">
                     <span className="text-sm font-medium text-gray-700">
                       Total views
                     </span>
@@ -309,7 +308,7 @@ export default function JobDetailPage() {
               </div>
 
               {/* Hiring Funnel */}
-              <div className="bg-white border border-gray-200 rounded-xl p-8">
+              <div className="bg-white border border-gray-200 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-8">
                   <h3 className="text-lg font-semibold text-gray-900">
                     Hiring Funnel
@@ -499,7 +498,7 @@ export default function JobDetailPage() {
               </div>
 
               {/* Activity & Pipeline Metrics */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Days Since Published */}
                 <div className="bg-white border border-gray-200 rounded-xl p-6">
                   <span className="text-sm font-medium text-gray-700">
@@ -565,9 +564,9 @@ export default function JobDetailPage() {
           )}
 
           {/* Job Details */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-4">
               {/* Job Description */}
               <div className="bg-white shadow rounded-lg">
                 <div className="p-4">
@@ -589,7 +588,7 @@ export default function JobDetailPage() {
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Quick Stats */}
               <div className="bg-white shadow rounded-lg">
                 <div className="p-4">
@@ -824,7 +823,7 @@ export default function JobDetailPage() {
       )}
 
       {activeTab === "applications" && (
-        <div className="flex gap-4 h-[calc(100vh-250px)]">
+        <div className="flex gap-4 h-[calc(100vh-160px)]">
           {/* Applications List */}
           <div
             className={`bg-white shadow rounded-lg transition-all duration-300 h-full ${
@@ -832,7 +831,7 @@ export default function JobDetailPage() {
                 ? "w-12"
                 : isDrawerOpen
                   ? "w-[35%]"
-                  : "w-full"
+                  : "w-1/2"
             }`}
           >
             {isLeftSidebarCollapsed ? (
@@ -847,8 +846,8 @@ export default function JobDetailPage() {
                 </button>
               </div>
             ) : (
-              <div className="p-4 h-full flex flex-col">
-                <div className="flex items-center justify-between mb-4">
+              <div className="p-3 h-full flex flex-col">
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     {isDrawerOpen && (
                       <button
@@ -907,13 +906,14 @@ export default function JobDetailPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="flex-1 overflow-y-auto space-y-4">
+                    <div className="flex-1 overflow-y-auto space-y-3">
                       {candidates
                         .sort((a, b) => (b.ai_score || 0) - (a.ai_score || 0))
-                        .map((candidate) => (
+                        .map((candidate, index) => (
                           <CandidateCard
                             key={candidate.id}
                             candidate={candidate}
+                            rank={index + 1}
                             onStatusChange={handleCandidateStatusChange}
                             onClick={() => handleViewApplication(candidate.id)}
                             isSelected={selectedApplicationId === candidate.id}
@@ -962,6 +962,40 @@ export default function JobDetailPage() {
               </div>
             )}
           </div>
+
+          {/* Placeholder when no application is selected */}
+          {!isDrawerOpen && !isLeftSidebarCollapsed && (
+            <div className="w-1/2 h-full bg-white shadow rounded-lg flex items-center justify-center">
+              <div className="text-center px-8">
+                <svg
+                  className="mx-auto h-16 w-16 text-gray-300 mb-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No Application Selected
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Click on &quot;View details&quot; on any candidate card to see
+                  their full application details here
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Application Details Panel */}
           {isDrawerOpen && selectedApplicationId && (

@@ -4,13 +4,12 @@
       "id": "1",
       "name": "Sarah Johnson",
       "rank": 1,
-      "skillsData": [
-        { "skill": "React", "required": 90, "candidate": 95 },
-        { "skill": "TypeScript", "required": 80, "candidate": 90 },
-        { "skill": "Node.js", "required": 70, "candidate": 85 },
-        { "skill": "SQL", "required": 75, "candidate": 80 },
-        { "skill": "AWS", "required": 65, "candidate": 75 },
-        { "skill": "Python", "required": 60, "candidate": 70 }
+      "analysisData": [
+        { "focus": "Culture Fit", "score": 9 },
+        { "focus": "Skills Match", "score": 9 },
+        { "focus": "Experience", "score": 8 },
+        { "focus": "Communication", "score": 9 },
+        { "focus": "Problem Solving", "score": 9 }
       ],
       "techStack": [
         {
@@ -70,19 +69,19 @@
         "Slightly over-qualified which may lead to retention concerns",
         "Limited management or mentorship experience mentioned",
         "May expect higher compensation due to experience level"
-      ]
+      ],
+      "overallMatch": "Exceptional candidate with strong technical skills and cultural alignment, ideal for senior engineering roles."
     },
     {
       "id": "2",
       "name": "Michael Chen",
       "rank": 2,
-      "skillsData": [
-        { "skill": "React", "required": 90, "candidate": 85 },
-        { "skill": "TypeScript", "required": 80, "candidate": 75 },
-        { "skill": "Node.js", "required": 70, "candidate": 80 },
-        { "skill": "SQL", "required": 75, "candidate": 60 },
-        { "skill": "AWS", "required": 65, "candidate": 50 },
-        { "skill": "Python", "required": 60, "candidate": 70 }
+      "analysisData": [
+        { "focus": "Culture Fit", "score": 8 },
+        { "focus": "Skills Match", "score": 8 },
+        { "focus": "Experience", "score": 9 },
+        { "focus": "Communication", "score": 8 },
+        { "focus": "Problem Solving", "score": 8 }
       ],
       "techStack": [
         {
@@ -142,19 +141,19 @@
         "SQL proficiency is below requirements and could benefit from development",
         "No demonstrated experience with Docker or GraphQL containerization",
         "Redis experience is unclear from resume and needs verification"
-      ]
+      ],
+      "overallMatch": "Solid mid-level candidate with strong technical foundation and excellent culture fit potential."
     },
     {
       "id": "3",
       "name": "Emily Rodriguez",
       "rank": 3,
-      "skillsData": [
-        { "skill": "React", "required": 90, "candidate": 88 },
-        { "skill": "TypeScript", "required": 80, "candidate": 82 },
-        { "skill": "Node.js", "required": 70, "candidate": 65 },
-        { "skill": "SQL", "required": 75, "candidate": 85 },
-        { "skill": "AWS", "required": 65, "candidate": 70 },
-        { "skill": "Python", "required": 60, "candidate": 55 }
+      "analysisData": [
+        { "focus": "Culture Fit", "score": 8 },
+        { "focus": "Skills Match", "score": 8 },
+        { "focus": "Experience", "score": 9 },
+        { "focus": "Communication", "score": 9 },
+        { "focus": "Problem Solving", "score": 7 }
       ],
       "techStack": [
         {
@@ -210,19 +209,19 @@
         "Python proficiency is below average and may need improvement",
         "GraphQL experience is mentioned but lacks concrete project examples",
         "Less well-rounded full-stack profile compared to other candidates"
-      ]
+      ],
+      "overallMatch": "Promising candidate with solid frontend expertise, though backend experience requires further development."
     },
     {
       "id": "4",
       "name": "David Kim",
       "rank": 4,
-      "skillsData": [
-        { "skill": "React", "required": 90, "candidate": 80 },
-        { "skill": "TypeScript", "required": 80, "candidate": 70 },
-        { "skill": "Node.js", "required": 70, "candidate": 85 },
-        { "skill": "SQL", "required": 75, "candidate": 75 },
-        { "skill": "AWS", "required": 65, "candidate": 80 },
-        { "skill": "Python", "required": 60, "candidate": 90 }
+      "analysisData": [
+        { "focus": "Culture Fit", "score": 7 },
+        { "focus": "Skills Match", "score": 8 },
+        { "focus": "Experience", "score": 8 },
+        { "focus": "Communication", "score": 7 },
+        { "focus": "Problem Solving", "score": 9 }
       ],
       "techStack": [
         {
@@ -278,19 +277,19 @@
         "TypeScript usage appears inconsistent across projects",
         "Less experience with modern frontend frameworks and tooling",
         "May require additional support for complex UI/UX implementations"
-      ]
+      ],
+      "overallMatch": "Junior-level candidate with potential but lacks the experience depth required for this mid-senior position."
     },
     {
       "id": "5",
       "name": "Jessica Martinez",
       "rank": 5,
-      "skillsData": [
-        { "skill": "React", "required": 90, "candidate": 75 },
-        { "skill": "TypeScript", "required": 80, "candidate": 65 },
-        { "skill": "Node.js", "required": 70, "candidate": 70 },
-        { "skill": "SQL", "required": 75, "candidate": 70 },
-        { "skill": "AWS", "required": 65, "candidate": 60 },
-        { "skill": "Python", "required": 60, "candidate": 50 }
+      "analysisData": [
+        { "focus": "Culture Fit", "score": 8 },
+        { "focus": "Skills Match", "score": 7 },
+        { "focus": "Experience", "score": 6 },
+        { "focus": "Communication", "score": 8 },
+        { "focus": "Problem Solving", "score": 7 }
       ],
       "techStack": [
         {
@@ -346,19 +345,19 @@
         "TypeScript knowledge is basic and needs significant development",
         "Limited exposure to cloud infrastructure and AWS services",
         "Missing experience with Docker, GraphQL, and Redis technologies"
-      ]
+      ],
+      "overallMatch": "Strong backend-focused engineer with adequate frontend skills, better suited for infrastructure-heavy roles."
     },
     {
       "id": "6",
       "name": "Alex Thompson",
       "rank": 6,
-      "skillsData": [
-        { "skill": "React", "required": 90, "candidate": 70 },
-        { "skill": "TypeScript", "required": 80, "candidate": 60 },
-        { "skill": "Node.js", "required": 70, "candidate": 65 },
-        { "skill": "SQL", "required": 75, "candidate": 55 },
-        { "skill": "AWS", "required": 65, "candidate": 45 },
-        { "skill": "Python", "required": 60, "candidate": 40 }
+      "analysisData": [
+        { "focus": "Culture Fit", "score": 7 },
+        { "focus": "Skills Match", "score": 5 },
+        { "focus": "Experience", "score": 4 },
+        { "focus": "Communication", "score": 7 },
+        { "focus": "Problem Solving", "score": 6 }
       ],
       "techStack": [
         {
@@ -414,7 +413,8 @@
         "Missing most required technologies including TypeScript and SQL",
         "No production experience with backend or cloud infrastructure",
         "Would require extensive training and mentorship to be productive"
-      ]
+      ],
+      "overallMatch": "Entry-level candidate with enthusiasm but significantly underqualified for this position's requirements."
     }
   ]
 }

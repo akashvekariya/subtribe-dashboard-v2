@@ -9,7 +9,6 @@ import { getErrorMessage } from "@/lib/error";
 import { STATUS_OPTIONS } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
 import {
-  UserCircleIcon,
   StarIcon,
   CalendarIcon,
   DocumentTextIcon,
@@ -22,6 +21,7 @@ interface CandidateCardProps {
   onStatusChange?: (candidateId: string, newStatus: ApplicationStatus) => void;
   onClick?: () => void;
   isSelected?: boolean;
+  rank?: number;
 }
 
 /**
@@ -33,6 +33,7 @@ export function CandidateCard({
   onStatusChange,
   onClick,
   isSelected = false,
+  rank,
 }: CandidateCardProps) {
   const [isLoadingResume, setIsLoadingResume] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -40,6 +41,20 @@ export function CandidateCard({
     null
   );
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  // Get select styling based on current status
+  const getSelectStyling = (status: ApplicationStatus) => {
+    const colorMap: Record<ApplicationStatus, string> = {
+      applied: "border-blue-300 bg-blue-50",
+      screening: "border-yellow-300 bg-yellow-50",
+      interviewing: "border-purple-300 bg-purple-50",
+      offer: "border-green-300 bg-green-50",
+      hired: "border-emerald-300 bg-emerald-50",
+      rejected: "border-red-300 bg-red-50",
+    };
+
+    return colorMap[status] || "border-blue-300 bg-blue-50";
+  };
 
   const handleStatusChange = async (newStatus: ApplicationStatus) => {
     const highSignalResult = isHighSignalTransition(
@@ -113,12 +128,41 @@ export function CandidateCard({
 
   return (
     <div
-      className={`bg-white border-2 rounded-lg transition-all ${isSelected ? "border-[var(--color-primary)] shadow-md" : "border-gray-200"}`}
+      className={`rounded-lg transition-all ${
+        isSelected
+          ? "bg-blue-50 border-2 border-blue-200 shadow-lg"
+          : "bg-white border-2 border-gray-200 hover:border-gray-300"
+      }`}
     >
-      <div className="p-4">
+      <div className="p-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3 flex-1 min-w-0">
-            <UserCircleIcon className="h-10 w-10 text-gray-400 flex-shrink-0" />
+            {/* Rank Circle */}
+            <div
+              className={`flex-shrink-0 w-10 h-10 rounded-full border flex items-center justify-center ${
+                rank === 1
+                  ? "bg-yellow-50 border-yellow-300"
+                  : rank === 2
+                    ? "bg-gray-200 border-gray-400"
+                    : rank === 3
+                      ? "bg-orange-50 border-orange-300"
+                      : "bg-gray-100 border-gray-300"
+              }`}
+            >
+              <span
+                className={`text-sm font-semibold ${
+                  rank === 1
+                    ? "text-yellow-700"
+                    : rank === 2
+                      ? "text-gray-700"
+                      : rank === 3
+                        ? "text-orange-700"
+                        : "text-gray-700"
+                }`}
+              >
+                #{rank || "—"}
+              </span>
+            </div>
 
             <div className="flex-1 min-w-0">
               <h3 className="text-base font-medium text-gray-900 truncate">
@@ -142,7 +186,7 @@ export function CandidateCard({
               onChange={(e) =>
                 handleStatusChange(e.target.value as ApplicationStatus)
               }
-              className="h-8 text-sm font-medium border-2 border-blue-300 rounded-md px-3 py-1 bg-gradient-to-r from-blue-50 to-purple-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm"
+              className={`h-8 text-sm font-medium border-2 rounded-md px-3 py-1 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm ${getSelectStyling(candidate.status)}`}
             >
               {STATUS_OPTIONS.map((status) => (
                 <option key={status.value} value={status.value}>
@@ -155,26 +199,18 @@ export function CandidateCard({
               <button
                 onClick={handleViewResume}
                 disabled={isLoadingResume}
-                className="group flex items-center justify-center w-8 h-8 rounded-lg border border-gray-300 bg-white hover:w-auto hover:px-2 transition-[width,padding] duration-200 ease-in-out overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center w-8 h-8 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title={isLoadingResume ? "Loading..." : "View resume"}
               >
-                <DocumentTextIcon className="h-3.5 w-3.5 text-gray-600 flex-shrink-0" />
-                <span className="w-0 group-hover:w-auto overflow-hidden whitespace-nowrap">
-                  <span className="ml-1.5 text-xs font-medium text-gray-700">
-                    {isLoadingResume ? "Loading..." : "Resume"}
-                  </span>
-                </span>
+                <DocumentTextIcon className="h-3.5 w-3.5 text-gray-600" />
               </button>
 
               <button
                 onClick={onClick}
-                className="group flex items-center justify-center w-8 h-8 rounded-lg border border-gray-300 bg-white hover:w-auto hover:px-2 transition-[width,padding] duration-200 ease-in-out overflow-hidden"
+                className="flex items-center justify-center w-8 h-8 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+                title="View details"
               >
-                <EyeIcon className="h-3.5 w-3.5 text-gray-600 flex-shrink-0" />
-                <span className="w-0 group-hover:w-auto overflow-hidden whitespace-nowrap">
-                  <span className="ml-1.5 text-xs font-medium text-gray-700">
-                    Details
-                  </span>
-                </span>
+                <EyeIcon className="h-3.5 w-3.5 text-gray-600" />
               </button>
             </div>
           </div>
