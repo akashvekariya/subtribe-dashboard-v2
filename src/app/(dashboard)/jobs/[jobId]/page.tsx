@@ -13,6 +13,7 @@ import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import showToast from "@/lib/toast";
 import { api } from "@/lib/api-client";
 import { getPublicJobUrl } from "@/lib/env";
+import mockCandidateData from "@/data/mockCandidateAnalysis.json";
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -80,7 +81,21 @@ export default function JobDetailPage() {
           params.status = statusFilter;
         }
         const response = await getCandidatesByJobId(jobId, params);
-        setCandidates(response.data || []);
+        // Add mock AI scores from mock data (for demo purposes)
+        const candidatesWithScores = (response.data || []).map((candidate, index) => {
+          // Get mock candidate data by index (cycling through available mock data)
+          const mockIndex = index % mockCandidateData.candidates.length;
+          const mockCandidate = mockCandidateData.candidates[mockIndex];
+
+          // Calculate average score from analysisData
+          const avgScore = mockCandidate.analysisData.reduce((sum, item) => sum + item.score, 0) / mockCandidate.analysisData.length;
+
+          return {
+            ...candidate,
+            ai_score: candidate.ai_score || Math.round(avgScore),
+          };
+        });
+        setCandidates(candidatesWithScores);
         if (response.pagination) {
           setTotalPages(response.pagination.total_pages);
         }

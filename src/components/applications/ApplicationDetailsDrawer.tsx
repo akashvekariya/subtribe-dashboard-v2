@@ -586,7 +586,7 @@ export function ApplicationDetailsDrawer({
 
               {/* Status History */}
               {statusHistory.length > 0 && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 opacity-60">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
                   <h3 className="text-xs font-medium text-gray-700 mb-2">
                     Status History
                   </h3>

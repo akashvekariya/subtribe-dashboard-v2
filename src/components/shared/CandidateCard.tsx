@@ -9,12 +9,12 @@ import { getErrorMessage } from "@/lib/error";
 import { STATUS_OPTIONS } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
 import {
-  StarIcon,
   CalendarIcon,
   DocumentTextIcon,
   EyeIcon,
+  EnvelopeIcon,
+  PhoneIcon,
 } from "@heroicons/react/24/outline";
-import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 
 interface CandidateCardProps {
   candidate: Application;
@@ -108,19 +108,29 @@ export function CandidateCard({
     }
   };
 
-  const renderStars = (score: number) => {
-    const stars = Math.round(score / 20);
+  const renderProgressBar = (score: number) => {
+    const normalizedScore = Math.min(Math.max(score, 0), 10); // Ensure score is between 0-10
+    const percentage = (normalizedScore / 10) * 100;
+
     return (
-      <div className="flex items-center">
-        {[...Array(5)].map((_, i) =>
-          i < stars ? (
-            <StarIconSolid key={i} className="h-4 w-4 text-yellow-400" />
-          ) : (
-            <StarIcon key={i} className="h-4 w-4 text-gray-300" />
-          )
-        )}
-        <span className="ml-2 text-sm font-medium text-gray-700">
-          {candidate.ai_score || 0}
+      <div className="flex items-center gap-2.5">
+        <div className="relative w-32 h-1.5 bg-gray-100 rounded-full">
+          {/* Markers */}
+          {[...Array(11)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute top-1/2 -translate-y-1/2 w-0.5 h-2 bg-gray-200"
+              style={{ left: `${(i / 10) * 100}%` }}
+            />
+          ))}
+          {/* Progress fill */}
+          <div
+            className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-full transition-all"
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+        <span className="text-xs font-medium text-gray-600 min-w-[2.25rem]">
+          {Math.round(normalizedScore)}/10
         </span>
       </div>
     );
@@ -170,7 +180,7 @@ export function CandidateCard({
               </h3>
               <p className="text-sm text-gray-600">{candidate.email}</p>
 
-              <div className="mt-2">{renderStars(candidate.ai_score || 0)}</div>
+              <div className="mt-2">{renderProgressBar(candidate.ai_score || 0)}</div>
 
               <div className="mt-2 flex items-center text-gray-500 text-xs">
                 <CalendarIcon className="h-3.5 w-3.5 mr-1" />
@@ -196,6 +206,24 @@ export function CandidateCard({
             </select>
 
             <div className="flex gap-1 mt-1">
+              <a
+                href={`mailto:${candidate.email}`}
+                className="flex items-center justify-center w-8 h-8 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+                title="Send email"
+              >
+                <EnvelopeIcon className="h-3.5 w-3.5 text-gray-600" />
+              </a>
+
+              {candidate.phone && (
+                <a
+                  href={`tel:${candidate.phone}`}
+                  className="flex items-center justify-center w-8 h-8 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 transition-colors"
+                  title="Call phone"
+                >
+                  <PhoneIcon className="h-3.5 w-3.5 text-gray-600" />
+                </a>
+              )}
+
               <button
                 onClick={handleViewResume}
                 disabled={isLoadingResume}
