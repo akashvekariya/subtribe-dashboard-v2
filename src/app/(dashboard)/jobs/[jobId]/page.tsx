@@ -82,19 +82,25 @@ export default function JobDetailPage() {
         }
         const response = await getCandidatesByJobId(jobId, params);
         // Add mock AI scores from mock data (for demo purposes)
-        const candidatesWithScores = (response.data || []).map((candidate, index) => {
-          // Get mock candidate data by index (cycling through available mock data)
-          const mockIndex = index % mockCandidateData.candidates.length;
-          const mockCandidate = mockCandidateData.candidates[mockIndex];
+        const candidatesWithScores = (response.data || []).map(
+          (candidate, index) => {
+            // Get mock candidate data by index (cycling through available mock data)
+            const mockIndex = index % mockCandidateData.candidates.length;
+            const mockCandidate = mockCandidateData.candidates[mockIndex];
 
-          // Calculate average score from analysisData
-          const avgScore = mockCandidate.analysisData.reduce((sum, item) => sum + item.score, 0) / mockCandidate.analysisData.length;
+            // Calculate average score from analysisData
+            const avgScore =
+              mockCandidate.analysisData.reduce(
+                (sum, item) => sum + item.score,
+                0
+              ) / mockCandidate.analysisData.length;
 
-          return {
-            ...candidate,
-            ai_score: candidate.ai_score || Math.round(avgScore),
-          };
-        });
+            return {
+              ...candidate,
+              ai_score: candidate.ai_score || Math.round(avgScore),
+            };
+          }
+        );
         setCandidates(candidatesWithScores);
         if (response.pagination) {
           setTotalPages(response.pagination.total_pages);
