@@ -149,7 +149,7 @@ export function SkillsAnalysis() {
                         tech.status === "present"
                           ? "bg-green-100 text-green-800 border border-green-300"
                           : tech.status === "missing"
-                            ? "bg-red-100 text-red-800 border border-red-300"
+                            ? "bg-orange-100 text-orange-800 border border-orange-300"
                             : "bg-gray-100 text-gray-800 border border-gray-300"
                       }`}
                     >
@@ -158,7 +158,7 @@ export function SkillsAnalysis() {
                           tech.status === "present"
                             ? "text-green-700"
                             : tech.status === "missing"
-                              ? "text-red-700"
+                              ? "text-orange-700"
                               : "text-gray-600"
                         }`}
                       />
@@ -181,7 +181,7 @@ export function SkillsAnalysis() {
                         tech.status === "present"
                           ? "bg-green-100 text-green-800 border border-green-300"
                           : tech.status === "missing"
-                            ? "bg-red-100 text-red-800 border border-red-300"
+                            ? "bg-orange-100 text-orange-800 border border-orange-300"
                             : "bg-gray-100 text-gray-800 border border-gray-300"
                       }`}
                     >
@@ -190,7 +190,7 @@ export function SkillsAnalysis() {
                           tech.status === "present"
                             ? "text-green-700"
                             : tech.status === "missing"
-                              ? "text-red-700"
+                              ? "text-orange-700"
                               : "text-gray-600"
                         }`}
                       />
@@ -314,6 +314,129 @@ export function SkillsAnalysis() {
                   <strong className="text-gray-900">Match</strong>
                 </span>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Ranking and Insights */}
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Candidate Assessment
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                AI-powered evaluation and insights
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-[var(--color-primary)]">
+                #2
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                Job-level ranking
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="p-6">
+          {/* Disclaimer */}
+          <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-gray-700">
+              <span className="font-medium">Note:</span> This ranking changes
+              constantly as new candidates enter the system.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Strengths */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <CheckCircleIcon className="h-5 w-5 text-green-600" />
+                Strengths
+              </h4>
+              <ul className="space-y-2">
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="text-green-600 mt-0.5">•</span>
+                  <span className="text-gray-700">
+                    Strong proficiency in React, TypeScript, and Node.js with
+                    proven track record
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="text-green-600 mt-0.5">•</span>
+                  <span className="text-gray-700">
+                    Exceeds experience requirements with 5.5 years of relevant
+                    work
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="text-green-600 mt-0.5">•</span>
+                  <span className="text-gray-700">
+                    Advanced Python skills provide additional value for
+                    full-stack projects
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="text-green-600 mt-0.5">•</span>
+                  <span className="text-gray-700">
+                    Demonstrated ability to work with PostgreSQL and modern
+                    database systems
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Weaknesses */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <svg
+                  className="h-5 w-5 text-orange-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+                Areas for Development
+              </h4>
+              <ul className="space-y-2">
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="text-orange-600 mt-0.5">•</span>
+                  <span className="text-gray-700">
+                    AWS cloud infrastructure experience appears limited and may
+                    require additional training
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="text-orange-600 mt-0.5">•</span>
+                  <span className="text-gray-700">
+                    SQL proficiency is below requirements and could benefit from
+                    focused development
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="text-orange-600 mt-0.5">•</span>
+                  <span className="text-gray-700">
+                    No demonstrated experience with Docker or GraphQL, which are
+                    good-to-have skills
+                  </span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <span className="text-orange-600 mt-0.5">•</span>
+                  <span className="text-gray-700">
+                    Redis experience is unclear from resume and may need
+                    verification during interview
+                  </span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>

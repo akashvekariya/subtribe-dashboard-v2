@@ -475,7 +475,7 @@ export default function JobDetailPage() {
                       <div className="text-sm text-gray-600 mb-1">
                         Total Rejected
                       </div>
-                      <div className="text-2xl font-semibold text-red-600">
+                      <div className="text-2xl font-semibold text-orange-600">
                         {stats.applications.by_status.rejected}
                       </div>
                     </div>
@@ -557,8 +557,8 @@ export default function JobDetailPage() {
               </div>
             </>
           ) : (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-sm text-red-700">Failed to load statistics</p>
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+              <p className="text-sm text-orange-700">Failed to load statistics</p>
             </div>
           )}
 
