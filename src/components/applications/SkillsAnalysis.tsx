@@ -18,31 +18,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
-
-// Fake data for demo
-const skillsData = [
-  { skill: "React", required: 90, candidate: 85 },
-  { skill: "TypeScript", required: 80, candidate: 75 },
-  { skill: "Node.js", required: 70, candidate: 80 },
-  { skill: "SQL", required: 75, candidate: 60 },
-  { skill: "AWS", required: 65, candidate: 50 },
-  { skill: "Python", required: 60, candidate: 70 },
-];
-
-const techStack = [
-  { name: "React", icon: "devicon-react-original", status: "present" },
-  { name: "TypeScript", icon: "devicon-typescript-plain", status: "present" },
-  { name: "Node.js", icon: "devicon-nodejs-plain", status: "present" },
-  { name: "PostgreSQL", icon: "devicon-postgresql-plain", status: "present" },
-  {
-    name: "AWS",
-    icon: "devicon-amazonwebservices-plain-wordmark",
-    status: "uncertain",
-  },
-  { name: "Docker", icon: "devicon-docker-plain", status: "missing" },
-  { name: "GraphQL", icon: "devicon-graphql-plain", status: "missing" },
-  { name: "Redis", icon: "devicon-redis-plain", status: "uncertain" },
-];
+import mockData from "@/data/mockCandidateAnalysis.json";
 
 const chartConfig = {
   required: {
@@ -55,11 +31,23 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function SkillsAnalysis() {
-  // Experience data: candidate has 5.5 years, required is 3-5 years
-  const candidateExperience = 5.5;
-  const requiredMinExperience = 3;
-  const requiredMaxExperience = 5;
+interface SkillsAnalysisProps {
+  applicationId: string;
+}
+
+export function SkillsAnalysis({ applicationId }: SkillsAnalysisProps) {
+  // Find candidate data from mock JSON
+  // In production, this would come from API based on applicationId
+  const candidateIndex = parseInt(applicationId) % mockData.candidates.length;
+  const candidateData = mockData.candidates[candidateIndex];
+
+  const { skillsData, techStack, experience, strengths, weaknesses, rank } =
+    candidateData;
+  const {
+    candidate: candidateExperience,
+    requiredMin: requiredMinExperience,
+    requiredMax: requiredMaxExperience,
+  } = experience;
   const maxYears = 15;
 
   // Calculate if candidate meets requirement
@@ -333,7 +321,7 @@ export function SkillsAnalysis() {
             </div>
             <div className="text-right">
               <div className="text-3xl font-bold text-[var(--color-primary)]">
-                #2
+                #{rank}
               </div>
               <div className="text-xs text-gray-500 mt-1">
                 Job-level ranking
@@ -358,34 +346,12 @@ export function SkillsAnalysis() {
                 Strengths
               </h4>
               <ul className="space-y-2">
-                <li className="flex items-start gap-2 text-sm">
-                  <span className="text-green-600 mt-0.5">•</span>
-                  <span className="text-gray-700">
-                    Strong proficiency in React, TypeScript, and Node.js with
-                    proven track record
-                  </span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <span className="text-green-600 mt-0.5">•</span>
-                  <span className="text-gray-700">
-                    Exceeds experience requirements with 5.5 years of relevant
-                    work
-                  </span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <span className="text-green-600 mt-0.5">•</span>
-                  <span className="text-gray-700">
-                    Advanced Python skills provide additional value for
-                    full-stack projects
-                  </span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <span className="text-green-600 mt-0.5">•</span>
-                  <span className="text-gray-700">
-                    Demonstrated ability to work with PostgreSQL and modern
-                    database systems
-                  </span>
-                </li>
+                {strengths.map((strength, index) => (
+                  <li key={index} className="flex items-start gap-2 text-sm">
+                    <span className="text-green-600 mt-0.5">•</span>
+                    <span className="text-gray-700">{strength}</span>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -408,34 +374,12 @@ export function SkillsAnalysis() {
                 Areas for Development
               </h4>
               <ul className="space-y-2">
-                <li className="flex items-start gap-2 text-sm">
-                  <span className="text-orange-600 mt-0.5">•</span>
-                  <span className="text-gray-700">
-                    AWS cloud infrastructure experience appears limited and may
-                    require additional training
-                  </span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <span className="text-orange-600 mt-0.5">•</span>
-                  <span className="text-gray-700">
-                    SQL proficiency is below requirements and could benefit from
-                    focused development
-                  </span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <span className="text-orange-600 mt-0.5">•</span>
-                  <span className="text-gray-700">
-                    No demonstrated experience with Docker or GraphQL, which are
-                    good-to-have skills
-                  </span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <span className="text-orange-600 mt-0.5">•</span>
-                  <span className="text-gray-700">
-                    Redis experience is unclear from resume and may need
-                    verification during interview
-                  </span>
-                </li>
+                {weaknesses.map((weakness, index) => (
+                  <li key={index} className="flex items-start gap-2 text-sm">
+                    <span className="text-orange-600 mt-0.5">•</span>
+                    <span className="text-gray-700">{weakness}</span>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>

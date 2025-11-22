@@ -316,7 +316,7 @@ export function ApplicationDetailsDrawer({
           </TabsList>
 
           <TabsContent value="analysis" className="mt-6 space-y-6">
-            <SkillsAnalysis />
+            <SkillsAnalysis applicationId={applicationId} />
           </TabsContent>
 
           <TabsContent value="overview" className="mt-6 space-y-6">

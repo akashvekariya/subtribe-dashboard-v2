@@ -558,7 +558,9 @@ export default function JobDetailPage() {
             </>
           ) : (
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-              <p className="text-sm text-orange-700">Failed to load statistics</p>
+              <p className="text-sm text-orange-700">
+                Failed to load statistics
+              </p>
             </div>
           )}
 
