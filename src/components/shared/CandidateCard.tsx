@@ -138,7 +138,8 @@ export function CandidateCard({
 
   return (
     <div
-      className={`rounded-lg transition-all ${
+      onClick={onClick}
+      className={`rounded-lg transition-all cursor-pointer ${
         isSelected
           ? "bg-blue-50 border-2 border-blue-200 shadow-lg"
           : "bg-white border-2 border-gray-200 hover:border-gray-300"
@@ -198,6 +199,7 @@ export function CandidateCard({
               onChange={(e) =>
                 handleStatusChange(e.target.value as ApplicationStatus)
               }
+              onClick={(e) => e.stopPropagation()}
               className={`h-8 text-sm font-medium border-2 rounded-md px-3 py-1 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm ${getSelectStyling(candidate.status)}`}
             >
               {STATUS_OPTIONS.map((status) => (
