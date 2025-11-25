@@ -13,14 +13,21 @@ import {
   ArrowDownTrayIcon,
   EnvelopeIcon,
   PhoneIcon,
-  CalendarIcon,
+  QuestionMarkCircleIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   isHighSignalTransition,
   getStatusUpdateMessaging,
   combineTagsAndNotes,
 } from "@/lib/status-update-config";
+import { SkillsAnalysis } from "./SkillsAnalysis";
 
 const APPLICATION_STATUSES = [
   { value: "applied", label: "Applied", color: "bg-blue-100 text-blue-800" },
@@ -263,6 +270,23 @@ export function ApplicationDetailsDrawer({
   );
   const candidateName = `${application.first_name} ${application.last_name}`;
 
+  // Get select styling based on current status
+  const getSelectStyling = (status: ApplicationStatus) => {
+    const statusConfig = APPLICATION_STATUSES.find((s) => s.value === status);
+    if (!statusConfig) return "border-gray-300 bg-white";
+
+    const colorMap: Record<string, string> = {
+      "bg-blue-100 text-blue-800": "border-blue-300 bg-blue-50",
+      "bg-yellow-100 text-yellow-800": "border-yellow-300 bg-yellow-50",
+      "bg-purple-100 text-purple-800": "border-purple-300 bg-purple-50",
+      "bg-green-100 text-green-800": "border-green-300 bg-green-50",
+      "bg-emerald-100 text-emerald-800": "border-emerald-300 bg-emerald-50",
+      "bg-red-100 text-red-800": "border-red-300 bg-red-50",
+    };
+
+    return colorMap[statusConfig.color] || "border-gray-300 bg-white";
+  };
+
   const highSignalResult = pendingStatus
     ? isHighSignalTransition(
         application.status,
@@ -275,451 +299,429 @@ export function ApplicationDetailsDrawer({
     : null;
 
   return (
-    <div className="h-full overflow-y-auto">
-      {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 pr-20 z-10">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">{candidateName}</h2>
-            <p className="text-sm text-gray-500">
-              Applied{" "}
-              {new Date(
-                application.applied_at || application.created_at
-              ).toLocaleDateString()}
-            </p>
-          </div>
-          <span
-            className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${currentStatus?.color || "bg-gray-100 text-gray-800"} mr-2`}
-          >
-            {currentStatus?.label || application.status}
-          </span>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="px-6 py-6">
-        <Tabs defaultValue="analysis" className="w-full">
-          <TabsList className="bg-gray-100 w-full">
-            <TabsTrigger
-              value="analysis"
-              className="flex-1 data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-[var(--color-primary)]"
-            >
-              Analysis
-            </TabsTrigger>
-            <TabsTrigger
-              value="overview"
-              className="flex-1 data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-[var(--color-primary)]"
-            >
-              Overview
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="analysis" className="mt-6 space-y-6">
-            {/* Placeholder for analysis metrics */}
-            <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-              <div className="text-gray-400">
-                <svg
-                  className="mx-auto h-12 w-12 mb-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
-                <h3 className="text-sm font-medium text-gray-900">
-                  Analysis Coming Soon
-                </h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Resume analysis metrics will be displayed here
-                </p>
-              </div>
+    <TooltipProvider>
+      <div className="h-full overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 pr-20 z-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {candidateName}
+              </h2>
+              <p className="text-sm text-gray-500">
+                Applied{" "}
+                {new Date(
+                  application.applied_at || application.created_at
+                ).toLocaleDateString()}
+              </p>
             </div>
-          </TabsContent>
+            <span
+              className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${currentStatus?.color || "bg-gray-100 text-gray-800"} mr-2`}
+            >
+              {currentStatus?.label || application.status}
+            </span>
+          </div>
+        </div>
 
-          <TabsContent value="overview" className="mt-6 space-y-6">
-            {/* Row 1: Contact Information + Professional Links */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Contact Information */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="text-base font-semibold text-gray-900 mb-4">
-                  Contact Information
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <EnvelopeIcon className="h-5 w-5 text-gray-400" />
-                    <div>
-                      <dt className="text-xs font-medium text-gray-500">
-                        Email
-                      </dt>
-                      <dd className="text-sm text-gray-900">
-                        <a
-                          href={`mailto:${application.email}`}
-                          className="text-blue-600 hover:underline"
-                        >
-                          {application.email}
-                        </a>
-                      </dd>
-                    </div>
-                  </div>
-                  {application.phone && (
+        {/* Content */}
+        <div className="px-4 py-4">
+          <Tabs defaultValue="analysis" className="w-full">
+            <TabsList className="bg-gray-100 w-full">
+              <TabsTrigger
+                value="analysis"
+                className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              >
+                Analysis
+              </TabsTrigger>
+              <TabsTrigger
+                value="overview"
+                className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              >
+                Overview
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="analysis" className="mt-2 space-y-2">
+              <SkillsAnalysis applicationId={applicationId} />
+            </TabsContent>
+
+            <TabsContent value="overview" className="mt-2 space-y-4">
+              {/* Row 1: Contact Information + Professional Links */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Contact Information */}
+                <div className="bg-white border border-gray-200 rounded-lg p-3">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                    Contact Information
+                  </h3>
+                  <div className="space-y-3">
                     <div className="flex items-center space-x-3">
-                      <PhoneIcon className="h-5 w-5 text-gray-400" />
+                      <EnvelopeIcon className="h-5 w-5 text-gray-400" />
                       <div>
                         <dt className="text-xs font-medium text-gray-500">
-                          Phone
+                          Email
                         </dt>
                         <dd className="text-sm text-gray-900">
-                          {application.phone}
+                          <a
+                            href={`mailto:${application.email}`}
+                            className="text-blue-600 hover:underline"
+                          >
+                            {application.email}
+                          </a>
                         </dd>
                       </div>
                     </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Professional Links */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="text-base font-semibold text-gray-900 mb-4">
-                  Professional Links
-                </h3>
-                {application.linkedin_url ||
-                application.github_url ||
-                application.portfolio_url ? (
-                  <div className="space-y-3">
-                    {application.linkedin_url && (
-                      <div>
-                        <Label className="text-xs">LinkedIn</Label>
-                        <a
-                          href={application.linkedin_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block text-sm text-blue-600 hover:underline truncate"
-                        >
-                          {application.linkedin_url}
-                        </a>
-                      </div>
-                    )}
-                    {application.github_url && (
-                      <div>
-                        <Label className="text-xs">GitHub</Label>
-                        <a
-                          href={application.github_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block text-sm text-blue-600 hover:underline truncate"
-                        >
-                          {application.github_url}
-                        </a>
-                      </div>
-                    )}
-                    {application.portfolio_url && (
-                      <div>
-                        <Label className="text-xs">Portfolio</Label>
-                        <a
-                          href={application.portfolio_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block text-sm text-blue-600 hover:underline truncate"
-                        >
-                          {application.portfolio_url}
-                        </a>
+                    {application.phone && (
+                      <div className="flex items-center space-x-3">
+                        <PhoneIcon className="h-5 w-5 text-gray-400" />
+                        <div>
+                          <dt className="text-xs font-medium text-gray-500">
+                            Phone
+                          </dt>
+                          <dd className="text-sm text-gray-900">
+                            {application.phone}
+                          </dd>
+                        </div>
                       </div>
                     )}
                   </div>
-                ) : (
-                  <p className="text-sm text-gray-500">No links provided</p>
-                )}
-              </div>
-            </div>
+                </div>
 
-            {/* Row 2: Compensation & Availability + Resume */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Compensation & Availability */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="text-base font-semibold text-gray-900 mb-4">
-                  Compensation & Availability
-                </h3>
-                <dl className="grid grid-cols-1 gap-3">
-                  {application.current_ctc && (
-                    <div>
-                      <dt className="text-xs font-medium text-gray-500">
-                        Current CTC
-                      </dt>
-                      <dd className="mt-1 text-sm text-gray-900">
-                        ₹{application.current_ctc.toLocaleString()}
-                      </dd>
+                {/* Professional Links */}
+                <div className="bg-white border border-gray-200 rounded-lg p-3">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                    Professional Links
+                  </h3>
+                  {application.linkedin_url ||
+                  application.github_url ||
+                  application.portfolio_url ? (
+                    <div className="space-y-3">
+                      {application.linkedin_url && (
+                        <div>
+                          <Label className="text-xs">LinkedIn</Label>
+                          <a
+                            href={application.linkedin_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block text-sm text-blue-600 hover:underline truncate"
+                          >
+                            {application.linkedin_url}
+                          </a>
+                        </div>
+                      )}
+                      {application.github_url && (
+                        <div>
+                          <Label className="text-xs">GitHub</Label>
+                          <a
+                            href={application.github_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block text-sm text-blue-600 hover:underline truncate"
+                          >
+                            {application.github_url}
+                          </a>
+                        </div>
+                      )}
+                      {application.portfolio_url && (
+                        <div>
+                          <Label className="text-xs">Portfolio</Label>
+                          <a
+                            href={application.portfolio_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block text-sm text-blue-600 hover:underline truncate"
+                          >
+                            {application.portfolio_url}
+                          </a>
+                        </div>
+                      )}
                     </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No links provided</p>
                   )}
-                  {application.expected_ctc && (
-                    <div>
-                      <dt className="text-xs font-medium text-gray-500">
-                        Expected CTC
-                      </dt>
-                      <dd className="mt-1 text-sm text-gray-900">
-                        ₹{application.expected_ctc.toLocaleString()}
-                      </dd>
-                    </div>
-                  )}
-                  {application.notice_period_days !== undefined &&
-                    application.notice_period_days !== null && (
+                </div>
+              </div>
+
+              {/* Row 2: Compensation & Availability + Resume */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* Compensation & Availability */}
+                <div className="bg-white border border-gray-200 rounded-lg p-3">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                    Compensation & Availability
+                  </h3>
+                  <dl className="grid grid-cols-1 gap-3">
+                    {application.current_ctc && (
                       <div>
                         <dt className="text-xs font-medium text-gray-500">
-                          Notice Period
+                          Current CTC
                         </dt>
                         <dd className="mt-1 text-sm text-gray-900">
-                          {application.notice_period_days} days
+                          ₹{application.current_ctc.toLocaleString()}
                         </dd>
                       </div>
                     )}
-                </dl>
-              </div>
-
-              {/* Resume Actions */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="text-base font-semibold text-gray-900 mb-4">
-                  Resume
-                </h3>
-                <div className="flex flex-col gap-2">
-                  <Button
-                    onClick={handleViewResume}
-                    disabled={isLoadingResume}
-                    size="sm"
-                    variant="outline"
-                    className="w-full justify-start"
-                  >
-                    <DocumentTextIcon className="h-4 w-4 mr-2" />
-                    Open Resume in New Tab
-                  </Button>
-                  <Button
-                    onClick={handleDownloadResume}
-                    disabled={isLoadingResume}
-                    size="sm"
-                    variant="outline"
-                    className="w-full justify-start"
-                  >
-                    <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
-                    Download Resume
-                  </Button>
-                </div>
-                {application.resume_filename && (
-                  <p className="text-xs text-gray-500 mt-2">
-                    {application.resume_filename}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Screening Answers */}
-            {application.screening_answers &&
-              Object.keys(application.screening_answers).length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <h3 className="text-base font-semibold text-gray-900 mb-4">
-                    Screening Questions
-                  </h3>
-                  <div className="space-y-4">
-                    {Object.entries(application.screening_answers).map(
-                      ([questionId, answer]) => (
-                        <div
-                          key={questionId}
-                          className="border-l-4 border-blue-500 pl-4"
-                        >
-                          <p className="text-sm font-medium text-gray-900 mb-2">
-                            Question {questionId}
-                          </p>
-                          <p className="text-sm text-gray-700">{answer}</p>
-                        </div>
-                      )
+                    {application.expected_ctc && (
+                      <div>
+                        <dt className="text-xs font-medium text-gray-500">
+                          Expected CTC
+                        </dt>
+                        <dd className="mt-1 text-sm text-gray-900">
+                          ₹{application.expected_ctc.toLocaleString()}
+                        </dd>
+                      </div>
                     )}
+                    {application.notice_period_days !== undefined &&
+                      application.notice_period_days !== null && (
+                        <div>
+                          <dt className="text-xs font-medium text-gray-500">
+                            Notice Period
+                          </dt>
+                          <dd className="mt-1 text-sm text-gray-900">
+                            {application.notice_period_days} days
+                          </dd>
+                        </div>
+                      )}
+                  </dl>
+                </div>
+
+                {/* Resume Actions */}
+                <div className="bg-white border border-gray-200 rounded-lg p-3">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                    Resume
+                  </h3>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      onClick={handleViewResume}
+                      disabled={isLoadingResume}
+                      size="sm"
+                      variant="secondary"
+                      className="w-full justify-start"
+                    >
+                      <DocumentTextIcon className="h-4 w-4 mr-2" />
+                      Open Resume in New Tab
+                    </Button>
+                    <Button
+                      onClick={handleDownloadResume}
+                      disabled={isLoadingResume}
+                      size="sm"
+                      variant="secondary"
+                      className="w-full justify-start"
+                    >
+                      <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+                      Download Resume
+                    </Button>
+                  </div>
+                  {application.resume_filename && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      {application.resume_filename}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Screening Answers */}
+              {application.screening_answers &&
+                Object.keys(application.screening_answers).length > 0 && (
+                  <div className="bg-white border border-gray-200 rounded-lg p-3">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                      Screening Questions
+                    </h3>
+                    <div className="space-y-4">
+                      {Object.entries(application.screening_answers).map(
+                        ([questionId, answer]) => (
+                          <div
+                            key={questionId}
+                            className="border-l-4 border-blue-500 pl-4"
+                          >
+                            <p className="text-sm font-medium text-gray-900 mb-2">
+                              Question {questionId}
+                            </p>
+                            <p className="text-sm text-gray-700">{answer}</p>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Status Update */}
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-3 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <svg
+                    className="h-4 w-4 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                    Application Status
+                  </h3>
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700">
+                    Change Status
+                  </Label>
+                  <select
+                    value={application.status}
+                    onChange={(e) =>
+                      handleStatusChange(e.target.value as ApplicationStatus)
+                    }
+                    disabled={isUpdatingStatus}
+                    className={`mt-2 w-full px-4 py-3 text-base font-medium border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${getSelectStyling(application.status)}`}
+                  >
+                    {APPLICATION_STATUSES.map((status) => (
+                      <option key={status.value} value={status.value}>
+                        {status.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Status History */}
+              {statusHistory.length > 0 && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                  <h3 className="text-xs font-medium text-gray-700 mb-2">
+                    Status History
+                  </h3>
+                  <div className="space-y-2">
+                    {statusHistory.map((entry) => (
+                      <div
+                        key={entry.id}
+                        className="flex items-start space-x-2 pb-2 border-b border-gray-200 last:border-0"
+                      >
+                        <ClockIcon className="h-4 w-4 text-gray-400 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-700">
+                            Changed to{" "}
+                            <span className="font-medium">
+                              {
+                                APPLICATION_STATUSES.find(
+                                  (s) => s.value === entry.to_status
+                                )?.label
+                              }
+                            </span>
+                          </p>
+                          {entry.notes && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              {entry.notes}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-400 mt-1">
+                            {new Date(entry.created_at).toLocaleString()}
+                            {entry.changed_by &&
+                              ` by ${entry.changed_by.full_name}`}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
+            </TabsContent>
+          </Tabs>
+        </div>
 
-            {/* Status Update */}
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg p-5 shadow-sm">
-              <div className="flex items-center gap-2 mb-4">
-                <svg
-                  className="h-5 w-5 text-blue-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <h3 className="text-lg font-bold text-gray-900">
-                  Application Status
-                </h3>
-              </div>
-              <div>
-                <Label className="text-sm font-semibold text-gray-700">
-                  Change Status
-                </Label>
-                <select
-                  value={application.status}
-                  onChange={(e) =>
-                    handleStatusChange(e.target.value as ApplicationStatus)
-                  }
-                  disabled={isUpdatingStatus}
-                  className="mt-2 w-full px-4 py-3 text-base font-medium border-2 border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                >
-                  {APPLICATION_STATUSES.map((status) => (
-                    <option key={status.value} value={status.value}>
-                      {status.label}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-2 text-xs text-gray-600 italic">
-                  Changing status may trigger additional questions to help
-                  improve candidate matching
-                </p>
-              </div>
-            </div>
-
-            {/* Status History */}
-            {statusHistory.length > 0 && (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 opacity-60">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">
-                  Status History
-                </h3>
-                <div className="space-y-2">
-                  {statusHistory.map((entry) => (
-                    <div
-                      key={entry.id}
-                      className="flex items-start space-x-2 pb-2 border-b border-gray-200 last:border-0"
-                    >
-                      <ClockIcon className="h-4 w-4 text-gray-400 mt-0.5" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-gray-700">
-                          Changed to{" "}
-                          <span className="font-medium">
-                            {
-                              APPLICATION_STATUSES.find(
-                                (s) => s.value === entry.to_status
-                              )?.label
-                            }
-                          </span>
-                        </p>
-                        {entry.notes && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            {entry.notes}
-                          </p>
-                        )}
-                        <p className="text-xs text-gray-400 mt-1">
-                          {new Date(entry.created_at).toLocaleString()}
-                          {entry.changed_by &&
-                            ` by ${entry.changed_by.full_name}`}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      {/* Status Update Modal */}
-      {showStatusModal && statusUpdateConfig && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-          onClick={() => {
-            setShowStatusModal(false);
-            setPendingStatus(null);
-            setSelectedTags([]);
-            setCustomNotes("");
-          }}
-        >
+        {/* Status Update Modal */}
+        {showStatusModal && statusUpdateConfig && (
           <div
-            className="w-full max-w-md bg-white rounded-lg p-6 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+            onClick={() => {
+              setShowStatusModal(false);
+              setPendingStatus(null);
+              setSelectedTags([]);
+              setCustomNotes("");
+            }}
           >
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {statusUpdateConfig.title}
-            </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              {statusUpdateConfig.subtitle}
-            </p>
+            <div
+              className="w-full max-w-md bg-white rounded-lg p-6 shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {statusUpdateConfig.title}
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                {statusUpdateConfig.subtitle}
+              </p>
 
-            {/* Quick Pick Tags */}
-            {statusUpdateConfig.tags && statusUpdateConfig.tags.length > 0 && (
+              {/* Quick Pick Tags */}
+              {statusUpdateConfig.tags &&
+                statusUpdateConfig.tags.length > 0 && (
+                  <div className="mb-4">
+                    <Label className="text-xs mb-2">
+                      {statusUpdateConfig.quickPicksLabel}
+                    </Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {statusUpdateConfig.tags.map((tag) => (
+                        <button
+                          key={tag}
+                          onClick={() => handleTagClick(tag)}
+                          className={`px-3 py-1 text-sm rounded-full transition-colors ${
+                            selectedTags.includes(tag)
+                              ? "bg-blue-600 text-white"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* Custom Notes */}
               <div className="mb-4">
                 <Label className="text-xs mb-2">
-                  {statusUpdateConfig.quickPicksLabel}
+                  Additional Notes (Optional)
                 </Label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {statusUpdateConfig.tags.map((tag) => (
-                    <button
-                      key={tag}
-                      onClick={() => handleTagClick(tag)}
-                      className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                        selectedTags.includes(tag)
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
+                <textarea
+                  value={customNotes}
+                  onChange={(e) => setCustomNotes(e.target.value)}
+                  placeholder="Add any additional context..."
+                  className="w-full h-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
-            )}
 
-            {/* Custom Notes */}
-            <div className="mb-4">
-              <Label className="text-xs mb-2">
-                Additional Notes (Optional)
-              </Label>
-              <textarea
-                value={customNotes}
-                onChange={(e) => setCustomNotes(e.target.value)}
-                placeholder="Add any additional context..."
-                className="w-full h-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowStatusModal(false);
+                    setPendingStatus(null);
+                    setSelectedTags([]);
+                    setCustomNotes("");
+                  }}
+                  className="flex-1"
+                  disabled={isUpdatingStatus}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleModalSubmit}
+                  disabled={isUpdatingStatus}
+                  className="flex-1"
+                >
+                  {isUpdatingStatus ? "Updating..." : "Update Status"}
+                </Button>
+              </div>
+
+              {statusUpdateConfig.hint && (
+                <p className="text-xs text-gray-500 mt-3 text-center">
+                  {statusUpdateConfig.hint}
+                </p>
+              )}
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowStatusModal(false);
-                  setPendingStatus(null);
-                  setSelectedTags([]);
-                  setCustomNotes("");
-                }}
-                className="flex-1"
-                disabled={isUpdatingStatus}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleModalSubmit}
-                disabled={isUpdatingStatus}
-                className="flex-1"
-              >
-                {isUpdatingStatus ? "Updating..." : "Update Status"}
-              </Button>
-            </div>
-
-            {statusUpdateConfig.hint && (
-              <p className="text-xs text-gray-500 mt-3 text-center">
-                {statusUpdateConfig.hint}
-              </p>
-            )}
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </TooltipProvider>
   );
 }
