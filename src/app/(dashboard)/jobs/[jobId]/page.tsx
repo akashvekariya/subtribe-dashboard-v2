@@ -994,13 +994,16 @@ export default function JobDetailPage() {
                       <option value="hired">Hired</option>
                       <option value="rejected">Rejected</option>
                     </select>
-                    <Button
-                      variant={isSelectMode ? "default" : "outline"}
-                      size="sm"
+                    <button
                       onClick={handleToggleSelectMode}
+                      className={`h-8 px-3 text-sm font-medium rounded-md transition-colors ${
+                        isSelectMode
+                          ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
+                          : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      }`}
                     >
                       {isSelectMode ? "Cancel" : "Select"}
-                    </Button>
+                    </button>
                   </div>
                 </div>
 
