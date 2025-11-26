@@ -62,7 +62,8 @@ export default function EmailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<EmailTemplate | null>(null);
   const [formData, setFormData] = useState<TemplateFormData>(defaultFormData);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -111,7 +112,11 @@ export default function EmailPage() {
   };
 
   const handleSave = async () => {
-    if (!formData.name.trim() || !formData.subject.trim() || !formData.body.trim()) {
+    if (
+      !formData.name.trim() ||
+      !formData.subject.trim() ||
+      !formData.body.trim()
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -138,7 +143,11 @@ export default function EmailPage() {
       loadTemplates();
     } catch (error) {
       console.error("Failed to save template:", error);
-      toast.error(selectedTemplate ? "Failed to update template" : "Failed to create template");
+      toast.error(
+        selectedTemplate
+          ? "Failed to update template"
+          : "Failed to create template"
+      );
     } finally {
       setIsSaving(false);
     }
@@ -163,15 +172,23 @@ export default function EmailPage() {
   };
 
   const insertWildcard = (wildcard: string) => {
-    const textarea = document.getElementById("template-body") as HTMLTextAreaElement;
+    const textarea = document.getElementById(
+      "template-body"
+    ) as HTMLTextAreaElement;
     if (textarea) {
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
-      const newBody = formData.body.substring(0, start) + wildcard + formData.body.substring(end);
+      const newBody =
+        formData.body.substring(0, start) +
+        wildcard +
+        formData.body.substring(end);
       setFormData((prev) => ({ ...prev, body: newBody }));
       setTimeout(() => {
         textarea.focus();
-        textarea.setSelectionRange(start + wildcard.length, start + wildcard.length);
+        textarea.setSelectionRange(
+          start + wildcard.length,
+          start + wildcard.length
+        );
       }, 0);
     } else {
       setFormData((prev) => ({ ...prev, body: prev.body + wildcard }));
@@ -216,14 +233,21 @@ export default function EmailPage() {
             <p className="text-sm text-gray-500">
               Create and manage email templates for candidate communication
             </p>
-            <Button size="sm" onClick={handleOpenCreate} title="Create Template">
+            <Button
+              size="sm"
+              onClick={handleOpenCreate}
+              title="Create Template"
+            >
               <PlusIcon className="h-4 w-4" />
             </Button>
           </div>
 
           {/* Templates List */}
           {isLoading ? (
-            <LoadingSpinner message="Loading templates..." className="min-h-64" />
+            <LoadingSpinner
+              message="Loading templates..."
+              className="min-h-64"
+            />
           ) : templates.length === 0 ? (
             <EmptyState
               icon={EnvelopeIcon}
@@ -261,7 +285,9 @@ export default function EmailPage() {
                                   : "bg-green-100 text-green-800"
                               )}
                             >
-                              {template.category === "system" ? "System" : "Custom"}
+                              {template.category === "system"
+                                ? "System"
+                                : "Custom"}
                             </span>
                           </div>
                           <p className="mt-1 text-sm text-gray-500 truncate">
@@ -323,7 +349,9 @@ export default function EmailPage() {
               <Input
                 id="template-name"
                 value={formData.name}
-                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, name: e.target.value }))
+                }
                 placeholder="e.g., Interview Invitation"
               />
             </div>
@@ -348,20 +376,26 @@ export default function EmailPage() {
               <Textarea
                 id="template-body"
                 value={formData.body}
-                onChange={(e) => setFormData((prev) => ({ ...prev, body: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, body: e.target.value }))
+                }
                 placeholder="Write your email content here. Use wildcards like {candidate_name} to personalize..."
                 rows={10}
                 className="font-mono text-sm"
               />
               <p className="text-xs text-gray-500">
-                Use wildcards like {"{candidate_name}"}, {"{job_title}"}, {"{company_name}"}{" "}
-                to personalize emails.
+                Use wildcards like {"{candidate_name}"}, {"{job_title}"},{" "}
+                {"{company_name}"} to personalize emails.
               </p>
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={handleCloseDialog} disabled={isSaving}>
+            <Button
+              variant="outline"
+              onClick={handleCloseDialog}
+              disabled={isSaving}
+            >
               Cancel
             </Button>
             <Button onClick={handleSave} disabled={isSaving}>
@@ -372,13 +406,16 @@ export default function EmailPage() {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Template</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &quot;{selectedTemplate?.name}&quot;? This action
-              cannot be undone.
+              Are you sure you want to delete &quot;{selectedTemplate?.name}
+              &quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -28,6 +28,7 @@ import {
   combineTagsAndNotes,
 } from "@/lib/status-update-config";
 import { SkillsAnalysis } from "./SkillsAnalysis";
+import { CommunicationTab } from "./CommunicationTab";
 
 const APPLICATION_STATUSES = [
   { value: "applied", label: "Applied", color: "bg-blue-100 text-blue-800" },
@@ -339,6 +340,12 @@ export function ApplicationDetailsDrawer({
               >
                 Overview
               </TabsTrigger>
+              <TabsTrigger
+                value="communication"
+                className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              >
+                Communications
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="analysis" className="mt-2 space-y-2">
@@ -624,6 +631,10 @@ export function ApplicationDetailsDrawer({
                   </div>
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="communication" className="mt-2">
+              <CommunicationTab application={application} />
             </TabsContent>
           </Tabs>
         </div>

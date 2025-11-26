@@ -89,7 +89,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           );
         })}
       </nav>
-
     </div>
   );
 }

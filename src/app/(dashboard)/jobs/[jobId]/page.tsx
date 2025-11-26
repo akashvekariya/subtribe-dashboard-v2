@@ -46,7 +46,9 @@ export default function JobDetailPage() {
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
 
   // Multi-select for bulk email
-  const [selectedCandidateIds, setSelectedCandidateIds] = useState<Set<string>>(new Set());
+  const [selectedCandidateIds, setSelectedCandidateIds] = useState<Set<string>>(
+    new Set()
+  );
   const [isBulkEmailModalOpen, setIsBulkEmailModalOpen] = useState(false);
   const [isSelectMode, setIsSelectMode] = useState(false);
 
@@ -245,7 +247,9 @@ export default function JobDetailPage() {
     }
 
     if (successCount < selectedIds.length) {
-      showToast.error(`Failed to update ${selectedIds.length - successCount} candidate(s)`);
+      showToast.error(
+        `Failed to update ${selectedIds.length - successCount} candidate(s)`
+      );
     }
   };
 
@@ -1007,7 +1011,10 @@ export default function JobDetailPage() {
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={selectedCandidateIds.size === candidates.length && candidates.length > 0}
+                          checked={
+                            selectedCandidateIds.size === candidates.length &&
+                            candidates.length > 0
+                          }
                           onChange={handleSelectAllCandidates}
                           className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
@@ -1025,7 +1032,9 @@ export default function JobDetailPage() {
                         value=""
                         onChange={(e) => {
                           if (e.target.value) {
-                            handleBulkStatusChange(e.target.value as Application["status"]);
+                            handleBulkStatusChange(
+                              e.target.value as Application["status"]
+                            );
                             e.target.value = "";
                           }
                         }}
@@ -1078,7 +1087,9 @@ export default function JobDetailPage() {
                             isSelected={selectedApplicationId === candidate.id}
                             isSelectMode={isSelectMode}
                             isChecked={selectedCandidateIds.has(candidate.id)}
-                            onToggleSelect={() => handleToggleCandidateSelection(candidate.id)}
+                            onToggleSelect={() =>
+                              handleToggleCandidateSelection(candidate.id)
+                            }
                           />
                         ))}
                     </div>

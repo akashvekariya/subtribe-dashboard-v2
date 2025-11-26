@@ -175,30 +175,30 @@ export function CandidateCard({
               </div>
             ) : (
               <div
-              className={`flex-shrink-0 w-10 h-10 rounded-full border flex items-center justify-center ${
-                rank === 1
-                  ? "bg-yellow-50 border-yellow-300"
-                  : rank === 2
-                    ? "bg-gray-200 border-gray-400"
-                    : rank === 3
-                      ? "bg-orange-50 border-orange-300"
-                      : "bg-gray-100 border-gray-300"
-              }`}
-            >
-              <span
-                className={`text-sm font-semibold ${
+                className={`flex-shrink-0 w-10 h-10 rounded-full border flex items-center justify-center ${
                   rank === 1
-                    ? "text-yellow-700"
+                    ? "bg-yellow-50 border-yellow-300"
                     : rank === 2
-                      ? "text-gray-700"
+                      ? "bg-gray-200 border-gray-400"
                       : rank === 3
-                        ? "text-orange-700"
-                        : "text-gray-700"
+                        ? "bg-orange-50 border-orange-300"
+                        : "bg-gray-100 border-gray-300"
                 }`}
               >
-                #{rank || "—"}
-              </span>
-            </div>
+                <span
+                  className={`text-sm font-semibold ${
+                    rank === 1
+                      ? "text-yellow-700"
+                      : rank === 2
+                        ? "text-gray-700"
+                        : rank === 3
+                          ? "text-orange-700"
+                          : "text-gray-700"
+                  }`}
+                >
+                  #{rank || "—"}
+                </span>
+              </div>
             )}
 
             <div className="flex-1 min-w-0">

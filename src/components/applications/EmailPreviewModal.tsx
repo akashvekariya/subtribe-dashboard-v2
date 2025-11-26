@@ -32,7 +32,8 @@ export function EmailPreviewModal({
         <DialogHeader>
           <DialogTitle>Email Preview</DialogTitle>
           <DialogDescription>
-            This is how the email will appear to the recipient after wildcard replacement.
+            This is how the email will appear to the recipient after wildcard
+            replacement.
           </DialogDescription>
         </DialogHeader>
 

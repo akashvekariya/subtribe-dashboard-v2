@@ -12,7 +12,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { EnvelopeIcon, UserGroupIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  EnvelopeIcon,
+  UserGroupIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 
 interface BulkEmailModalProps {
   isOpen: boolean;

@@ -23,7 +23,6 @@ import {
   getStatusUpdateMessaging,
   combineTagsAndNotes,
 } from "@/lib/status-update-config";
-import { ScheduledEmails } from "@/components/applications/ScheduledEmails";
 import { CommunicationTab } from "@/components/applications/CommunicationTab";
 
 const APPLICATION_STATUSES = [
@@ -798,11 +797,6 @@ export default function ApplicationDetailPage() {
               </div>
             </div>
           )}
-
-          {/* Scheduled Emails */}
-          <div className="mt-6">
-            <ScheduledEmails applicationId={applicationId} />
-          </div>
         </TabsContent>
 
         <TabsContent value="analysis" className="mt-6">

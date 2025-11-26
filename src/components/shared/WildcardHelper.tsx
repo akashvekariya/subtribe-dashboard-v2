@@ -69,7 +69,7 @@ export function WildcardHelper({ onInsert, className }: WildcardHelperProps) {
   };
 
   return (
-    <Popover>
+    <Popover modal={false}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
@@ -80,17 +80,23 @@ export function WildcardHelper({ onInsert, className }: WildcardHelperProps) {
           <span className="text-xs">Wildcards</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0 max-h-[400px] overflow-hidden" align="start">
-        <div className="p-3 border-b border-gray-100">
+      <PopoverContent className="w-80 p-0" align="start" sideOffset={8}>
+        {/* Header - fixed */}
+        <div className="p-3 border-b border-gray-100 bg-white rounded-t-md">
           <h4 className="font-medium text-sm text-gray-900">
             Available Wildcards
           </h4>
           <p className="text-xs text-gray-500 mt-1">
-            Click to {onInsert ? "insert" : "copy"} a wildcard. These will be
-            replaced with actual values when sending.
+            Click to {onInsert ? "insert" : "copy"} a wildcard
           </p>
         </div>
-        <div className="max-h-[280px] overflow-y-auto">
+
+        {/* Scrollable list */}
+        <div
+          className="overflow-y-auto overscroll-contain"
+          style={{ maxHeight: "180px" }}
+          onWheel={(e) => e.stopPropagation()}
+        >
           {loading ? (
             <div className="p-4 text-center text-sm text-gray-500">
               Loading wildcards...
@@ -102,13 +108,13 @@ export function WildcardHelper({ onInsert, className }: WildcardHelperProps) {
                   <button
                     type="button"
                     onClick={() => handleInsert(wildcard.name)}
-                    className="w-full px-3 py-2 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
+                    className="w-full px-3 py-2.5 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
                   >
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <code className="text-xs font-mono text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
                         {`{${wildcard.name}}`}
                       </code>
-                      <p className="text-xs text-gray-500 mt-0.5 truncate">
+                      <p className="text-xs text-gray-500 mt-1 truncate">
                         {wildcard.description}
                       </p>
                     </div>
@@ -125,7 +131,9 @@ export function WildcardHelper({ onInsert, className }: WildcardHelperProps) {
             </ul>
           )}
         </div>
-        <div className="p-2 border-t border-gray-100 bg-gray-50">
+
+        {/* Footer - fixed */}
+        <div className="p-2 border-t border-gray-100 bg-gray-50 rounded-b-md">
           <p className="text-xs text-gray-500 text-center">
             Example: &quot;Hi {"{candidate_name}"}&quot; becomes &quot;Hi
             John&quot;

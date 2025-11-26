@@ -487,6 +487,15 @@ export const emailAPI = {
       body: JSON.stringify(data),
     });
   },
+
+  // Cancel a scheduled email
+  async cancelScheduledEmail(
+    emailId: string
+  ): Promise<{ success: boolean; message: string }> {
+    return apiFetch(`/emails/scheduled/${emailId}/cancel`, {
+      method: "POST",
+    });
+  },
 };
 
 export async function checkAuth(): Promise<User | null> {

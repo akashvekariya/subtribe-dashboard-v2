@@ -16,7 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/Select";
 import { Switch } from "@/components/ui/switch";
-import { CalendarIcon, EyeIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 
 export interface EmailFormData {
   templateId?: string;
@@ -65,7 +66,9 @@ export function EmailComposeForm({
   const [sendImmediately, setSendImmediately] = useState(
     initialData?.sendImmediately ?? true
   );
-  const [scheduledFor, setScheduledFor] = useState(initialData?.scheduledFor || "");
+  const [scheduledFor, setScheduledFor] = useState(
+    initialData?.scheduledFor || ""
+  );
   const [isPreviewing, setIsPreviewing] = useState(false);
 
   const bodyRef = useRef<HTMLTextAreaElement>(null);
@@ -113,11 +116,16 @@ export function EmailComposeForm({
     if (textarea) {
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
-      setBody((prev) => prev.substring(0, start) + wildcard + prev.substring(end));
+      setBody(
+        (prev) => prev.substring(0, start) + wildcard + prev.substring(end)
+      );
       // Focus and set cursor position after the inserted wildcard
       setTimeout(() => {
         textarea.focus();
-        textarea.setSelectionRange(start + wildcard.length, start + wildcard.length);
+        textarea.setSelectionRange(
+          start + wildcard.length,
+          start + wildcard.length
+        );
       }, 0);
     } else {
       setBody((prev) => prev + wildcard);
@@ -129,7 +137,10 @@ export function EmailComposeForm({
     e.preventDefault();
 
     const formData: EmailFormData = {
-      templateId: selectedTemplateId !== "none" ? selectedTemplateId : undefined,
+      templateId:
+        selectedTemplateId && selectedTemplateId !== "none"
+          ? selectedTemplateId
+          : undefined,
       subject: subject.trim(),
       body: body.trim(),
       sendImmediately,
@@ -151,14 +162,8 @@ export function EmailComposeForm({
     }
   };
 
-  // Get minimum datetime for scheduling (now + 5 minutes)
-  const getMinDateTime = () => {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() + 5);
-    return now.toISOString().slice(0, 16);
-  };
-
-  const isFormValid = subject.trim() && body.trim() && (sendImmediately || scheduledFor);
+  const isFormValid =
+    subject.trim() && body.trim() && (sendImmediately || scheduledFor);
 
   return (
     <form onSubmit={handleSubmit} className={`space-y-4 ${className}`}>
@@ -172,7 +177,11 @@ export function EmailComposeForm({
         >
           <SelectTrigger id="template-select">
             <SelectValue
-              placeholder={isLoadingTemplates ? "Loading templates..." : "Select a template"}
+              placeholder={
+                isLoadingTemplates
+                  ? "Loading templates..."
+                  : "Select a template"
+              }
             />
           </SelectTrigger>
           <SelectContent>
@@ -215,7 +224,8 @@ export function EmailComposeForm({
           required
         />
         <p className="text-xs text-gray-500">
-          Use wildcards like {"{candidate_name}"}, {"{job_title}"} to personalize the email.
+          Use wildcards like {"{candidate_name}"}, {"{job_title}"} to
+          personalize the email.
         </p>
       </div>
 
@@ -226,7 +236,9 @@ export function EmailComposeForm({
             <div className="space-y-0.5">
               <Label htmlFor="send-immediately">Send Immediately</Label>
               <p className="text-xs text-gray-500">
-                {sendImmediately ? "Email will be sent right away" : "Choose when to send"}
+                {sendImmediately
+                  ? "Email will be sent right away"
+                  : "Choose when to send"}
               </p>
             </div>
             <Switch
@@ -239,44 +251,35 @@ export function EmailComposeForm({
           {!sendImmediately && (
             <div className="space-y-2">
               <Label htmlFor="scheduled-for">Schedule For *</Label>
-              <div className="relative">
-                <Input
-                  id="scheduled-for"
-                  type="datetime-local"
-                  value={scheduledFor}
-                  onChange={(e) => setScheduledFor(e.target.value)}
-                  min={getMinDateTime()}
-                  required={!sendImmediately}
-                  className="pl-10"
-                />
-                <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              </div>
+              <DateTimePicker
+                value={scheduledFor}
+                onChange={setScheduledFor}
+                minDate={new Date()}
+                placeholder="Select date and time"
+              />
             </div>
           )}
         </div>
       )}
 
       {/* Actions */}
-      <div className="flex items-center justify-between pt-4 border-t">
-        <div>
-          {onPreview && applicationId && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handlePreview}
-              disabled={!subject.trim() || !body.trim() || isPreviewing || isSubmitting}
-            >
-              <EyeIcon className="h-4 w-4 mr-2" />
-              {isPreviewing ? "Loading..." : "Preview"}
-            </Button>
-          )}
-        </div>
-        <Button
-          type="submit"
-          disabled={!isFormValid || isSubmitting}
-          className="min-w-[120px]"
-        >
-          <PaperAirplaneIcon className="h-4 w-4 mr-2" />
+      <div className="flex items-center justify-end gap-2 pt-4 border-t">
+        {onPreview && applicationId && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handlePreview}
+            disabled={
+              !subject.trim() || !body.trim() || isPreviewing || isSubmitting
+            }
+          >
+            <EyeIcon className="h-4 w-4 mr-1.5" />
+            Preview
+          </Button>
+        )}
+        <Button type="submit" size="sm" disabled={!isFormValid || isSubmitting}>
+          <PaperAirplaneIcon className="h-4 w-4 mr-1.5" />
           {isSubmitting ? "Sending..." : submitLabel}
         </Button>
       </div>
