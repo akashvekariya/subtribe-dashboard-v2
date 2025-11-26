@@ -22,6 +22,10 @@ interface CandidateCardProps {
   onClick?: () => void;
   isSelected?: boolean;
   rank?: number;
+  // Multi-select props
+  isSelectMode?: boolean;
+  isChecked?: boolean;
+  onToggleSelect?: () => void;
 }
 
 /**
@@ -34,6 +38,9 @@ export function CandidateCard({
   onClick,
   isSelected = false,
   rank,
+  isSelectMode = false,
+  isChecked = false,
+  onToggleSelect,
 }: CandidateCardProps) {
   const [isLoadingResume, setIsLoadingResume] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -136,20 +143,38 @@ export function CandidateCard({
     );
   };
 
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleSelect?.();
+  };
+
   return (
     <div
-      onClick={onClick}
+      onClick={isSelectMode ? handleCheckboxClick : onClick}
       className={`rounded-lg transition-all cursor-pointer ${
-        isSelected
-          ? "bg-blue-50 border-2 border-blue-200 shadow-lg"
-          : "bg-white border-2 border-gray-200 hover:border-gray-300"
+        isChecked
+          ? "bg-blue-50 border-2 border-blue-400"
+          : isSelected
+            ? "bg-blue-50 border-2 border-blue-200 shadow-lg"
+            : "bg-white border-2 border-gray-200 hover:border-gray-300"
       }`}
     >
       <div className="p-3">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3 flex-1 min-w-0">
-            {/* Rank Circle */}
-            <div
+            {/* Select Checkbox or Rank Circle */}
+            {isSelectMode ? (
+              <div className="flex-shrink-0 flex items-center justify-center w-10 h-10">
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={() => onToggleSelect?.()}
+                  onClick={(e) => e.stopPropagation()}
+                  className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                />
+              </div>
+            ) : (
+              <div
               className={`flex-shrink-0 w-10 h-10 rounded-full border flex items-center justify-center ${
                 rank === 1
                   ? "bg-yellow-50 border-yellow-300"
@@ -174,6 +199,7 @@ export function CandidateCard({
                 #{rank || "—"}
               </span>
             </div>
+            )}
 
             <div className="flex-1 min-w-0">
               <h3 className="text-base font-medium text-gray-900 truncate">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Job, Application, JobStats } from "@/types";
@@ -10,6 +10,7 @@ import { CandidateCard } from "@/components/shared/CandidateCard";
 import { Button } from "@/components/ui/Button";
 import { ApplicationDetailsDrawer } from "@/components/applications/ApplicationDetailsDrawer";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
+import { BulkEmailModal } from "@/components/applications/BulkEmailModal";
 import showToast from "@/lib/toast";
 import { api } from "@/lib/api-client";
 import { getPublicJobUrl } from "@/lib/env";
@@ -18,8 +19,6 @@ import {
   ArrowLeftIcon,
   PencilIcon,
   UserGroupIcon,
-  CalendarIcon,
-  ChartBarIcon,
   InformationCircleIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -45,6 +44,11 @@ export default function JobDetailPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
+
+  // Multi-select for bulk email
+  const [selectedCandidateIds, setSelectedCandidateIds] = useState<Set<string>>(new Set());
+  const [isBulkEmailModalOpen, setIsBulkEmailModalOpen] = useState(false);
+  const [isSelectMode, setIsSelectMode] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -158,6 +162,92 @@ export default function JobDetailPage() {
       setIsLeftSidebarCollapsed(false);
     }
   }, [isDrawerOpen]);
+
+  // Multi-select handlers
+  const selectedCandidates = useMemo(
+    () => candidates.filter((c) => selectedCandidateIds.has(c.id)),
+    [candidates, selectedCandidateIds]
+  );
+
+  const handleToggleSelectMode = () => {
+    setIsSelectMode(!isSelectMode);
+    if (isSelectMode) {
+      // Clear selections when exiting select mode
+      setSelectedCandidateIds(new Set());
+    }
+  };
+
+  const handleToggleCandidateSelection = (candidateId: string) => {
+    setSelectedCandidateIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(candidateId)) {
+        newSet.delete(candidateId);
+      } else {
+        newSet.add(candidateId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAllCandidates = () => {
+    if (selectedCandidateIds.size === candidates.length) {
+      // Deselect all
+      setSelectedCandidateIds(new Set());
+    } else {
+      // Select all
+      setSelectedCandidateIds(new Set(candidates.map((c) => c.id)));
+    }
+  };
+
+  const handleBulkEmailSuccess = () => {
+    setSelectedCandidateIds(new Set());
+    setIsSelectMode(false);
+    setIsBulkEmailModalOpen(false);
+  };
+
+  // Handle bulk status change
+  const handleBulkStatusChange = async (newStatus: Application["status"]) => {
+    if (selectedCandidateIds.size === 0) return;
+
+    const selectedIds = Array.from(selectedCandidateIds);
+    let successCount = 0;
+
+    for (const candidateId of selectedIds) {
+      try {
+        await updateCandidateStatus(candidateId, newStatus);
+        successCount++;
+      } catch (error) {
+        console.error(`Failed to update status for ${candidateId}:`, error);
+      }
+    }
+
+    // Update local state
+    setCandidates((prev) =>
+      prev.map((candidate) =>
+        selectedCandidateIds.has(candidate.id)
+          ? {
+              ...candidate,
+              status: newStatus,
+              updated_at: new Date().toISOString(),
+            }
+          : candidate
+      )
+    );
+
+    if (successCount > 0) {
+      // Show toast with action to send bulk email
+      showToast.withAction(
+        `Updated ${successCount} candidate${successCount > 1 ? "s" : ""} to ${newStatus}`,
+        "Send Email",
+        () => setIsBulkEmailModalOpen(true),
+        { duration: 8000 }
+      );
+    }
+
+    if (successCount < selectedIds.length) {
+      showToast.error(`Failed to update ${selectedIds.length - successCount} candidate(s)`);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -900,8 +990,56 @@ export default function JobDetailPage() {
                       <option value="hired">Hired</option>
                       <option value="rejected">Rejected</option>
                     </select>
+                    <Button
+                      variant={isSelectMode ? "default" : "outline"}
+                      size="sm"
+                      onClick={handleToggleSelectMode}
+                    >
+                      {isSelectMode ? "Cancel" : "Select"}
+                    </Button>
                   </div>
                 </div>
+
+                {/* Bulk Action Bar */}
+                {isSelectMode && (
+                  <div className="flex items-center justify-between mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center gap-3">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedCandidateIds.size === candidates.length && candidates.length > 0}
+                          onChange={handleSelectAllCandidates}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-gray-700">
+                          All
+                        </span>
+                      </label>
+                      <span className="text-sm text-gray-500">
+                        {selectedCandidateIds.size} selected
+                      </span>
+                    </div>
+                    {selectedCandidateIds.size > 0 && (
+                      <select
+                        className="h-8 text-sm border border-gray-300 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value=""
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            handleBulkStatusChange(e.target.value as Application["status"]);
+                            e.target.value = "";
+                          }
+                        }}
+                      >
+                        <option value="">Change Status</option>
+                        <option value="screening">Screening</option>
+                        <option value="interviewing">Interviewing</option>
+                        <option value="offer">Offer</option>
+                        <option value="hired">Hired</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
+                    )}
+                  </div>
+                )}
 
                 {candidates.length === 0 ? (
                   <div className="text-center py-12">
@@ -938,6 +1076,9 @@ export default function JobDetailPage() {
                             onStatusChange={handleCandidateStatusChange}
                             onClick={() => handleViewApplication(candidate.id)}
                             isSelected={selectedApplicationId === candidate.id}
+                            isSelectMode={isSelectMode}
+                            isChecked={selectedCandidateIds.has(candidate.id)}
+                            onToggleSelect={() => handleToggleCandidateSelection(candidate.id)}
                           />
                         ))}
                     </div>
@@ -945,14 +1086,10 @@ export default function JobDetailPage() {
                     {/* Pagination */}
                     {totalPages > 1 && (
                       <div className="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
-                        <div className="flex items-center">
-                          <p className="text-sm text-gray-700">
-                            Page{" "}
-                            <span className="font-medium">{currentPage}</span>{" "}
-                            of <span className="font-medium">{totalPages}</span>
-                          </p>
-                        </div>
-                        <div className="flex space-x-2">
+                        <p className="text-sm text-gray-500">
+                          {currentPage} / {totalPages}
+                        </p>
+                        <div className="flex gap-1">
                           <Button
                             variant="outline"
                             size="sm"
@@ -960,8 +1097,9 @@ export default function JobDetailPage() {
                               setCurrentPage((prev) => Math.max(1, prev - 1))
                             }
                             disabled={currentPage === 1}
+                            title="Previous page"
                           >
-                            Previous
+                            <ChevronLeftIcon className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="outline"
@@ -972,8 +1110,9 @@ export default function JobDetailPage() {
                               )
                             }
                             disabled={currentPage === totalPages}
+                            title="Next page"
                           >
-                            Next
+                            <ChevronRightIcon className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
@@ -1055,6 +1194,14 @@ export default function JobDetailPage() {
           )}
         </div>
       )}
+
+      {/* Bulk Email Modal */}
+      <BulkEmailModal
+        isOpen={isBulkEmailModalOpen}
+        onClose={() => setIsBulkEmailModalOpen(false)}
+        selectedCandidates={selectedCandidates}
+        onSuccess={handleBulkEmailSuccess}
+      />
     </div>
   );
 }
