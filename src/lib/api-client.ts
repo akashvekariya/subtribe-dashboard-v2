@@ -570,6 +570,40 @@ export interface InviteValidationResponse {
   role?: string;
 }
 
+export interface Invite {
+  id: string;
+  code: string;
+  email: string;
+  role: string;
+  max_uses: number | null;
+  uses_count: number;
+  expires_at: string | null;
+  is_active: boolean;
+  created_at: string;
+  creator?: {
+    id: string;
+    full_name: string;
+  } | null;
+}
+
+export interface InviteListResponse {
+  invites: Invite[];
+  total: number;
+}
+
+export interface InviteCreateRequest {
+  email: string;
+  role?: string;
+  max_uses?: number;
+  expires_in_days?: number;
+}
+
+export interface InviteSendResponse {
+  success: boolean;
+  invite: Invite;
+  message: string;
+}
+
 export const invitesAPI = {
   /**
    * Validate an invite code (public endpoint)
@@ -577,6 +611,56 @@ export const invitesAPI = {
   async validate(code: string): Promise<InviteValidationResponse> {
     return apiFetch<InviteValidationResponse>(`/invites/validate/${code}`, {
       method: "GET",
+    });
+  },
+
+  /**
+   * List all invites for the company
+   */
+  async list(): Promise<InviteListResponse> {
+    return apiFetch<InviteListResponse>("/invites", {
+      method: "GET",
+    });
+  },
+
+  /**
+   * Create and send a new invite
+   */
+  async create(data: InviteCreateRequest): Promise<InviteSendResponse> {
+    return apiFetch<InviteSendResponse>("/invites", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * Get invite details
+   */
+  async get(id: string): Promise<Invite> {
+    return apiFetch<Invite>(`/invites/${id}`, {
+      method: "GET",
+    });
+  },
+
+  /**
+   * Update invite (deactivate or change max_uses)
+   */
+  async update(
+    id: string,
+    data: { is_active?: boolean; max_uses?: number }
+  ): Promise<Invite> {
+    return apiFetch<Invite>(`/invites/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * Deactivate an invite
+   */
+  async delete(id: string): Promise<void> {
+    return apiFetch<void>(`/invites/${id}`, {
+      method: "DELETE",
     });
   },
 };

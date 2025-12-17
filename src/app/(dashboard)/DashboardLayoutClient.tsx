@@ -33,7 +33,10 @@ export default function DashboardLayoutClient({
         }
 
         // Check email verification (skip if already on verify-email page)
-        if (!authUser.email_verified && !pathname?.startsWith("/verify-email")) {
+        if (
+          !authUser.email_verified &&
+          !pathname?.startsWith("/verify-email")
+        ) {
           window.location.href = `/verify-email?email=${encodeURIComponent(authUser.email)}`;
           return;
         }

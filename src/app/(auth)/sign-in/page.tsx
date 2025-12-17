@@ -42,7 +42,9 @@ export default function SignInPage() {
       }
 
       if (user.company && !user.company.onboarding_completed) {
-        showToast.success(`Welcome back, ${user.first_name}! Let's complete your setup.`);
+        showToast.success(
+          `Welcome back, ${user.first_name}! Let's complete your setup.`
+        );
         window.location.href = "/onboarding";
         return;
       }
