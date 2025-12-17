@@ -8,6 +8,8 @@ import { api, APIError, Invite } from "@/lib/api-client";
 import showToast from "@/lib/toast";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/shared/FormField";
+import { Label } from "@/components/ui/Label";
+import { NativeSelect } from "@/components/ui/NativeSelect";
 
 const inviteSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -135,13 +137,18 @@ export default function TeamPage() {
     try {
       await api.invites.delete(inviteId);
       showToast.success("Invite revoked");
-      loadInvites();
+      await loadInvites();
     } catch (error) {
+      console.error("Revoke invite error:", error);
       if (error instanceof APIError) {
         showToast.error(error.message);
+      } else if (error instanceof Error) {
+        showToast.error(`Failed to revoke invite: ${error.message}`);
       } else {
         showToast.error("Failed to revoke invite");
       }
+      // Reload invites anyway in case the delete actually succeeded
+      await loadInvites();
     } finally {
       setIsRevoking(null);
     }
@@ -186,39 +193,53 @@ export default function TeamPage() {
               />
             </div>
 
-            <div>
-              <label
+            <div className="flex flex-col">
+              <Label
                 htmlFor="role"
-                className="block text-sm font-medium text-gray-700"
+                className="mb-2"
+                style={{
+                  fontSize: "var(--label-font-size)",
+                  fontWeight: "var(--label-font-weight)",
+                }}
               >
                 Role
-              </label>
-              <select
+              </Label>
+              <NativeSelect
                 id="role"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                hasError={!!errors.role}
                 {...register("role")}
               >
                 <option value="recruiter">Recruiter</option>
                 <option value="admin">Admin</option>
                 <option value="interviewer">Interviewer</option>
-              </select>
+              </NativeSelect>
               {errors.role && (
-                <p className="mt-1 text-sm text-red-600">
+                <p
+                  className="text-xs mt-1.5"
+                  style={{
+                    color: "var(--color-error)",
+                    fontSize: "var(--error-font-size)",
+                    marginTop: "var(--error-margin-top)",
+                  }}
+                >
                   {errors.role.message}
                 </p>
               )}
             </div>
 
-            <div>
-              <label
+            <div className="flex flex-col">
+              <Label
                 htmlFor="expires_in_days"
-                className="block text-sm font-medium text-gray-700"
+                className="mb-2"
+                style={{
+                  fontSize: "var(--label-font-size)",
+                  fontWeight: "var(--label-font-weight)",
+                }}
               >
-                Expires in (days)
-              </label>
-              <select
+                Expires in
+              </Label>
+              <NativeSelect
                 id="expires_in_days"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 {...register("expires_in_days", { valueAsNumber: true })}
               >
                 <option value={1}>1 day</option>
@@ -226,7 +247,7 @@ export default function TeamPage() {
                 <option value={7}>7 days</option>
                 <option value={14}>14 days</option>
                 <option value={30}>30 days</option>
-              </select>
+              </NativeSelect>
             </div>
           </div>
 

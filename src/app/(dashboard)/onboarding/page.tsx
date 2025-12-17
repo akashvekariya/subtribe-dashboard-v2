@@ -10,6 +10,8 @@ import { getCurrentUser } from "@/lib/auth";
 import showToast from "@/lib/toast";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/shared/FormField";
+import { Textarea } from "@/components/ui/Textarea";
+import { Label } from "@/components/ui/Label";
 
 type Step = "basics" | "details" | "review";
 
@@ -289,46 +291,43 @@ export default function OnboardingPage() {
                   </p>
                 </div>
 
-                <div>
-                  <label
-                    htmlFor="tagline"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Tagline (optional)
-                  </label>
-                  <input
-                    id="tagline"
-                    type="text"
-                    placeholder="Building the future of work"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    {...register("tagline")}
-                  />
-                  {errors.tagline && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.tagline.message}
-                    </p>
-                  )}
-                  <p className="mt-1 text-xs text-gray-500">
-                    A short phrase that describes your organization
-                  </p>
-                </div>
+                <FormField
+                  id="tagline"
+                  label="Tagline (optional)"
+                  type="text"
+                  placeholder="Building the future of work"
+                  error={errors.tagline?.message}
+                  helperText="A short phrase that describes your organization"
+                  {...register("tagline")}
+                />
 
-                <div>
-                  <label
+                <div className="flex flex-col">
+                  <Label
                     htmlFor="about"
-                    className="block text-sm font-medium text-gray-700"
+                    className="mb-2"
+                    style={{
+                      fontSize: "var(--label-font-size)",
+                      fontWeight: "var(--label-font-weight)",
+                    }}
                   >
                     About (optional)
-                  </label>
-                  <textarea
+                  </Label>
+                  <Textarea
                     id="about"
                     rows={5}
                     placeholder="Tell candidates about your organization, culture, and what makes you a great place to work..."
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    hasError={!!errors.about}
                     {...register("about")}
                   />
                   {errors.about && (
-                    <p className="mt-1 text-sm text-red-600">
+                    <p
+                      className="text-xs mt-1.5"
+                      style={{
+                        color: "var(--color-error)",
+                        fontSize: "var(--error-font-size)",
+                        marginTop: "var(--error-margin-top)",
+                      }}
+                    >
                       {errors.about.message}
                     </p>
                   )}
