@@ -64,9 +64,7 @@ export default function ClaimInvitePage() {
             );
             break;
           case "invite_expired":
-            setError(
-              "This invite code has expired. Please request a new one."
-            );
+            setError("This invite code has expired. Please request a new one.");
             break;
           case "invite_maxed":
             setError(
@@ -158,7 +156,8 @@ export default function ClaimInvitePage() {
               </div>
               <div className="ml-3">
                 <p className="text-sm text-green-700">
-                  Invite code from your link has been applied. Click Continue to proceed.
+                  Invite code from your link has been applied. Click Continue to
+                  proceed.
                 </p>
               </div>
             </div>
