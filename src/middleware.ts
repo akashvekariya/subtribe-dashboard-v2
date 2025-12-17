@@ -27,13 +27,17 @@ export function middleware(request: NextRequest) {
 
   // Content Security Policy (CSP)
   // Allow Next.js assets, API calls, and external resources
+  // Dynamically include API URL from environment to avoid CSP violations
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+  const connectSrcUrls = ["'self'", apiUrl].filter(Boolean).join(" ");
+
   const cspHeader = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires unsafe-eval and unsafe-inline
     "style-src 'self' 'unsafe-inline'", // Tailwind requires unsafe-inline
     "img-src 'self' data: https:",
     "font-src 'self' data:",
-    "connect-src 'self' https://api.thesubtribe.com https://dashboard.thesubtribe.com https://*.run.app", // API endpoints
+    `connect-src ${connectSrcUrls}`, // API endpoints from environment
     "frame-src 'self' https://storage.googleapis.com", // Allow PDF embedding from Google Cloud Storage
     "object-src 'self' https://storage.googleapis.com", // Allow PDF embedding via object/embed tags
     "frame-ancestors 'none'",
