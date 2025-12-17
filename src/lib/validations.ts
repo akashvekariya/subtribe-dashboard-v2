@@ -35,12 +35,23 @@ export const signInSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
+// Password validation matching backend requirements
+const passwordSchema = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .regex(/[A-Z]/, "Password must contain at least one uppercase letter (A-Z)")
+  .regex(/\d/, "Password must contain at least one number (0-9)")
+  .regex(
+    /[!@#$%^&*(),.?":{}|<>]/,
+    "Password must contain at least one special character (!@#$%^&*...)"
+  );
+
 export const signUpSchema = z
   .object({
     email: z.string().email("Invalid email address"),
     first_name: z.string().min(2, "First name must be at least 2 characters"),
     last_name: z.string().min(2, "Last name must be at least 2 characters"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    password: passwordSchema,
     confirmPassword: z.string(),
     invite_token: z.string().optional(), // Optional - used when joining via invite link
   })
