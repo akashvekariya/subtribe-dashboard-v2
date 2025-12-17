@@ -140,21 +140,31 @@ export const authAPI = {
   /**
    * Verify email with token
    */
-  async verifyEmail(token: string): Promise<{ success: boolean; message: string }> {
-    return apiFetch<{ success: boolean; message: string }>("/auth/verify-email", {
-      method: "POST",
-      body: JSON.stringify({ token }),
-    });
+  async verifyEmail(
+    token: string
+  ): Promise<{ success: boolean; message: string }> {
+    return apiFetch<{ success: boolean; message: string }>(
+      "/auth/verify-email",
+      {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      }
+    );
   },
 
   /**
    * Resend verification email
    */
-  async resendVerification(email: string): Promise<{ success: boolean; message: string }> {
-    return apiFetch<{ success: boolean; message: string }>("/auth/resend-verification", {
-      method: "POST",
-      body: JSON.stringify({ email }),
-    });
+  async resendVerification(
+    email: string
+  ): Promise<{ success: boolean; message: string }> {
+    return apiFetch<{ success: boolean; message: string }>(
+      "/auth/resend-verification",
+      {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      }
+    );
   },
 
   /**
@@ -181,6 +191,20 @@ export const authAPI = {
   },
 };
 
+export interface OnboardingRequest {
+  name: string;
+  slug: string;
+  logo_url?: string;
+  tagline?: string;
+  about?: string;
+}
+
+export interface OnboardingResponse {
+  success: boolean;
+  company: Company;
+  message: string;
+}
+
 export const companyAPI = {
   async getCompany(): Promise<Company> {
     return apiFetch<Company>("/companies/me", {
@@ -193,6 +217,15 @@ export const companyAPI = {
   ): Promise<Company> {
     return apiFetch<Company>("/companies/me", {
       method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async completeOnboarding(
+    data: OnboardingRequest
+  ): Promise<OnboardingResponse> {
+    return apiFetch<OnboardingResponse>("/companies/onboarding", {
+      method: "POST",
       body: JSON.stringify(data),
     });
   },

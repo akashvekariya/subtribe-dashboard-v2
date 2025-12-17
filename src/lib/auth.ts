@@ -103,7 +103,9 @@ export async function registerUser(data: {
  * Verify email with token
  * @returns success status and message
  */
-export async function verifyEmail(token: string): Promise<{ success: boolean; message: string }> {
+export async function verifyEmail(
+  token: string
+): Promise<{ success: boolean; message: string }> {
   try {
     return await api.auth.verifyEmail(token);
   } catch (error) {
@@ -118,7 +120,9 @@ export async function verifyEmail(token: string): Promise<{ success: boolean; me
  * Resend verification email
  * @returns success status and message
  */
-export async function resendVerificationEmail(email: string): Promise<{ success: boolean; message: string }> {
+export async function resendVerificationEmail(
+  email: string
+): Promise<{ success: boolean; message: string }> {
   try {
     return await api.auth.resendVerification(email);
   } catch (error) {

@@ -353,6 +353,37 @@ export const validateCurrency = (amount: number, currency: string) => {
   return { valid: true };
 };
 
+// Onboarding schema for organization setup
+export const onboardingSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Organization name must be at least 2 characters")
+    .max(255, "Organization name must be less than 255 characters"),
+  slug: z
+    .string()
+    .min(2, "URL slug must be at least 2 characters")
+    .max(100, "URL slug must be less than 100 characters")
+    .regex(
+      /^[a-z0-9-]+$/,
+      "URL slug can only contain lowercase letters, numbers, and hyphens"
+    ),
+  logo_url: z
+    .string()
+    .url("Invalid logo URL")
+    .optional()
+    .or(z.literal("")),
+  tagline: z
+    .string()
+    .max(500, "Tagline must be less than 500 characters")
+    .optional()
+    .or(z.literal("")),
+  about: z
+    .string()
+    .max(20000, "About section must be less than 20,000 characters")
+    .optional()
+    .or(z.literal("")),
+});
+
 // Type exports
 export type SignInInput = z.infer<typeof signInSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
@@ -361,6 +392,7 @@ export type ApplicationInput = z.infer<typeof applicationSchema>;
 export type StatusUpdateInput = z.infer<typeof statusUpdateSchema>;
 export type CompanyProfileInput = z.infer<typeof companyProfileSchema>;
 export type ScreeningQuestionInput = z.infer<typeof screeningQuestionSchema>;
+export type OnboardingInput = z.infer<typeof onboardingSchema>;
 
 // Backward compatibility types
 export type JobFormData = JobInput;
