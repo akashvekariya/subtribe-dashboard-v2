@@ -69,7 +69,7 @@ export async function authenticateUser(
 }
 
 /**
- * Register new user with company code
+ * Register new user (creates org or joins via invite token)
  * @returns User object if successful, null otherwise
  */
 export async function registerUser(data: {
@@ -77,7 +77,7 @@ export async function registerUser(data: {
   password: string;
   first_name: string;
   last_name: string;
-  company_code: string;
+  invite_token?: string;
 }): Promise<User | null> {
   try {
     const response: AuthResponse = await api.auth.register(data);
@@ -91,6 +91,36 @@ export async function registerUser(data: {
     }
 
     return response.user;
+  } catch (error) {
+    if (error instanceof APIError) {
+      throw error;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Verify email with token
+ * @returns success status and message
+ */
+export async function verifyEmail(token: string): Promise<{ success: boolean; message: string }> {
+  try {
+    return await api.auth.verifyEmail(token);
+  } catch (error) {
+    if (error instanceof APIError) {
+      throw error;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Resend verification email
+ * @returns success status and message
+ */
+export async function resendVerificationEmail(email: string): Promise<{ success: boolean; message: string }> {
+  try {
+    return await api.auth.resendVerification(email);
   } catch (error) {
     if (error instanceof APIError) {
       throw error;

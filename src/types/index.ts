@@ -31,6 +31,7 @@ export interface Company {
   website_url?: string;
   tagline?: string;
   about?: string;
+  onboarding_completed?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -42,7 +43,8 @@ export interface User {
   first_name: string;
   last_name: string;
   role: "recruiter" | "admin";
-  company: Company;
+  email_verified: boolean;
+  company?: Company | null; // Optional - null during invite-based registration
   created_at?: string;
   updated_at?: string;
 }

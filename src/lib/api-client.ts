@@ -121,7 +121,7 @@ export const authAPI = {
   },
 
   /**
-   * Register new user with company code
+   * Register new user (creates org or joins via invite)
    * Sets HTTP-only cookie on success
    */
   async register(data: {
@@ -129,11 +129,31 @@ export const authAPI = {
     password: string;
     first_name: string;
     last_name: string;
-    company_code: string;
+    invite_token?: string;
   }): Promise<AuthResponse> {
     return apiFetch<AuthResponse>("/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * Verify email with token
+   */
+  async verifyEmail(token: string): Promise<{ success: boolean; message: string }> {
+    return apiFetch<{ success: boolean; message: string }>("/auth/verify-email", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    });
+  },
+
+  /**
+   * Resend verification email
+   */
+  async resendVerification(email: string): Promise<{ success: boolean; message: string }> {
+    return apiFetch<{ success: boolean; message: string }>("/auth/resend-verification", {
+      method: "POST",
+      body: JSON.stringify({ email }),
     });
   },
 
@@ -508,6 +528,26 @@ export const emailAPI = {
   },
 };
 
+export interface InviteValidationResponse {
+  valid: boolean;
+  error?: string;
+  company_name?: string;
+  company_logo?: string;
+  inviter_name?: string;
+  role?: string;
+}
+
+export const invitesAPI = {
+  /**
+   * Validate an invite code (public endpoint)
+   */
+  async validate(code: string): Promise<InviteValidationResponse> {
+    return apiFetch<InviteValidationResponse>(`/invites/validate/${code}`, {
+      method: "GET",
+    });
+  },
+};
+
 export async function checkAuth(): Promise<User | null> {
   try {
     const user = await authAPI.me();
@@ -527,6 +567,7 @@ export const api = {
   applications: applicationsAPI,
   dashboard: dashboardAPI,
   email: emailAPI,
+  invites: invitesAPI,
   checkAuth,
 };
 

@@ -42,12 +42,20 @@ export const signUpSchema = z
     last_name: z.string().min(2, "Last name must be at least 2 characters"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
-    company_code: z.string().min(1, "Company code is required"),
+    invite_token: z.string().optional(), // Optional - used when joining via invite link
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1, "Verification token is required"),
+});
+
+export const resendVerificationSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
 
 // Screening question schema
 const screeningQuestionSchema = z.object({
