@@ -46,6 +46,7 @@ const passwordSchema = z
     "Password must contain at least one special character (!@#$%^&*...)"
   );
 
+// Note: invite_token removed - users enter invite code on /claim-invite after email verification
 export const signUpSchema = z
   .object({
     email: z.string().email("Invalid email address"),
@@ -53,7 +54,6 @@ export const signUpSchema = z
     last_name: z.string().min(2, "Last name must be at least 2 characters"),
     password: passwordSchema,
     confirmPassword: z.string(),
-    invite_token: z.string().optional(), // Optional - used when joining via invite link
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",

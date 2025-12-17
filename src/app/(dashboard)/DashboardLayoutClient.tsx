@@ -41,8 +41,28 @@ export default function DashboardLayoutClient({
           return;
         }
 
-        // Check onboarding completion (skip if on onboarding page)
-        // Only check if user has a company but onboarding is not completed
+        // Check if user claimed org_creator invite and needs to complete onboarding
+        // (pending_onboarding = true, no company yet)
+        if (
+          authUser.pending_onboarding &&
+          !pathname?.startsWith("/onboarding")
+        ) {
+          window.location.href = "/onboarding";
+          return;
+        }
+
+        // Check if user has no company (hasn't claimed invite yet)
+        if (
+          !authUser.company &&
+          !authUser.pending_onboarding &&
+          !pathname?.startsWith("/claim-invite")
+        ) {
+          window.location.href = "/claim-invite";
+          return;
+        }
+
+        // Check if user's company hasn't completed onboarding
+        // (team member joined company that hasn't completed setup)
         if (
           authUser.company &&
           !authUser.company.onboarding_completed &&

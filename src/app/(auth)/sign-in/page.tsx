@@ -41,7 +41,26 @@ export default function SignInPage() {
         return;
       }
 
-      if (user.company && !user.company.onboarding_completed) {
+      // User claimed org_creator invite, needs to create their org
+      if (user.pending_onboarding) {
+        showToast.success(
+          `Welcome back, ${user.first_name}! Let's set up your organization.`
+        );
+        window.location.href = "/onboarding";
+        return;
+      }
+
+      // User has no company yet - needs to claim an invite
+      if (!user.company) {
+        showToast.success(
+          `Welcome back, ${user.first_name}! Enter your invite code to continue.`
+        );
+        window.location.href = "/claim-invite";
+        return;
+      }
+
+      // User's company hasn't completed onboarding
+      if (!user.company.onboarding_completed) {
         showToast.success(
           `Welcome back, ${user.first_name}! Let's complete your setup.`
         );
@@ -49,6 +68,7 @@ export default function SignInPage() {
         return;
       }
 
+      // All good - go to dashboard
       showToast.success(`Welcome back, ${user.first_name}!`);
       window.location.href = "/";
     } catch (error) {

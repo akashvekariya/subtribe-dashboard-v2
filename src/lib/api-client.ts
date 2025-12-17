@@ -44,6 +44,14 @@ export class APIError extends Error {
   }
 }
 
+export interface ClaimInviteResponse {
+  success: boolean;
+  invite_type: "org_creator" | "team_member";
+  company: Company | null; // Only for team_member invites
+  redirect_to: string; // '/onboarding' or '/dashboard'
+  message?: string;
+}
+
 async function handleResponse<T>(response: Response): Promise<T> {
   if (response.ok) {
     // Handle 204 No Content or empty responses
@@ -132,7 +140,7 @@ export const authAPI = {
   },
 
   /**
-   * Register new user (creates org or joins via invite)
+   * Register new user (no org created - user enters invite code after email verification)
    * Sets HTTP-only cookie on success
    */
   async register(data: {
@@ -140,7 +148,6 @@ export const authAPI = {
     password: string;
     first_name: string;
     last_name: string;
-    invite_token?: string;
   }): Promise<AuthResponse> {
     return apiFetch<AuthResponse>("/auth/register", {
       method: "POST",
@@ -199,6 +206,17 @@ export const authAPI = {
       document.cookie =
         "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
     }
+  },
+
+  /**
+   * Claim an invite code to join or create an organization
+   * Called after email verification
+   */
+  async claimInvite(code: string): Promise<ClaimInviteResponse> {
+    return apiFetch<ClaimInviteResponse>("/auth/claim-invite", {
+      method: "POST",
+      body: JSON.stringify({ code }),
+    });
   },
 };
 
@@ -575,8 +593,9 @@ export const emailAPI = {
 export interface InviteValidationResponse {
   valid: boolean;
   error?: string;
-  company_name?: string;
-  company_logo?: string;
+  invite_type?: "team_member" | "org_creator"; // Type of invite
+  company_name?: string; // Only for team_member invites
+  company_logo?: string; // Only for team_member invites
   inviter_name?: string;
   role?: string;
 }
@@ -586,6 +605,7 @@ export interface Invite {
   code: string;
   email: string;
   role: string;
+  invite_type: "team_member" | "org_creator";
   max_uses: number | null;
   uses_count: number;
   expires_at: string | null;
@@ -604,9 +624,10 @@ export interface InviteListResponse {
 
 export interface InviteCreateRequest {
   email: string;
-  role?: string;
   max_uses?: number;
   expires_in_days?: number;
+  invite_type?: "team_member" | "org_creator";
+  // Note: role is always "admin" in V1 - no role selection
 }
 
 export interface InviteSendResponse {

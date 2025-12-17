@@ -44,7 +44,8 @@ export interface User {
   last_name: string;
   role: "recruiter" | "admin";
   email_verified: boolean;
-  company?: Company | null; // Optional - null during invite-based registration
+  pending_onboarding: boolean; // True when user claimed org_creator invite, waiting to create org
+  company?: Company | null; // Optional - null until invite is claimed
   created_at?: string;
   updated_at?: string;
 }

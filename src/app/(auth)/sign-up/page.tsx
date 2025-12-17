@@ -4,7 +4,7 @@ import React, { Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { signUpSchema, type SignUpInput } from "@/lib/validations";
 import { registerUser } from "@/lib/auth";
 import { APIError } from "@/lib/api-client";
@@ -18,6 +18,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+// New flow: Users sign up freely, then enter invite code after email verification
+// The invite code is entered on /claim-invite page, not during sign-up
 
 // Password validation checks
 function checkPasswordRequirements(password: string) {
@@ -56,10 +59,8 @@ function PasswordRequirementItem({
   );
 }
 
-function SignUpForm() {
-  const searchParams = useSearchParams();
+function RegistrationForm() {
   const router = useRouter();
-  const inviteToken = searchParams.get("invite");
 
   const {
     register,
@@ -68,9 +69,6 @@ function SignUpForm() {
     formState: { errors, isSubmitting },
   } = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: {
-      invite_token: inviteToken || undefined,
-    },
   });
 
   const password = watch("password", "");
@@ -86,7 +84,6 @@ function SignUpForm() {
         password: data.password,
         first_name: data.first_name,
         last_name: data.last_name,
-        invite_token: data.invite_token,
       });
 
       if (!user) {
@@ -121,9 +118,7 @@ function SignUpForm() {
             Create your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            {inviteToken
-              ? "Join your team on Subtribe ATS"
-              : "Start your recruiting journey with Subtribe"}
+            Start your recruiting journey with Subtribe
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
@@ -268,11 +263,6 @@ function SignUpForm() {
               error={errors.confirmPassword?.message}
               {...register("confirmPassword")}
             />
-
-            {/* Hidden field for invite token */}
-            {inviteToken && (
-              <input type="hidden" {...register("invite_token")} />
-            )}
           </div>
 
           <div>
@@ -307,7 +297,7 @@ export default function SignUpPage() {
         </div>
       }
     >
-      <SignUpForm />
+      <RegistrationForm />
     </Suspense>
   );
 }

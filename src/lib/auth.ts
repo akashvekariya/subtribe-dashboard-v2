@@ -69,7 +69,7 @@ export async function authenticateUser(
 }
 
 /**
- * Register new user (creates org or joins via invite token)
+ * Register new user (no org created - user enters invite code after email verification)
  * @returns User object if successful, null otherwise
  */
 export async function registerUser(data: {
@@ -77,7 +77,6 @@ export async function registerUser(data: {
   password: string;
   first_name: string;
   last_name: string;
-  invite_token?: string;
 }): Promise<User | null> {
   try {
     const response: AuthResponse = await api.auth.register(data);

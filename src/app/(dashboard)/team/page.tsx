@@ -11,9 +11,9 @@ import { FormField } from "@/components/shared/FormField";
 import { Label } from "@/components/ui/Label";
 import { NativeSelect } from "@/components/ui/NativeSelect";
 
+// Note: All users are admin in V1 - no role selection
 const inviteSchema = z.object({
   email: z.string().email("Invalid email address"),
-  role: z.enum(["admin", "recruiter", "interviewer"]),
   expires_in_days: z.number().min(1).max(30),
 });
 
@@ -82,7 +82,6 @@ export default function TeamPage() {
   } = useForm<InviteFormData>({
     resolver: zodResolver(inviteSchema),
     defaultValues: {
-      role: "recruiter",
       expires_in_days: 7,
     },
   });
@@ -112,8 +111,8 @@ export default function TeamPage() {
     try {
       const response = await api.invites.create({
         email: data.email,
-        role: data.role,
         expires_in_days: data.expires_in_days,
+        // All users are admin in V1 - no role selection
       });
 
       showToast.dismiss(toastId);
@@ -180,8 +179,8 @@ export default function TeamPage() {
           Invite a team member
         </h2>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
               <FormField
                 id="email"
                 label="Email address"
@@ -191,40 +190,6 @@ export default function TeamPage() {
                 error={errors.email?.message}
                 {...register("email")}
               />
-            </div>
-
-            <div className="flex flex-col">
-              <Label
-                htmlFor="role"
-                className="mb-2"
-                style={{
-                  fontSize: "var(--label-font-size)",
-                  fontWeight: "var(--label-font-weight)",
-                }}
-              >
-                Role
-              </Label>
-              <NativeSelect
-                id="role"
-                hasError={!!errors.role}
-                {...register("role")}
-              >
-                <option value="recruiter">Recruiter</option>
-                <option value="admin">Admin</option>
-                <option value="interviewer">Interviewer</option>
-              </NativeSelect>
-              {errors.role && (
-                <p
-                  className="text-xs mt-1.5"
-                  style={{
-                    color: "var(--color-error)",
-                    fontSize: "var(--error-font-size)",
-                    marginTop: "var(--error-margin-top)",
-                  }}
-                >
-                  {errors.role.message}
-                </p>
-              )}
             </div>
 
             <div className="flex flex-col">
