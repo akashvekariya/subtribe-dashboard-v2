@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { getCurrentUser, removeAuthToken, removeUserData } from "@/lib/auth";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { Header } from "@/components/shared/Header";
@@ -12,6 +13,7 @@ export default function DashboardLayoutClient({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -30,6 +32,23 @@ export default function DashboardLayoutClient({
           return;
         }
 
+        // Check email verification (skip if already on verify-email page)
+        if (!authUser.email_verified && !pathname?.startsWith("/verify-email")) {
+          window.location.href = `/verify-email?email=${encodeURIComponent(authUser.email)}`;
+          return;
+        }
+
+        // Check onboarding completion (skip if on onboarding page)
+        // Only check if user has a company but onboarding is not completed
+        if (
+          authUser.company &&
+          !authUser.company.onboarding_completed &&
+          !pathname?.startsWith("/onboarding")
+        ) {
+          window.location.href = "/onboarding";
+          return;
+        }
+
         setUser(authUser);
         setLoading(false);
       } catch {
@@ -41,7 +60,7 @@ export default function DashboardLayoutClient({
     };
 
     validateAuth();
-  }, []);
+  }, [pathname]);
 
   // Show loading state while validating auth
   if (loading) {

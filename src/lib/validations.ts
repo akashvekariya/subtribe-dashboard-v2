@@ -367,11 +367,7 @@ export const onboardingSchema = z.object({
       /^[a-z0-9-]+$/,
       "URL slug can only contain lowercase letters, numbers, and hyphens"
     ),
-  logo_url: z
-    .string()
-    .url("Invalid logo URL")
-    .optional()
-    .or(z.literal("")),
+  logo_url: z.string().url("Invalid logo URL").optional().or(z.literal("")),
   tagline: z
     .string()
     .max(500, "Tagline must be less than 500 characters")

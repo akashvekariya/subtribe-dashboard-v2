@@ -33,8 +33,21 @@ export default function SignInPage() {
       }
 
       showToast.dismiss(toastId);
-      showToast.success(`Welcome back, ${user.first_name}!`);
 
+      // Redirect based on user state
+      if (!user.email_verified) {
+        showToast.success("Please verify your email to continue.");
+        window.location.href = `/verify-email?email=${encodeURIComponent(user.email)}`;
+        return;
+      }
+
+      if (user.company && !user.company.onboarding_completed) {
+        showToast.success(`Welcome back, ${user.first_name}! Let's complete your setup.`);
+        window.location.href = "/onboarding";
+        return;
+      }
+
+      showToast.success(`Welcome back, ${user.first_name}!`);
       window.location.href = "/";
     } catch (error) {
       showToast.dismiss(toastId);
