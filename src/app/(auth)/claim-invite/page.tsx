@@ -43,6 +43,11 @@ export default function ClaimInvitePage() {
       const response = await authAPI.claimInvite(code.trim());
 
       if (response.success) {
+        // Store new token with updated company_id
+        if (response.access_token) {
+          localStorage.setItem("subtribe-token", response.access_token);
+        }
+
         showToast.success(response.message || "Invite claimed successfully!");
 
         // Redirect based on invite type

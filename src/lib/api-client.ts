@@ -48,8 +48,9 @@ export interface ClaimInviteResponse {
   success: boolean;
   invite_type: "org_creator" | "team_member";
   company: Company | null; // Only for team_member invites
-  redirect_to: string; // '/onboarding' or '/dashboard'
+  redirect_to: string; // '/onboarding' or '/'
   message?: string;
+  access_token: string; // New JWT with updated company_id
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -625,9 +626,9 @@ export interface InviteListResponse {
 export interface InviteCreateRequest {
   email: string;
   max_uses?: number;
-  expires_in_days?: number;
   invite_type?: "team_member" | "org_creator";
   // Note: role is always "admin" in V1 - no role selection
+  // Note: expiration is always 7 days - set by backend
 }
 
 export interface InviteSendResponse {

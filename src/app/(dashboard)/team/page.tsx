@@ -8,13 +8,11 @@ import { api, APIError, Invite } from "@/lib/api-client";
 import showToast from "@/lib/toast";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/shared/FormField";
-import { Label } from "@/components/ui/Label";
-import { NativeSelect } from "@/components/ui/NativeSelect";
 
 // Note: All users are admin in V1 - no role selection
+// Note: Expiration is always 7 days - not user configurable
 const inviteSchema = z.object({
   email: z.string().email("Invalid email address"),
-  expires_in_days: z.number().min(1).max(30),
 });
 
 type InviteFormData = z.infer<typeof inviteSchema>;
@@ -44,15 +42,15 @@ function InviteStatusBadge({ invite }: { invite: Invite }) {
 
   if (isMaxedOut) {
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-        Used
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+        Active
       </span>
     );
   }
 
   return (
-    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-      Active
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+      Pending
     </span>
   );
 }
@@ -63,10 +61,6 @@ function formatDate(dateString: string) {
     day: "numeric",
     year: "numeric",
   });
-}
-
-function formatRole(role: string) {
-  return role.charAt(0).toUpperCase() + role.slice(1);
 }
 
 export default function TeamPage() {
@@ -81,9 +75,6 @@ export default function TeamPage() {
     formState: { errors, isSubmitting },
   } = useForm<InviteFormData>({
     resolver: zodResolver(inviteSchema),
-    defaultValues: {
-      expires_in_days: 7,
-    },
   });
 
   async function loadInvites() {
@@ -111,8 +102,8 @@ export default function TeamPage() {
     try {
       const response = await api.invites.create({
         email: data.email,
-        expires_in_days: data.expires_in_days,
         // All users are admin in V1 - no role selection
+        // Expiration is always 7 days (set by backend)
       });
 
       showToast.dismiss(toastId);
@@ -163,6 +154,15 @@ export default function TeamPage() {
     }
   }
 
+  async function copyInviteCode(code: string) {
+    try {
+      await navigator.clipboard.writeText(code);
+      showToast.success("Invite code copied!");
+    } catch {
+      showToast.error("Failed to copy code");
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Page header */}
@@ -178,9 +178,9 @@ export default function TeamPage() {
         <h2 className="text-lg font-medium text-gray-900 mb-4">
           Invite a team member
         </h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1">
               <FormField
                 id="email"
                 label="Email address"
@@ -191,43 +191,22 @@ export default function TeamPage() {
                 {...register("email")}
               />
             </div>
-
-            <div className="flex flex-col">
-              <Label
-                htmlFor="expires_in_days"
-                className="mb-2"
-                style={{
-                  fontSize: "var(--label-font-size)",
-                  fontWeight: "var(--label-font-weight)",
-                }}
-              >
-                Expires in
-              </Label>
-              <NativeSelect
-                id="expires_in_days"
-                {...register("expires_in_days", { valueAsNumber: true })}
-              >
-                <option value={1}>1 day</option>
-                <option value={3}>3 days</option>
-                <option value={7}>7 days</option>
-                <option value={14}>14 days</option>
-                <option value={30}>30 days</option>
-              </NativeSelect>
+            <div className="sm:pt-6">
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Sending..." : "Send invite"}
+              </Button>
             </div>
           </div>
-
-          <div className="flex justify-end">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Sending..." : "Send invite"}
-            </Button>
-          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            Invite will expire in 7 days
+          </p>
         </form>
       </div>
 
       {/* Invites list */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">Sent invites</h2>
+          <h2 className="text-lg font-medium text-gray-900">Invited</h2>
         </div>
 
         {isLoading ? (
@@ -266,13 +245,10 @@ export default function TeamPage() {
                     Email
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Role
+                    Invite Code
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Sent
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Expires
@@ -295,14 +271,17 @@ export default function TeamPage() {
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatRole(invite.role)}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => copyInviteCode(invite.code)}
+                        className="text-sm font-mono text-gray-600 hover:text-blue-600 cursor-pointer"
+                        title="Click to copy code"
+                      >
+                        {invite.code}
+                      </button>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <InviteStatusBadge invite={invite} />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(invite.created_at)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {invite.expires_at
@@ -310,69 +289,24 @@ export default function TeamPage() {
                         : "Never"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex justify-end space-x-2">
+                      <div className="flex justify-end space-x-3">
                         {invite.is_active && (
                           <>
                             <button
                               onClick={() => copyInviteLink(invite.code)}
-                              className="text-blue-600 hover:text-blue-900"
+                              className="text-blue-600 hover:text-blue-800 text-sm inline-flex items-center gap-1"
                               title="Copy invite link"
                             >
-                              <svg
-                                className="h-5 w-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                                />
-                              </svg>
+                              Copy Link
                             </button>
                             <button
                               onClick={() => handleRevoke(invite.id)}
                               disabled={isRevoking === invite.id}
-                              className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                              title="Revoke invite"
+                              className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
                             >
-                              {isRevoking === invite.id ? (
-                                <svg
-                                  className="h-5 w-5 animate-spin"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <circle
-                                    className="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    strokeWidth="4"
-                                  />
-                                  <path
-                                    className="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                  />
-                                </svg>
-                              ) : (
-                                <svg
-                                  className="h-5 w-5"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                  />
-                                </svg>
-                              )}
+                              {isRevoking === invite.id
+                                ? "Revoking..."
+                                : "Revoke"}
                             </button>
                           </>
                         )}
