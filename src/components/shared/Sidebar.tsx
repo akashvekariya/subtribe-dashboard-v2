@@ -7,11 +7,13 @@ import {
   HomeIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  EnvelopeIcon,
 } from "@heroicons/react/24/outline";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: HomeIcon },
   { name: "Jobs", href: "/jobs", icon: BriefcaseIcon },
+  { name: "Email", href: "/email", icon: EnvelopeIcon },
 ];
 
 interface SidebarProps {
@@ -50,7 +52,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </button>
       </div>
 
-      {/* Navigation */}
+      {/* Main Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4">
         {navigation.map((item) => {
           const isActive = pathname === item.href;

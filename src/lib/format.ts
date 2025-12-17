@@ -29,6 +29,35 @@ export function formatDate(
 }
 
 /**
+ * Format date with time using Intl.DateTimeFormat
+ */
+export function formatDateTime(
+  date: string | Date | null | undefined,
+  format: "short" | "long" = "short"
+): string {
+  if (!date) return "—";
+
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  if (isNaN(dateObj.getTime())) return "—";
+
+  const dateOptions: Intl.DateTimeFormatOptions =
+    format === "long"
+      ? { month: "long", day: "numeric", year: "numeric" }
+      : { month: "short", day: "numeric" };
+
+  const timeOptions: Intl.DateTimeFormatOptions = {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  };
+
+  const formattedDate = dateObj.toLocaleDateString("en-US", dateOptions);
+  const formattedTime = dateObj.toLocaleTimeString("en-US", timeOptions);
+
+  return `${formattedDate}, ${formattedTime}`;
+}
+
+/**
  * Format currency using Intl.NumberFormat
  */
 export function formatCurrency(

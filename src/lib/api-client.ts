@@ -12,6 +12,13 @@ import {
   DashboardStats,
   Company,
   JobStats,
+  EmailTemplate,
+  EmailWildcard,
+  SendEmailRequest,
+  SendEmailResponse,
+  BulkEmailRequest,
+  BulkEmailResponse,
+  EmailPreviewResponse,
 } from "@/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -336,6 +343,26 @@ export const applicationsAPI = {
       method: "GET",
     });
   },
+
+  async getScheduledEmails(id: string): Promise<{
+    data: Array<{
+      id: string;
+      template_type: "interview_invite" | "rejection";
+      recipient_email: string;
+      recipient_name: string;
+      subject: string;
+      scheduled_for: string;
+      status: "pending" | "sent" | "failed" | "cancelled";
+      sent_at: string | null;
+      provider_message_id: string | null;
+      error_message: string | null;
+      created_at: string;
+    }>;
+  }> {
+    return apiFetch(`/applications/${id}/scheduled-emails`, {
+      method: "GET",
+    });
+  },
 };
 
 export const dashboardAPI = {
@@ -358,6 +385,119 @@ export const dashboardAPI = {
   },
 };
 
+// Backend response types
+interface WildcardsAPIResponse {
+  success: boolean;
+  message: string;
+  wildcards: EmailWildcard[];
+}
+
+interface TemplatesAPIResponse {
+  success: boolean;
+  message: string;
+  templates: EmailTemplate[];
+}
+
+export const emailAPI = {
+  // Get available wildcards for templates
+  async getWildcards(): Promise<{ data: EmailWildcard[] }> {
+    const response = await apiFetch<WildcardsAPIResponse>("/emails/wildcards", {
+      method: "GET",
+    });
+    return { data: response.wildcards };
+  },
+
+  // Get all email templates for the company
+  async getTemplates(): Promise<{ data: EmailTemplate[] }> {
+    const response = await apiFetch<TemplatesAPIResponse>("/emails/templates", {
+      method: "GET",
+    });
+    return { data: response.templates };
+  },
+
+  // Get a single template by ID
+  async getTemplate(id: string): Promise<EmailTemplate> {
+    return apiFetch(`/emails/templates/${id}`, {
+      method: "GET",
+    });
+  },
+
+  // Create a new email template
+  async createTemplate(data: {
+    name: string;
+    category?: string;
+    subject: string;
+    body: string;
+  }): Promise<EmailTemplate> {
+    return apiFetch("/emails/templates", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Update an existing template
+  async updateTemplate(
+    id: string,
+    data: {
+      name?: string;
+      category?: string;
+      subject?: string;
+      body?: string;
+    }
+  ): Promise<EmailTemplate> {
+    return apiFetch(`/emails/templates/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Delete a template
+  async deleteTemplate(id: string): Promise<void> {
+    return apiFetch(`/emails/templates/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  // Send email to a single application
+  async sendEmail(
+    applicationId: string,
+    data: SendEmailRequest
+  ): Promise<SendEmailResponse> {
+    return apiFetch(`/emails/applications/${applicationId}/send-email`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Send bulk emails to multiple applications
+  async sendBulkEmail(data: BulkEmailRequest): Promise<BulkEmailResponse> {
+    return apiFetch("/emails/bulk-send", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Preview email with replaced wildcards
+  async previewEmail(
+    applicationId: string,
+    data: { subject: string; body: string }
+  ): Promise<EmailPreviewResponse> {
+    return apiFetch(`/emails/applications/${applicationId}/preview-email`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Cancel a scheduled email
+  async cancelScheduledEmail(
+    emailId: string
+  ): Promise<{ success: boolean; message: string }> {
+    return apiFetch(`/emails/scheduled/${emailId}/cancel`, {
+      method: "POST",
+    });
+  },
+};
+
 export async function checkAuth(): Promise<User | null> {
   try {
     const user = await authAPI.me();
@@ -376,6 +516,7 @@ export const api = {
   jobs: jobsAPI,
   applications: applicationsAPI,
   dashboard: dashboardAPI,
+  email: emailAPI,
   checkAuth,
 };
 

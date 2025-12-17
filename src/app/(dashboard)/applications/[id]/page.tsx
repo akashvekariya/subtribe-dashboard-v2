@@ -23,6 +23,7 @@ import {
   getStatusUpdateMessaging,
   combineTagsAndNotes,
 } from "@/lib/status-update-config";
+import { CommunicationTab } from "@/components/applications/CommunicationTab";
 
 const APPLICATION_STATUSES = [
   { value: "applied", label: "Applied", color: "bg-blue-100 text-blue-800" },
@@ -51,6 +52,7 @@ export default function ApplicationDetailPage() {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isLoadingResume, setIsLoadingResume] = useState(false);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("details");
   const [statusHistory, setStatusHistory] = useState<
     Array<{
       id: string;
@@ -153,6 +155,13 @@ export default function ApplicationDetailPage() {
       setCustomNotes("");
 
       showToast.success("Status updated successfully!");
+
+      // Show prompt to send email
+      showToast.withAction(
+        "Would you like to send an email to the candidate?",
+        "Send Email",
+        () => setActiveTab("communication")
+      );
 
       // Reload history after status change
       const response = await api.applications.getApplicationHistory(
@@ -272,19 +281,25 @@ export default function ApplicationDetailPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="details" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="bg-gray-100">
           <TabsTrigger
             value="details"
             className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-[var(--color-primary)]"
           >
-            Basic Details
+            Overview
           </TabsTrigger>
           <TabsTrigger
             value="analysis"
             className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-[var(--color-primary)]"
           >
             Analysis
+          </TabsTrigger>
+          <TabsTrigger
+            value="communication"
+            className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-[var(--color-primary)]"
+          >
+            Communication
           </TabsTrigger>
         </TabsList>
 
@@ -812,6 +827,10 @@ export default function ApplicationDetailPage() {
               </div>
             </div>
           </div>
+        </TabsContent>
+
+        <TabsContent value="communication" className="mt-6">
+          <CommunicationTab application={application} />
         </TabsContent>
       </Tabs>
     </div>
