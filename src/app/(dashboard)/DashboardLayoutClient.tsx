@@ -97,6 +97,20 @@ export default function DashboardLayoutClient({
     );
   }
 
+  // Check if onboarding is not complete - show only the onboarding page without sidebar/header
+  const isOnboardingPage = pathname?.startsWith("/onboarding");
+  const onboardingNotComplete =
+    user?.company && !user.company.onboarding_completed;
+  const pendingOnboarding = user?.pending_onboarding;
+
+  if (isOnboardingPage || onboardingNotComplete || pendingOnboarding) {
+    return (
+      <ErrorBoundary>
+        <div className="min-h-screen bg-gray-50">{children}</div>
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50">

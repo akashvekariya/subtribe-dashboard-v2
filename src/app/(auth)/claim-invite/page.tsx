@@ -19,12 +19,12 @@ export default function ClaimInvitePage() {
 
   // Check for stored invite code on mount
   useEffect(() => {
-    const storedCode = sessionStorage.getItem(INVITE_CODE_STORAGE_KEY);
+    const storedCode = localStorage.getItem(INVITE_CODE_STORAGE_KEY);
     if (storedCode && !code) {
       setCode(storedCode);
       setHasPrefilledCode(true);
       // Clear the stored code after using it
-      sessionStorage.removeItem(INVITE_CODE_STORAGE_KEY);
+      localStorage.removeItem(INVITE_CODE_STORAGE_KEY);
     }
   }, [code]);
 

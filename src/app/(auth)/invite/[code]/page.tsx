@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/Button";
 type PageState = "loading" | "valid" | "invalid" | "expired" | "used";
 
 // Storage key for invite code (used by /claim-invite page)
+// Using localStorage instead of sessionStorage so it persists across tabs
+// (verification email opens in a new tab)
 const INVITE_CODE_STORAGE_KEY = "subtribe-pending-invite-code";
 
 export default function InvitePage() {
@@ -36,8 +38,8 @@ export default function InvitePage() {
         if (result.valid) {
           setInviteData(result);
           setPageState("valid");
-          // Store invite code in sessionStorage for /claim-invite to use
-          sessionStorage.setItem(INVITE_CODE_STORAGE_KEY, code);
+          // Store invite code in localStorage for /claim-invite to use
+          localStorage.setItem(INVITE_CODE_STORAGE_KEY, code);
         } else {
           switch (result.error) {
             case "not_found":
