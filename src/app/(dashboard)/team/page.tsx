@@ -299,15 +299,21 @@ export default function TeamPage() {
                             >
                               Copy Link
                             </button>
-                            <button
-                              onClick={() => handleRevoke(invite.id)}
-                              disabled={isRevoking === invite.id}
-                              className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
-                            >
-                              {isRevoking === invite.id
-                                ? "Revoking..."
-                                : "Revoke"}
-                            </button>
+                            {/* Only show Revoke for Pending invites (not maxed out) */}
+                            {!(
+                              invite.max_uses !== null &&
+                              invite.uses_count >= invite.max_uses
+                            ) && (
+                              <button
+                                onClick={() => handleRevoke(invite.id)}
+                                disabled={isRevoking === invite.id}
+                                className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
+                              >
+                                {isRevoking === invite.id
+                                  ? "Revoking..."
+                                  : "Revoke"}
+                              </button>
+                            )}
                           </>
                         )}
                       </div>

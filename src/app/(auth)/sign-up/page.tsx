@@ -72,8 +72,14 @@ function RegistrationForm() {
   });
 
   const password = watch("password", "");
+  const confirmPassword = watch("confirmPassword", "");
   const requirements = checkPasswordRequirements(password);
   const allRequirementsMet = Object.values(requirements).every(Boolean);
+
+  // Password match validation
+  const passwordsMatch =
+    password && confirmPassword && password === confirmPassword;
+  const passwordsMismatch = confirmPassword && password !== confirmPassword;
 
   async function onSubmit(data: SignUpInput) {
     const toastId = showToast.loading("Creating your account...");
@@ -218,7 +224,7 @@ function RegistrationForm() {
                     </ul>
                   </TooltipContent>
                 </Tooltip>
-                {allRequirementsMet && password && (
+                {allRequirementsMet && passwordsMatch && (
                   <svg
                     className="h-4 w-4 text-green-500"
                     fill="currentColor"
@@ -237,7 +243,7 @@ function RegistrationForm() {
                 type="password"
                 autoComplete="new-password"
                 hasError={!!errors.password}
-                isValid={allRequirementsMet && !!password}
+                isValid={allRequirementsMet && !!passwordsMatch}
                 {...register("password")}
               />
               {errors.password && (
@@ -260,7 +266,13 @@ function RegistrationForm() {
               type="password"
               autoComplete="new-password"
               required
-              error={errors.confirmPassword?.message}
+              error={
+                passwordsMismatch
+                  ? "Password doesn't match"
+                  : errors.confirmPassword?.message
+              }
+              isValid={!!passwordsMatch}
+              showSuccessIcon
               {...register("confirmPassword")}
             />
           </div>
