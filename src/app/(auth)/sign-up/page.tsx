@@ -224,7 +224,7 @@ function RegistrationForm() {
                     </ul>
                   </TooltipContent>
                 </Tooltip>
-                {allRequirementsMet && passwordsMatch && (
+                {allRequirementsMet && (
                   <svg
                     className="h-4 w-4 text-green-500"
                     fill="currentColor"
@@ -243,7 +243,7 @@ function RegistrationForm() {
                 type="password"
                 autoComplete="new-password"
                 hasError={!!errors.password}
-                isValid={allRequirementsMet && !!passwordsMatch}
+                isValid={allRequirementsMet}
                 {...register("password")}
               />
               {errors.password && (

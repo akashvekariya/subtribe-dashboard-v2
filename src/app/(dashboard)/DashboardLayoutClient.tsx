@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { getCurrentUser, removeAuthToken, removeUserData } from "@/lib/auth";
+import { getCurrentUser, removeUserData } from "@/lib/auth";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { Header } from "@/components/shared/Header";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
@@ -25,8 +25,8 @@ export default function DashboardLayoutClient({
         const authUser = await getCurrentUser();
 
         if (!authUser) {
-          // No valid user, clear everything and redirect
-          removeAuthToken();
+          // No valid user, clear cached data and redirect
+          // Cookie is handled by backend
           removeUserData();
           window.location.href = "/sign-in";
           return;
@@ -76,7 +76,7 @@ export default function DashboardLayoutClient({
         setLoading(false);
       } catch {
         // Any error (401, network, etc.) should redirect to login
-        removeAuthToken();
+        // Only clear cached user data - cookie is handled by backend
         removeUserData();
         window.location.href = "/sign-in";
       }

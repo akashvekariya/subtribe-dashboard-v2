@@ -28,7 +28,7 @@ export function handleAuthError(error: unknown): boolean {
         error.message.includes("Authentication required")));
 
   if (isAuthError && typeof window !== "undefined") {
-    localStorage.removeItem("subtribe-token");
+    // Only clear cached user data - cookie is handled by backend
     localStorage.removeItem("subtribe-user");
     window.location.href = "/sign-in";
     return true;

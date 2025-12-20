@@ -117,6 +117,7 @@ export default function OnboardingPage() {
         about: data.about || undefined,
       });
 
+      // Token is stored in HTTP-only cookie by backend (secure, not accessible via JS)
       showToast.dismiss(toastId);
       showToast.success("Organization setup complete! Welcome to Subtribe.");
 

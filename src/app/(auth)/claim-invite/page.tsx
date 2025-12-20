@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authAPI, APIError } from "@/lib/api-client";
+import { logoutUser } from "@/lib/auth";
 import showToast from "@/lib/toast";
 import { Button } from "@/components/ui/Button";
 
@@ -43,11 +44,7 @@ export default function ClaimInvitePage() {
       const response = await authAPI.claimInvite(code.trim());
 
       if (response.success) {
-        // Store new token with updated company_id
-        if (response.access_token) {
-          localStorage.setItem("subtribe-token", response.access_token);
-        }
-
+        // Token is stored in HTTP-only cookie by backend (secure, not accessible via JS)
         showToast.success(response.message || "Invite claimed successfully!");
 
         // Redirect based on invite type
@@ -214,14 +211,10 @@ export default function ClaimInvitePage() {
             <Link
               href="/sign-in"
               className="font-medium text-purple-600 hover:text-purple-500"
-              onClick={() => {
-                // Clear auth state
-                if (typeof document !== "undefined") {
-                  document.cookie =
-                    "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
-                }
-                localStorage.removeItem("subtribe-token");
-                localStorage.removeItem("subtribe-user");
+              onClick={async (e) => {
+                e.preventDefault();
+                await logoutUser();
+                window.location.href = "/sign-in";
               }}
             >
               Sign out

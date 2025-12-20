@@ -94,24 +94,17 @@ async function apiFetch<T>(
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("subtribe-token")
-      : null;
-
+  // Authentication is handled via HTTP-only cookies (credentials: "include")
+  // No need to send Authorization header - cookies are more secure against XSS
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
 
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
   const config: RequestInit = {
     ...options,
     headers,
-    credentials: "include",
+    credentials: "include", // Sends HTTP-only auth cookie automatically
   };
 
   try {
@@ -198,15 +191,12 @@ export const authAPI = {
 
   /**
    * Logout user
-   * Note: Currently handled client-side by clearing cookies
-   * Backend endpoint can be added if needed
+   * Calls backend to properly clear HTTP-only cookie with correct attributes
    */
   async logout(): Promise<void> {
-    // Clear the auth cookie by setting it to expire
-    if (typeof document !== "undefined") {
-      document.cookie =
-        "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
-    }
+    await apiFetch<{ message: string }>("/auth/logout", {
+      method: "POST",
+    });
   },
 
   /**
@@ -233,6 +223,7 @@ export interface OnboardingResponse {
   success: boolean;
   company: Company;
   message: string;
+  access_token?: string; // New JWT with updated company_id
 }
 
 export const companyAPI = {
