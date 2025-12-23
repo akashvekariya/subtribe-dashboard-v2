@@ -413,6 +413,14 @@ export const applicationsAPI = {
     });
   },
 
+  async getResumeDownloadUrl(
+    id: string
+  ): Promise<{ url: string; filename: string; expires_at: string }> {
+    return apiFetch(`/applications/${id}/resume/download`, {
+      method: "GET",
+    });
+  },
+
   async getApplicationHistory(id: string): Promise<{
     data: Array<{
       id: string;
