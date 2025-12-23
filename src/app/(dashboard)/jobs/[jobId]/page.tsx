@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Job, Application, JobStats } from "@/types";
@@ -22,7 +28,15 @@ import {
   InformationCircleIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 type TabType = "overview" | "applications";
 
@@ -32,8 +46,6 @@ export default function JobDetailPage() {
   const [job, setJob] = useState<Job | null>(null);
   const [candidates, setCandidates] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [stats, setStats] = useState<JobStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
@@ -45,12 +57,35 @@ export default function JobDetailPage() {
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
 
+  // Infinite scroll state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [totalCandidates, setTotalCandidates] = useState(0);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // Search and sort state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [sortBy, setSortBy] = useState<
+    "applied_at" | "name" | "status" | "ai_score"
+  >("applied_at");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
   // Multi-select for bulk email
   const [selectedCandidateIds, setSelectedCandidateIds] = useState<Set<string>>(
     new Set()
   );
   const [isBulkEmailModalOpen, setIsBulkEmailModalOpen] = useState(false);
   const [isSelectMode, setIsSelectMode] = useState(false);
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -76,17 +111,45 @@ export default function JobDetailPage() {
     loadData();
   }, [jobId]);
 
+  // Reset and load first page when filters change
   useEffect(() => {
-    const loadCandidates = async () => {
-      if (jobId) {
-        const params: { status?: string; page?: number; limit?: number } = {
-          page: currentPage,
+    setCurrentPage(1);
+    setCandidates([]);
+    setHasMore(true);
+  }, [debouncedSearch, statusFilter, sortBy, sortDir]);
+
+  // Load candidates (initial load and infinite scroll)
+  const loadCandidates = useCallback(
+    async (page: number, append: boolean = false) => {
+      if (!jobId) return;
+
+      if (append) {
+        setIsLoadingMore(true);
+      }
+
+      try {
+        const params: {
+          status?: string;
+          search?: string;
+          sort_by?: "applied_at" | "name" | "status" | "ai_score";
+          sort_dir?: "asc" | "desc";
+          page?: number;
+          limit?: number;
+        } = {
+          page,
           limit: 20,
+          sort_by: sortBy,
+          sort_dir: sortDir,
         };
         if (statusFilter) {
           params.status = statusFilter;
         }
+        if (debouncedSearch) {
+          params.search = debouncedSearch;
+        }
+
         const response = await getCandidatesByJobId(jobId, params);
+
         // Add mock AI scores from mock data (for demo purposes)
         const candidatesWithScores = (response.data || []).map(
           (candidate, index) => {
@@ -107,15 +170,54 @@ export default function JobDetailPage() {
             };
           }
         );
-        setCandidates(candidatesWithScores);
-        if (response.pagination) {
-          setTotalPages(response.pagination.total_pages);
-        }
-      }
-    };
 
-    loadCandidates();
-  }, [jobId, currentPage, statusFilter]);
+        if (append) {
+          setCandidates((prev) => [...prev, ...candidatesWithScores]);
+        } else {
+          setCandidates(candidatesWithScores);
+        }
+
+        if (response.pagination) {
+          setHasMore(response.pagination.has_more);
+          setTotalCandidates(response.pagination.total);
+        }
+      } finally {
+        setIsLoadingMore(false);
+      }
+    },
+    [jobId, statusFilter, debouncedSearch, sortBy, sortDir]
+  );
+
+  // Initial load and filter changes
+  useEffect(() => {
+    if (jobId && currentPage === 1) {
+      loadCandidates(1, false);
+    }
+  }, [jobId, currentPage, loadCandidates]);
+
+  // Load more when page changes (for infinite scroll)
+  useEffect(() => {
+    if (currentPage > 1) {
+      loadCandidates(currentPage, true);
+    }
+  }, [currentPage, loadCandidates]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasMore || isLoadingMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          setCurrentPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore]);
 
   const handleCandidateStatusChange = async (
     candidateId: string,
@@ -962,6 +1064,7 @@ export default function JobDetailPage() {
               </div>
             ) : (
               <div className="p-3 h-full flex flex-col">
+                {/* Header */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     {isDrawerOpen && (
@@ -974,26 +1077,146 @@ export default function JobDetailPage() {
                       </button>
                     )}
                     <h3 className="text-base font-semibold text-gray-900">
-                      Applications ({candidates.length})
+                      Applications
+                      <span className="ml-1 text-sm font-normal text-gray-500">
+                        ({totalCandidates})
+                      </span>
                     </h3>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <select
-                      className="h-8 text-sm border border-gray-300 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={statusFilter}
-                      onChange={(e) => {
-                        setStatusFilter(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                    >
-                      <option value="">All Statuses</option>
-                      <option value="applied">Applied</option>
-                      <option value="screening">Screening</option>
-                      <option value="interviewing">Interviewing</option>
-                      <option value="offer">Offer</option>
-                      <option value="hired">Hired</option>
-                      <option value="rejected">Rejected</option>
-                    </select>
+                  <div className="flex items-center gap-2">
+                    {/* Filter Popover */}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          className={`relative h-8 px-3 text-sm font-medium rounded-md transition-colors inline-flex items-center gap-1.5 ${
+                            debouncedSearch ||
+                            statusFilter ||
+                            sortBy !== "applied_at" ||
+                            sortDir !== "desc"
+                              ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
+                              : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                          }`}
+                        >
+                          <FunnelIcon className="h-4 w-4" />
+                          <span>Filter</span>
+                          {(debouncedSearch ||
+                            statusFilter ||
+                            sortBy !== "applied_at" ||
+                            sortDir !== "desc") && (
+                            <span className="absolute -top-1 -right-1 h-4 w-4 text-[10px] font-bold bg-blue-600 text-white rounded-full flex items-center justify-center">
+                              {
+                                [
+                                  debouncedSearch,
+                                  statusFilter,
+                                  sortBy !== "applied_at" || sortDir !== "desc",
+                                ].filter(Boolean).length
+                              }
+                            </span>
+                          )}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" className="w-72 p-4">
+                        <div className="space-y-4">
+                          {/* Search */}
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                              Search
+                            </label>
+                            <div className="relative mt-1.5">
+                              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <input
+                                type="text"
+                                placeholder="Name or email..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full h-9 pl-9 pr-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Status Filter */}
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                              Status
+                            </label>
+                            <select
+                              className="mt-1.5 w-full h-9 text-sm border border-gray-300 rounded-lg px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              value={statusFilter}
+                              onChange={(e) => setStatusFilter(e.target.value)}
+                            >
+                              <option value="">All Statuses</option>
+                              <option value="applied">Applied</option>
+                              <option value="screening">Screening</option>
+                              <option value="interviewing">Interviewing</option>
+                              <option value="offer">Offer</option>
+                              <option value="hired">Hired</option>
+                              <option value="rejected">Rejected</option>
+                            </select>
+                          </div>
+
+                          {/* Sort */}
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                              Sort By
+                            </label>
+                            <select
+                              className="mt-1.5 w-full h-9 text-sm border border-gray-300 rounded-lg px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              value={`${sortBy}-${sortDir}`}
+                              onChange={(e) => {
+                                const [newSortBy, newSortDir] =
+                                  e.target.value.split("-") as [
+                                    (
+                                      | "applied_at"
+                                      | "name"
+                                      | "status"
+                                      | "ai_score"
+                                    ),
+                                    "asc" | "desc",
+                                  ];
+                                setSortBy(newSortBy);
+                                setSortDir(newSortDir);
+                              }}
+                            >
+                              <option value="applied_at-desc">
+                                Newest First
+                              </option>
+                              <option value="applied_at-asc">
+                                Oldest First
+                              </option>
+                              <option value="name-asc">Name (A-Z)</option>
+                              <option value="name-desc">Name (Z-A)</option>
+                              <option value="ai_score-desc">
+                                Score (High-Low)
+                              </option>
+                              <option value="ai_score-asc">
+                                Score (Low-High)
+                              </option>
+                              <option value="status-asc">Status (A-Z)</option>
+                            </select>
+                          </div>
+
+                          {/* Clear Filters */}
+                          {(debouncedSearch ||
+                            statusFilter ||
+                            sortBy !== "applied_at" ||
+                            sortDir !== "desc") && (
+                            <button
+                              onClick={() => {
+                                setSearchQuery("");
+                                setStatusFilter("");
+                                setSortBy("applied_at");
+                                setSortDir("desc");
+                              }}
+                              className="w-full h-9 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                            >
+                              <XMarkIcon className="h-4 w-4" />
+                              Clear Filters
+                            </button>
+                          )}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+
                     <button
                       onClick={handleToggleSelectMode}
                       className={`h-8 px-3 text-sm font-medium rounded-md transition-colors ${
@@ -1006,6 +1229,34 @@ export default function JobDetailPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* Active Filters Display */}
+                {(debouncedSearch || statusFilter) && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {debouncedSearch && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-full">
+                        Search: {debouncedSearch}
+                        <button
+                          onClick={() => setSearchQuery("")}
+                          className="hover:bg-blue-100 rounded-full p-0.5"
+                        >
+                          <XMarkIcon className="h-3 w-3" />
+                        </button>
+                      </span>
+                    )}
+                    {statusFilter && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-full capitalize">
+                        {statusFilter}
+                        <button
+                          onClick={() => setStatusFilter("")}
+                          className="hover:bg-blue-100 rounded-full p-0.5"
+                        >
+                          <XMarkIcon className="h-3 w-3" />
+                        </button>
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Bulk Action Bar */}
                 {isSelectMode && (
@@ -1053,85 +1304,68 @@ export default function JobDetailPage() {
                   </div>
                 )}
 
-                {candidates.length === 0 ? (
+                {candidates.length === 0 && !isLoadingMore ? (
                   <div className="text-center py-12">
                     <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
                     <h4 className="mt-2 text-sm font-semibold text-gray-900">
-                      No applications yet
+                      {debouncedSearch || statusFilter
+                        ? "No matching applications"
+                        : "No applications yet"}
                     </h4>
                     <p className="mt-1 text-sm text-gray-500">
-                      Applications will appear here once candidates start
-                      applying to this job.
+                      {debouncedSearch || statusFilter
+                        ? "Try adjusting your search or filters."
+                        : "Applications will appear here once candidates start applying to this job."}
                     </p>
-                    <div className="mt-4">
-                      <a
-                        href={publicUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Button variant="outline" size="sm">
-                          Share Job Posting
-                        </Button>
-                      </a>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex-1 overflow-y-auto space-y-3">
-                      {candidates
-                        .sort((a, b) => (b.ai_score || 0) - (a.ai_score || 0))
-                        .map((candidate, index) => (
-                          <CandidateCard
-                            key={candidate.id}
-                            candidate={candidate}
-                            rank={index + 1}
-                            onStatusChange={handleCandidateStatusChange}
-                            onClick={() => handleViewApplication(candidate.id)}
-                            isSelected={selectedApplicationId === candidate.id}
-                            isSelectMode={isSelectMode}
-                            isChecked={selectedCandidateIds.has(candidate.id)}
-                            onToggleSelect={() =>
-                              handleToggleCandidateSelection(candidate.id)
-                            }
-                          />
-                        ))}
-                    </div>
-
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                      <div className="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
-                        <p className="text-sm text-gray-500">
-                          {currentPage} / {totalPages}
-                        </p>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              setCurrentPage((prev) => Math.max(1, prev - 1))
-                            }
-                            disabled={currentPage === 1}
-                            title="Previous page"
-                          >
-                            <ChevronLeftIcon className="h-4 w-4" />
+                    {!debouncedSearch && !statusFilter && (
+                      <div className="mt-4">
+                        <a
+                          href={publicUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Button variant="outline" size="sm">
+                            Share Job Posting
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              setCurrentPage((prev) =>
-                                Math.min(totalPages, prev + 1)
-                              )
-                            }
-                            disabled={currentPage === totalPages}
-                            title="Next page"
-                          >
-                            <ChevronRightIcon className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        </a>
                       </div>
                     )}
-                  </>
+                  </div>
+                ) : (
+                  <div className="flex-1 overflow-y-auto space-y-3">
+                    {candidates.map((candidate, index) => (
+                      <CandidateCard
+                        key={candidate.id}
+                        candidate={candidate}
+                        rank={index + 1}
+                        onStatusChange={handleCandidateStatusChange}
+                        onClick={() => handleViewApplication(candidate.id)}
+                        isSelected={selectedApplicationId === candidate.id}
+                        isSelectMode={isSelectMode}
+                        isChecked={selectedCandidateIds.has(candidate.id)}
+                        onToggleSelect={() =>
+                          handleToggleCandidateSelection(candidate.id)
+                        }
+                      />
+                    ))}
+
+                    {/* Infinite scroll trigger and loading indicator */}
+                    <div ref={loadMoreRef} className="py-4">
+                      {isLoadingMore && (
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                          <span className="text-sm text-gray-500">
+                            Loading more...
+                          </span>
+                        </div>
+                      )}
+                      {!hasMore && candidates.length > 0 && (
+                        <p className="text-center text-sm text-gray-400">
+                          All {totalCandidates} applications loaded
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             )}

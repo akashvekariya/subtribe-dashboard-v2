@@ -280,10 +280,20 @@ export const applicationsAPI = {
 
   async getJobApplications(
     jobId: string,
-    params?: { status?: string; page?: number; limit?: number }
+    params?: {
+      status?: string;
+      search?: string;
+      sort_by?: "applied_at" | "name" | "status" | "ai_score";
+      sort_dir?: "asc" | "desc";
+      page?: number;
+      limit?: number;
+    }
   ): Promise<PaginatedResponse<Application>> {
     const searchParams = new URLSearchParams();
     if (params?.status) searchParams.append("status", params.status);
+    if (params?.search) searchParams.append("search", params.search);
+    if (params?.sort_by) searchParams.append("sort_by", params.sort_by);
+    if (params?.sort_dir) searchParams.append("sort_dir", params.sort_dir);
     if (params?.page) searchParams.append("page", params.page.toString());
     if (params?.limit) searchParams.append("limit", params.limit.toString());
 

@@ -23,7 +23,14 @@ export async function getCandidates(): Promise<Application[]> {
 
 export async function getCandidatesByJobId(
   jobId: string,
-  params?: { status?: string; page?: number; limit?: number }
+  params?: {
+    status?: string;
+    search?: string;
+    sort_by?: "applied_at" | "name" | "status" | "ai_score";
+    sort_dir?: "asc" | "desc";
+    page?: number;
+    limit?: number;
+  }
 ) {
   try {
     return await api.applications.getJobApplications(jobId, params);
