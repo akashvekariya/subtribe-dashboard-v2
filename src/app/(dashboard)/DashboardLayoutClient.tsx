@@ -5,6 +5,7 @@ import { getCurrentUser, removeAuthToken, removeUserData } from "@/lib/auth";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { Header } from "@/components/shared/Header";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import { SupportWidget } from "@/components/support/SupportWidget";
 import { User } from "@/types";
 
 export default function DashboardLayoutClient({
@@ -88,6 +89,9 @@ export default function DashboardLayoutClient({
             </main>
           </div>
         </div>
+
+        {/* Support Widget */}
+        <SupportWidget />
       </div>
     </ErrorBoundary>
   );

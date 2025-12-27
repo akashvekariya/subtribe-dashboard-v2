@@ -520,6 +520,124 @@ export async function checkAuth(): Promise<User | null> {
   }
 }
 
+// Support Types (inline to avoid import issues)
+interface SupportTicketListResponse {
+  data: Array<{
+    id: string;
+    subject: string;
+    status: "open" | "in_progress" | "resolved" | "closed";
+    priority: "low" | "medium" | "high" | "urgent";
+    created_at: string;
+    updated_at: string;
+    message_count: number;
+  }>;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    total_pages: number;
+    has_more: boolean;
+  };
+}
+
+interface SupportTicketDetail {
+  id: string;
+  subject: string;
+  description: string;
+  status: "open" | "in_progress" | "resolved" | "closed";
+  priority: "low" | "medium" | "high" | "urgent";
+  discord_channel_id: string | null;
+  discord_thread_id: string | null;
+  created_at: string;
+  updated_at: string;
+  resolved_at: string | null;
+  user: { id: string; first_name: string; last_name: string } | null;
+  messages: Array<{
+    id: string;
+    content: string;
+    source: "dashboard" | "discord";
+    discord_message_id: string | null;
+    created_at: string;
+    user: { id: string; first_name: string; last_name: string } | null;
+  }>;
+}
+
+interface SupportMessageResponse {
+  id: string;
+  content: string;
+  source: "dashboard" | "discord";
+  discord_message_id: string | null;
+  created_at: string;
+  user: { id: string; first_name: string; last_name: string } | null;
+}
+
+export const supportAPI = {
+  async createTicket(data: {
+    subject: string;
+    description: string;
+    priority?: "low" | "medium" | "high" | "urgent";
+  }): Promise<{ id: string; message: string }> {
+    return apiFetch("/support/tickets", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async getTickets(params?: {
+    status?: "open" | "in_progress" | "resolved" | "closed";
+    priority?: "low" | "medium" | "high" | "urgent";
+    page?: number;
+    limit?: number;
+  }): Promise<SupportTicketListResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.append("status", params.status);
+    if (params?.priority) searchParams.append("priority", params.priority);
+    if (params?.page) searchParams.append("page", params.page.toString());
+    if (params?.limit) searchParams.append("limit", params.limit.toString());
+
+    const queryString = searchParams.toString();
+    const endpoint = queryString
+      ? `/support/tickets?${queryString}`
+      : "/support/tickets";
+
+    return apiFetch<SupportTicketListResponse>(endpoint, {
+      method: "GET",
+    });
+  },
+
+  async getTicket(id: string): Promise<SupportTicketDetail> {
+    return apiFetch<SupportTicketDetail>(`/support/tickets/${id}`, {
+      method: "GET",
+    });
+  },
+
+  async updateTicket(
+    id: string,
+    data: {
+      status?: "open" | "in_progress" | "resolved" | "closed";
+      priority?: "low" | "medium" | "high" | "urgent";
+    }
+  ): Promise<SupportTicketDetail> {
+    return apiFetch<SupportTicketDetail>(`/support/tickets/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async addMessage(
+    ticketId: string,
+    content: string
+  ): Promise<SupportMessageResponse> {
+    return apiFetch<SupportMessageResponse>(
+      `/support/tickets/${ticketId}/messages`,
+      {
+        method: "POST",
+        body: JSON.stringify({ content }),
+      }
+    );
+  },
+};
+
 export const api = {
   auth: authAPI,
   company: companyAPI,
@@ -527,6 +645,7 @@ export const api = {
   applications: applicationsAPI,
   dashboard: dashboardAPI,
   email: emailAPI,
+  support: supportAPI,
   checkAuth,
 };
 
