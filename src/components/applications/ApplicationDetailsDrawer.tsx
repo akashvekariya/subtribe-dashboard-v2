@@ -229,15 +229,26 @@ export function ApplicationDetailsDrawer({
 
     try {
       setIsLoadingResume(true);
-      const response = await api.applications.getResumeViewUrl(application.id);
+      // Get signed URL with attachment disposition
+      const response = await api.applications.getResumeDownloadUrl(
+        application.id
+      );
+
+      // Fetch file as blob (works for cross-origin)
+      const fileResponse = await fetch(response.url);
+      const blob = await fileResponse.blob();
+
+      // Create object URL and trigger download
+      const objectUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = response.url;
+      link.href = objectUrl;
       link.download =
         response.filename ||
         `${application.first_name}_${application.last_name}_resume.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(objectUrl);
     } catch {
       showToast.error("Failed to download resume");
     } finally {

@@ -33,8 +33,43 @@ export default function SignInPage() {
       }
 
       showToast.dismiss(toastId);
-      showToast.success(`Welcome back, ${user.first_name}!`);
 
+      // Redirect based on user state
+      if (!user.email_verified) {
+        showToast.success("Please verify your email to continue.");
+        window.location.href = `/verify-email?email=${encodeURIComponent(user.email)}`;
+        return;
+      }
+
+      // User claimed org_creator invite, needs to create their org
+      if (user.pending_onboarding) {
+        showToast.success(
+          `Welcome back, ${user.first_name}! Let's set up your organization.`
+        );
+        window.location.href = "/onboarding";
+        return;
+      }
+
+      // User has no company yet - needs to claim an invite
+      if (!user.company) {
+        showToast.success(
+          `Welcome back, ${user.first_name}! Enter your invite code to continue.`
+        );
+        window.location.href = "/claim-invite";
+        return;
+      }
+
+      // User's company hasn't completed onboarding
+      if (!user.company.onboarding_completed) {
+        showToast.success(
+          `Welcome back, ${user.first_name}! Let's complete your setup.`
+        );
+        window.location.href = "/onboarding";
+        return;
+      }
+
+      // All good - go to dashboard
+      showToast.success(`Welcome back, ${user.first_name}!`);
       window.location.href = "/";
     } catch (error) {
       showToast.dismiss(toastId);

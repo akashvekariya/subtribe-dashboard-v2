@@ -44,11 +44,31 @@ export class APIError extends Error {
   }
 }
 
+export interface ClaimInviteResponse {
+  success: boolean;
+  invite_type: "org_creator" | "team_member";
+  company: Company | null; // Only for team_member invites
+  redirect_to: string; // '/onboarding' or '/'
+  message?: string;
+  access_token: string; // New JWT with updated company_id
+}
+
 async function handleResponse<T>(response: Response): Promise<T> {
   if (response.ok) {
+    // Handle 204 No Content or empty responses
+    const contentLength = response.headers.get("content-length");
+    if (response.status === 204 || contentLength === "0") {
+      return {} as T;
+    }
+
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("application/json")) {
-      return response.json();
+      // Check if body is empty before parsing
+      const text = await response.text();
+      if (!text || text.trim() === "") {
+        return {} as T;
+      }
+      return JSON.parse(text);
     }
     return {} as T;
   }
@@ -74,24 +94,17 @@ async function apiFetch<T>(
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("subtribe-token")
-      : null;
-
+  // Authentication is handled via HTTP-only cookies (credentials: "include")
+  // No need to send Authorization header - cookies are more secure against XSS
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
 
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
   const config: RequestInit = {
     ...options,
     headers,
-    credentials: "include",
+    credentials: "include", // Sends HTTP-only auth cookie automatically
   };
 
   try {
@@ -121,7 +134,7 @@ export const authAPI = {
   },
 
   /**
-   * Register new user with company code
+   * Register new user (no org created - user enters invite code after email verification)
    * Sets HTTP-only cookie on success
    */
   async register(data: {
@@ -129,12 +142,41 @@ export const authAPI = {
     password: string;
     first_name: string;
     last_name: string;
-    company_code: string;
   }): Promise<AuthResponse> {
     return apiFetch<AuthResponse>("/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
     });
+  },
+
+  /**
+   * Verify email with token
+   */
+  async verifyEmail(
+    token: string
+  ): Promise<{ success: boolean; message: string }> {
+    return apiFetch<{ success: boolean; message: string }>(
+      "/auth/verify-email",
+      {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      }
+    );
+  },
+
+  /**
+   * Resend verification email
+   */
+  async resendVerification(
+    email: string
+  ): Promise<{ success: boolean; message: string }> {
+    return apiFetch<{ success: boolean; message: string }>(
+      "/auth/resend-verification",
+      {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      }
+    );
   },
 
   /**
@@ -149,17 +191,40 @@ export const authAPI = {
 
   /**
    * Logout user
-   * Note: Currently handled client-side by clearing cookies
-   * Backend endpoint can be added if needed
+   * Calls backend to properly clear HTTP-only cookie with correct attributes
    */
   async logout(): Promise<void> {
-    // Clear the auth cookie by setting it to expire
-    if (typeof document !== "undefined") {
-      document.cookie =
-        "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
-    }
+    await apiFetch<{ message: string }>("/auth/logout", {
+      method: "POST",
+    });
+  },
+
+  /**
+   * Claim an invite code to join or create an organization
+   * Called after email verification
+   */
+  async claimInvite(code: string): Promise<ClaimInviteResponse> {
+    return apiFetch<ClaimInviteResponse>("/auth/claim-invite", {
+      method: "POST",
+      body: JSON.stringify({ code }),
+    });
   },
 };
+
+export interface OnboardingRequest {
+  name: string;
+  slug: string;
+  logo_url?: string;
+  tagline?: string;
+  about?: string;
+}
+
+export interface OnboardingResponse {
+  success: boolean;
+  company: Company;
+  message: string;
+  access_token?: string; // New JWT with updated company_id
+}
 
 export const companyAPI = {
   async getCompany(): Promise<Company> {
@@ -173,6 +238,15 @@ export const companyAPI = {
   ): Promise<Company> {
     return apiFetch<Company>("/companies/me", {
       method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async completeOnboarding(
+    data: OnboardingRequest
+  ): Promise<OnboardingResponse> {
+    return apiFetch<OnboardingResponse>("/companies/onboarding", {
+      method: "POST",
       body: JSON.stringify(data),
     });
   },
@@ -335,6 +409,14 @@ export const applicationsAPI = {
     id: string
   ): Promise<{ url: string; filename: string; expires_at: string }> {
     return apiFetch(`/applications/${id}/resume/view`, {
+      method: "GET",
+    });
+  },
+
+  async getResumeDownloadUrl(
+    id: string
+  ): Promise<{ url: string; filename: string; expires_at: string }> {
+    return apiFetch(`/applications/${id}/resume/download`, {
       method: "GET",
     });
   },
@@ -508,6 +590,113 @@ export const emailAPI = {
   },
 };
 
+export interface InviteValidationResponse {
+  valid: boolean;
+  error?: string;
+  invite_type?: "team_member" | "org_creator"; // Type of invite
+  company_name?: string; // Only for team_member invites
+  company_logo?: string; // Only for team_member invites
+  inviter_name?: string;
+  role?: string;
+}
+
+export interface Invite {
+  id: string;
+  code: string;
+  email: string;
+  role: string;
+  invite_type: "team_member" | "org_creator";
+  max_uses: number | null;
+  uses_count: number;
+  expires_at: string | null;
+  is_active: boolean;
+  created_at: string;
+  creator?: {
+    id: string;
+    full_name: string;
+  } | null;
+}
+
+export interface InviteListResponse {
+  invites: Invite[];
+  total: number;
+}
+
+export interface InviteCreateRequest {
+  email: string;
+  max_uses?: number;
+  invite_type?: "team_member" | "org_creator";
+  // Note: role is always "admin" in V1 - no role selection
+  // Note: expiration is always 7 days - set by backend
+}
+
+export interface InviteSendResponse {
+  success: boolean;
+  invite: Invite;
+  message: string;
+}
+
+export const invitesAPI = {
+  /**
+   * Validate an invite code (public endpoint)
+   */
+  async validate(code: string): Promise<InviteValidationResponse> {
+    return apiFetch<InviteValidationResponse>(`/invites/validate/${code}`, {
+      method: "GET",
+    });
+  },
+
+  /**
+   * List all invites for the company
+   */
+  async list(): Promise<InviteListResponse> {
+    return apiFetch<InviteListResponse>("/invites", {
+      method: "GET",
+    });
+  },
+
+  /**
+   * Create and send a new invite
+   */
+  async create(data: InviteCreateRequest): Promise<InviteSendResponse> {
+    return apiFetch<InviteSendResponse>("/invites", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * Get invite details
+   */
+  async get(id: string): Promise<Invite> {
+    return apiFetch<Invite>(`/invites/${id}`, {
+      method: "GET",
+    });
+  },
+
+  /**
+   * Update invite (deactivate or change max_uses)
+   */
+  async update(
+    id: string,
+    data: { is_active?: boolean; max_uses?: number }
+  ): Promise<Invite> {
+    return apiFetch<Invite>(`/invites/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
+  /**
+   * Deactivate an invite
+   */
+  async delete(id: string): Promise<void> {
+    return apiFetch<void>(`/invites/${id}`, {
+      method: "DELETE",
+    });
+  },
+};
+
 export async function checkAuth(): Promise<User | null> {
   try {
     const user = await authAPI.me();
@@ -527,6 +716,7 @@ export const api = {
   applications: applicationsAPI,
   dashboard: dashboardAPI,
   email: emailAPI,
+  invites: invitesAPI,
   checkAuth,
 };
 

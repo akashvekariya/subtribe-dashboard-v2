@@ -8,12 +8,14 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   EnvelopeIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: HomeIcon },
   { name: "Jobs", href: "/jobs", icon: BriefcaseIcon },
   { name: "Email", href: "/email", icon: EnvelopeIcon },
+  { name: "Team", href: "/team", icon: UserGroupIcon },
 ];
 
 interface SidebarProps {

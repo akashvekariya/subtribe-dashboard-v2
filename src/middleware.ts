@@ -29,7 +29,9 @@ export function middleware(request: NextRequest) {
   // Allow Next.js assets, API calls, and external resources
   // Dynamically include API URL from environment to avoid CSP violations
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-  const connectSrcUrls = ["'self'", apiUrl].filter(Boolean).join(" ");
+  const connectSrcUrls = ["'self'", apiUrl, "https://storage.googleapis.com"]
+    .filter(Boolean)
+    .join(" ");
 
   const cspHeader = [
     "default-src 'self'",

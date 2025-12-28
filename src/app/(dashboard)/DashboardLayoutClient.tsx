@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getCurrentUser, removeAuthToken, removeUserData } from "@/lib/auth";
+import { usePathname } from "next/navigation";
+import { getCurrentUser, removeUserData } from "@/lib/auth";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { Header } from "@/components/shared/Header";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
@@ -12,6 +13,7 @@ export default function DashboardLayoutClient({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -23,10 +25,50 @@ export default function DashboardLayoutClient({
         const authUser = await getCurrentUser();
 
         if (!authUser) {
-          // No valid user, clear everything and redirect
-          removeAuthToken();
+          // No valid user, clear cached data and redirect
+          // Cookie is handled by backend
           removeUserData();
           window.location.href = "/sign-in";
+          return;
+        }
+
+        // Check email verification (skip if already on verify-email page)
+        if (
+          !authUser.email_verified &&
+          !pathname?.startsWith("/verify-email")
+        ) {
+          window.location.href = `/verify-email?email=${encodeURIComponent(authUser.email)}`;
+          return;
+        }
+
+        // Check if user claimed org_creator invite and needs to complete onboarding
+        // (pending_onboarding = true, no company yet)
+        if (
+          authUser.pending_onboarding &&
+          !pathname?.startsWith("/onboarding")
+        ) {
+          window.location.href = "/onboarding";
+          return;
+        }
+
+        // Check if user has no company (hasn't claimed invite yet)
+        if (
+          !authUser.company &&
+          !authUser.pending_onboarding &&
+          !pathname?.startsWith("/claim-invite")
+        ) {
+          window.location.href = "/claim-invite";
+          return;
+        }
+
+        // Check if user's company hasn't completed onboarding
+        // (team member joined company that hasn't completed setup)
+        if (
+          authUser.company &&
+          !authUser.company.onboarding_completed &&
+          !pathname?.startsWith("/onboarding")
+        ) {
+          window.location.href = "/onboarding";
           return;
         }
 
@@ -34,14 +76,14 @@ export default function DashboardLayoutClient({
         setLoading(false);
       } catch {
         // Any error (401, network, etc.) should redirect to login
-        removeAuthToken();
+        // Only clear cached user data - cookie is handled by backend
         removeUserData();
         window.location.href = "/sign-in";
       }
     };
 
     validateAuth();
-  }, []);
+  }, [pathname]);
 
   // Show loading state while validating auth
   if (loading) {
@@ -52,6 +94,20 @@ export default function DashboardLayoutClient({
           <p className="mt-2 text-sm text-gray-600">Loading...</p>
         </div>
       </div>
+    );
+  }
+
+  // Check if onboarding is not complete - show only the onboarding page without sidebar/header
+  const isOnboardingPage = pathname?.startsWith("/onboarding");
+  const onboardingNotComplete =
+    user?.company && !user.company.onboarding_completed;
+  const pendingOnboarding = user?.pending_onboarding;
+
+  if (isOnboardingPage || onboardingNotComplete || pendingOnboarding) {
+    return (
+      <ErrorBoundary>
+        <div className="min-h-screen bg-gray-50">{children}</div>
+      </ErrorBoundary>
     );
   }
 

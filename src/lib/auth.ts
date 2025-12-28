@@ -1,47 +1,20 @@
 /**
  * Authentication service with backend API integration
  * Uses HTTP-only cookies for secure JWT token storage
+ *
+ * Security: JWT tokens are stored ONLY in HTTP-only cookies (set by backend)
+ * This prevents XSS attacks from accessing tokens via JavaScript
+ * User data is cached in localStorage for quick UI, but auth state comes from cookies
  */
 
 import { User, AuthResponse } from "@/types";
 import { api, APIError } from "./api-client";
 
 const USER_STORAGE_KEY = "subtribe-user";
-const TOKEN_STORAGE_KEY = "subtribe-token";
-
-/**
- * Store authentication token in localStorage
- */
-export function setAuthToken(token: string): void {
-  if (typeof window !== "undefined") {
-    localStorage.setItem(TOKEN_STORAGE_KEY, token);
-  }
-}
-
-/**
- * Get authentication token from localStorage
- */
-export function getAuthToken(): string | null {
-  if (typeof window === "undefined") return null;
-
-  try {
-    return localStorage.getItem(TOKEN_STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Remove authentication token from localStorage
- */
-export function removeAuthToken(): void {
-  if (typeof window !== "undefined") {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-  }
-}
 
 /**
  * Authenticate user with email and password
+ * Backend sets HTTP-only cookie automatically
  * @returns User object if successful, null otherwise
  */
 export async function authenticateUser(
@@ -51,10 +24,8 @@ export async function authenticateUser(
   try {
     const response: AuthResponse = await api.auth.login(email, password);
 
-    if (response.access_token) {
-      setAuthToken(response.access_token);
-    }
-
+    // Token is stored in HTTP-only cookie by backend (secure, not accessible via JS)
+    // Only cache user data for quick UI access
     if (response.user) {
       setUserData(response.user);
     }
@@ -69,7 +40,8 @@ export async function authenticateUser(
 }
 
 /**
- * Register new user with company code
+ * Register new user (no org created - user enters invite code after email verification)
+ * Backend sets HTTP-only cookie automatically
  * @returns User object if successful, null otherwise
  */
 export async function registerUser(data: {
@@ -77,20 +49,51 @@ export async function registerUser(data: {
   password: string;
   first_name: string;
   last_name: string;
-  company_code: string;
 }): Promise<User | null> {
   try {
     const response: AuthResponse = await api.auth.register(data);
 
-    if (response.access_token) {
-      setAuthToken(response.access_token);
-    }
-
+    // Token is stored in HTTP-only cookie by backend (secure, not accessible via JS)
+    // Only cache user data for quick UI access
     if (response.user) {
       setUserData(response.user);
     }
 
     return response.user;
+  } catch (error) {
+    if (error instanceof APIError) {
+      throw error;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Verify email with token
+ * @returns success status and message
+ */
+export async function verifyEmail(
+  token: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    return await api.auth.verifyEmail(token);
+  } catch (error) {
+    if (error instanceof APIError) {
+      throw error;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Resend verification email
+ * @returns success status and message
+ */
+export async function resendVerificationEmail(
+  email: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    return await api.auth.resendVerification(email);
   } catch (error) {
     if (error instanceof APIError) {
       throw error;
@@ -152,12 +155,13 @@ export function removeUserData(): void {
 
 /**
  * Logout user and clear all auth data
+ * Backend clears the HTTP-only cookie, we just clear cached user data
  */
 export async function logoutUser(): Promise<void> {
   try {
     await api.auth.logout();
   } finally {
-    removeAuthToken();
+    // Only clear cached user data - cookie is cleared by backend
     removeUserData();
   }
 }
