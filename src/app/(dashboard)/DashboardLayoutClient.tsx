@@ -6,6 +6,7 @@ import { getCurrentUser, removeUserData } from "@/lib/auth";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { Header } from "@/components/shared/Header";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import { TawkTo } from "@/components/shared/TawkTo";
 import { User } from "@/types";
 
 export default function DashboardLayoutClient({
@@ -144,6 +145,9 @@ export default function DashboardLayoutClient({
             </main>
           </div>
         </div>
+
+        {/* Tawk.to Live Chat */}
+        <TawkTo />
       </div>
     </ErrorBoundary>
   );
