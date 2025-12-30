@@ -33,8 +33,9 @@ export function middleware(request: NextRequest) {
     .filter(Boolean)
     .join(" ");
 
-  // Tawk.to domains for live chat
-  const tawkDomains = "https://embed.tawk.to https://*.tawk.to wss://*.tawk.to";
+  // Tawk.to domains for live chat (includes jsdelivr for emoji support)
+  const tawkDomains =
+    "https://embed.tawk.to https://*.tawk.to wss://*.tawk.to https://cdn.jsdelivr.net";
 
   const cspHeader = [
     "default-src 'self'",
