@@ -46,6 +46,20 @@ const passwordSchema = z
     "Password must contain at least one special character (!@#$%^&*...)"
   );
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    password: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
 // Note: invite_token removed - users enter invite code on /claim-invite after email verification
 export const signUpSchema = z
   .object({
@@ -394,6 +408,8 @@ export const onboardingSchema = z.object({
 // Type exports
 export type SignInInput = z.infer<typeof signInSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type JobInput = z.infer<typeof jobSchema>;
 export type ApplicationInput = z.infer<typeof applicationSchema>;
 export type StatusUpdateInput = z.infer<typeof statusUpdateSchema>;

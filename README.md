@@ -1,6 +1,6 @@
 # Subtribe Dashboard
 
-Admin/Client interface for managing jobs and applications in the Subtribe ATS.
+Admin/Client interface for managing jobs and applications in the Subtribe.
 
 **Domain:** dashboard.thesubtribe.com
 
@@ -296,7 +296,7 @@ pnpm build
 ## 🔗 Related Repositories
 
 - **App (Candidate Interface):** `subtribe-app` repository
-- **Backend API:** Subtribe ATS API
+- **Backend API:** Subtribe API
 
 ---
 
