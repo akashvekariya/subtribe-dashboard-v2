@@ -36,7 +36,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Logo and Toggle */}
       <div className="flex h-16 flex-shrink-0 items-center justify-between px-3 border-b border-gray-200">
         {!collapsed && (
-          <h1 className="text-xl font-bold text-gray-900 ml-3">Subtribe ATS</h1>
+          <h1 className="text-xl font-bold text-gray-900 ml-3">Subtribe</h1>
         )}
         <button
           onClick={onToggle}

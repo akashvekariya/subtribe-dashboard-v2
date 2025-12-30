@@ -13,6 +13,7 @@ export interface InputProps
  * - Uses design tokens from globals.css
  * - Consistent focus states with primary color
  * - Proper error state styling
+ * - Green border when isValid is true
  */
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, hasError, isValid, ...props }, ref) => {

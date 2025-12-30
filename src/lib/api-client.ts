@@ -1,5 +1,5 @@
 /**
- * API Client for Subtribe ATS Backend
+ * API Client for Subtribe Backend
  * Handles authentication, requests, and error management
  */
 
@@ -207,6 +207,50 @@ export const authAPI = {
     return apiFetch<ClaimInviteResponse>("/auth/claim-invite", {
       method: "POST",
       body: JSON.stringify({ code }),
+    });
+  },
+
+  /**
+   * Request password reset email
+   * Always returns success to prevent email enumeration
+   */
+  async forgotPassword(
+    email: string
+  ): Promise<{ success: boolean; message: string }> {
+    return apiFetch("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  /**
+   * Reset password with token
+   */
+  async resetPassword(
+    token: string,
+    password: string,
+    confirmPassword: string
+  ): Promise<{ success: boolean; message: string }> {
+    return apiFetch("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify({
+        token,
+        password,
+        confirm_password: confirmPassword,
+      }),
+    });
+  },
+
+  /**
+   * Validate a password reset token
+   * Returns whether token is valid and masked email
+   */
+  async validateResetToken(
+    token: string
+  ): Promise<{ valid: boolean; email?: string; message?: string }> {
+    return apiFetch("/auth/validate-reset-token", {
+      method: "POST",
+      body: JSON.stringify({ token }),
     });
   },
 };

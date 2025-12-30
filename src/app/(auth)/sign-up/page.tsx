@@ -11,53 +11,10 @@ import { APIError } from "@/lib/api-client";
 import showToast from "@/lib/toast";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/shared/FormField";
-import { Input } from "@/components/ui/Input";
-import { Label } from "@/components/ui/Label";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { PasswordField } from "@/components/shared/PasswordField";
 
 // New flow: Users sign up freely, then enter invite code after email verification
 // The invite code is entered on /claim-invite page, not during sign-up
-
-// Password validation checks
-function checkPasswordRequirements(password: string) {
-  return {
-    minLength: password.length >= 8,
-    hasUppercase: /[A-Z]/.test(password),
-    hasNumber: /\d/.test(password),
-    hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-  };
-}
-
-function PasswordRequirementItem({
-  met,
-  text,
-}: {
-  met: boolean;
-  text: string;
-}) {
-  return (
-    <li className={`flex items-center gap-1.5 ${met ? "text-green-600" : ""}`}>
-      {met ? (
-        <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fillRule="evenodd"
-            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ) : (
-        <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-          <circle cx="10" cy="10" r="3" />
-        </svg>
-      )}
-      {text}
-    </li>
-  );
-}
 
 function RegistrationForm() {
   const router = useRouter();
@@ -73,8 +30,6 @@ function RegistrationForm() {
 
   const password = watch("password", "");
   const confirmPassword = watch("confirmPassword", "");
-  const requirements = checkPasswordRequirements(password);
-  const allRequirementsMet = Object.values(requirements).every(Boolean);
 
   // Password match validation
   const passwordsMatch =
@@ -161,104 +116,14 @@ function RegistrationForm() {
               {...register("email")}
             />
 
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1 mb-2">
-                <Label
-                  htmlFor="password"
-                  style={{
-                    fontSize: "var(--label-font-size)",
-                    fontWeight: "var(--label-font-weight)",
-                  }}
-                >
-                  Password
-                  <span
-                    style={{ color: "var(--color-error)" }}
-                    className="ml-1"
-                  >
-                    *
-                  </span>
-                </Label>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="text-gray-400 hover:text-gray-600"
-                    >
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="bg-gray-900 text-white p-3 max-w-xs"
-                  >
-                    <p className="font-medium mb-1">Password requirements:</p>
-                    <ul className="text-xs space-y-0.5">
-                      <PasswordRequirementItem
-                        met={requirements.minLength}
-                        text="At least 8 characters"
-                      />
-                      <PasswordRequirementItem
-                        met={requirements.hasUppercase}
-                        text="One uppercase letter (A-Z)"
-                      />
-                      <PasswordRequirementItem
-                        met={requirements.hasNumber}
-                        text="One number (0-9)"
-                      />
-                      <PasswordRequirementItem
-                        met={requirements.hasSpecial}
-                        text="One special character (!@#$%^&*...)"
-                      />
-                    </ul>
-                  </TooltipContent>
-                </Tooltip>
-                {allRequirementsMet && (
-                  <svg
-                    className="h-4 w-4 text-green-500"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                )}
-              </div>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                hasError={!!errors.password}
-                isValid={allRequirementsMet}
-                {...register("password")}
-              />
-              {errors.password && (
-                <p
-                  className="text-xs mt-1.5"
-                  style={{
-                    color: "var(--color-error)",
-                    fontSize: "var(--error-font-size)",
-                    marginTop: "var(--error-margin-top)",
-                  }}
-                >
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
+            <PasswordField
+              id="password"
+              label="Password"
+              password={password}
+              autoComplete="new-password"
+              error={errors.password?.message}
+              {...register("password")}
+            />
 
             <FormField
               id="confirmPassword"

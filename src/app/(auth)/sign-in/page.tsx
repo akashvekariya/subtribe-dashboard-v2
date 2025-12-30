@@ -115,15 +115,25 @@ export default function SignInPage() {
               {...register("email")}
             />
 
-            <FormField
-              id="password"
-              label="Password"
-              type="password"
-              autoComplete="current-password"
-              required
-              error={errors.password?.message}
-              {...register("password")}
-            />
+            <div>
+              <FormField
+                id="password"
+                label="Password"
+                type="password"
+                autoComplete="current-password"
+                required
+                error={errors.password?.message}
+                {...register("password")}
+              />
+              <div className="mt-1 text-right">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
+            </div>
           </div>
 
           <div>
