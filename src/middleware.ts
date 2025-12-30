@@ -33,14 +33,17 @@ export function middleware(request: NextRequest) {
     .filter(Boolean)
     .join(" ");
 
+  // Tawk.to domains for live chat
+  const tawkDomains = "https://embed.tawk.to https://*.tawk.to wss://*.tawk.to";
+
   const cspHeader = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires unsafe-eval and unsafe-inline
+    `script-src 'self' 'unsafe-eval' 'unsafe-inline' ${tawkDomains}`, // Next.js + Tawk.to
     "style-src 'self' 'unsafe-inline'", // Tailwind requires unsafe-inline
-    "img-src 'self' data: https:",
-    "font-src 'self' data:",
-    `connect-src ${connectSrcUrls}`, // API endpoints from environment
-    "frame-src 'self' https://storage.googleapis.com", // Allow PDF embedding from Google Cloud Storage
+    `img-src 'self' data: https: ${tawkDomains}`,
+    `font-src 'self' data: ${tawkDomains}`,
+    `connect-src ${connectSrcUrls} ${tawkDomains}`, // API endpoints + Tawk.to WebSocket
+    `frame-src 'self' https://storage.googleapis.com ${tawkDomains}`, // PDF embedding + Tawk.to
     "object-src 'self' https://storage.googleapis.com", // Allow PDF embedding via object/embed tags
     "frame-ancestors 'none'",
   ].join("; ");
