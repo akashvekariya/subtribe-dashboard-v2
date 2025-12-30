@@ -39,7 +39,7 @@ export function middleware(request: NextRequest) {
   const cspHeader = [
     "default-src 'self'",
     `script-src 'self' 'unsafe-eval' 'unsafe-inline' ${tawkDomains}`, // Next.js + Tawk.to
-    "style-src 'self' 'unsafe-inline'", // Tailwind requires unsafe-inline
+    `style-src 'self' 'unsafe-inline' ${tawkDomains}`, // Tailwind + Tawk.to
     `img-src 'self' data: https: ${tawkDomains}`,
     `font-src 'self' data: ${tawkDomains}`,
     `connect-src ${connectSrcUrls} ${tawkDomains}`, // API endpoints + Tawk.to WebSocket
