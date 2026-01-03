@@ -31,6 +31,7 @@ import {
   MagnifyingGlassIcon,
   FunnelIcon,
   XMarkIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import {
   Popover,
@@ -441,6 +442,16 @@ export default function JobDetailPage() {
                 Applications ({candidates.length})
               </button>
             </div>
+
+            <Link href={`/jobs/${job.id}/calibrate`}>
+              <button
+                className="flex items-center gap-1.5 px-3 h-8 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 transition-colors text-purple-700"
+                title="AI Calibration"
+              >
+                <SparklesIcon className="h-3.5 w-3.5" />
+                <span className="text-sm font-medium">Calibrate</span>
+              </button>
+            </Link>
 
             <Link href={`/jobs/${job.id}/edit`}>
               <button
