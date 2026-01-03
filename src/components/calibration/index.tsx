@@ -192,7 +192,7 @@ export default function JobCalibration({
       // For now, just complete the flow
       setCurrentStep("complete");
       onComplete(jobId);
-    } catch (_err) {
+    } catch {
       setError("Failed to save job. Please try again.");
       setCurrentStep("framework_view");
     } finally {
