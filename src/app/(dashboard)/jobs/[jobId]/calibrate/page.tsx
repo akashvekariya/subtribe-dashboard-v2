@@ -4,10 +4,13 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Job, BasicJobData } from "@/types";
+import { EvaluationFramework } from "@/types/evaluationFramework";
 import { getJobById } from "@/lib/jobs";
+import { jobsAPI } from "@/lib/api-client";
 import { Button } from "@/components/ui/Button";
 import JobCalibration from "@/components/calibration";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import EvaluationFrameworkView from "@/components/calibration/EvaluationFrameworkView";
+import { ArrowLeftIcon, SparklesIcon } from "@heroicons/react/24/outline";
 
 function transformJobToBasicJobData(job: Job): BasicJobData {
   return {
@@ -31,6 +34,9 @@ export default function CalibratePage() {
   const [job, setJob] = useState<Job | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [existingFramework, setExistingFramework] =
+    useState<EvaluationFramework | null>(null);
+  const [showRecalibrate, setShowRecalibrate] = useState(false);
 
   useEffect(() => {
     const loadJob = async () => {
@@ -44,6 +50,20 @@ export default function CalibratePage() {
           return;
         }
         setJob(jobData);
+
+        // If job is calibrated, fetch the existing framework
+        if (jobData.calibrated_at) {
+          try {
+            const calibration = await jobsAPI.getCalibration(jobId);
+            if (calibration.evaluation_framework) {
+              setExistingFramework(
+                calibration.evaluation_framework as EvaluationFramework
+              );
+            }
+          } catch (err) {
+            console.error("Failed to load calibration:", err);
+          }
+        }
       } catch (err) {
         console.error("Failed to load job:", err);
         if (
@@ -96,6 +116,36 @@ export default function CalibratePage() {
             </Button>
           </Link>
         </div>
+      </div>
+    );
+  }
+
+  // If job is calibrated and we have the framework, show it
+  if (job.calibrated_at && existingFramework && !showRecalibrate) {
+    return (
+      <div>
+        {/* Re-calibrate banner */}
+        <div className="bg-green-50 border-b border-green-200 px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <SparklesIcon className="h-5 w-5 text-green-600" />
+            <span className="text-sm text-green-800">
+              This job was calibrated on{" "}
+              {new Date(job.calibrated_at).toLocaleDateString()}
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowRecalibrate(true)}
+          >
+            Re-calibrate
+          </Button>
+        </div>
+        <EvaluationFrameworkView
+          framework={existingFramework}
+          onBack={handleBack}
+          onDone={handleBack}
+        />
       </div>
     );
   }

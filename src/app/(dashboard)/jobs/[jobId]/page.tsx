@@ -450,11 +450,15 @@ export default function JobDetailPage() {
                     ? "border-green-200 bg-green-50 hover:bg-green-100 text-green-700"
                     : "border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700"
                 }`}
-                title={job.calibrated_at ? "Re-calibrate AI" : "AI Calibration"}
+                title={
+                  job.calibrated_at
+                    ? "View AI evaluation framework"
+                    : "AI Calibration"
+                }
               >
                 <SparklesIcon className="h-3.5 w-3.5" />
                 <span className="text-sm font-medium">
-                  {job.calibrated_at ? "Calibrated" : "Calibrate"}
+                  {job.calibrated_at ? "View Framework" : "Calibrate"}
                 </span>
               </button>
             </Link>
