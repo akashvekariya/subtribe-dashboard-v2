@@ -9,7 +9,7 @@ import {
   SectionFeedback,
   createInitialCalibrationData,
 } from "../../types";
-import { aiAPI } from "../../lib/api-client";
+import { aiAPI, jobsAPI } from "../../lib/api-client";
 import {
   EvaluationFramework,
   PostProcessingResult,
@@ -23,12 +23,14 @@ import CalibrationComplete from "./CalibrationComplete";
 import EvaluationFrameworkView from "./EvaluationFrameworkView";
 
 interface JobCalibrationProps {
+  jobId: string; // Actual database job ID for saving
   basicJobData: BasicJobData;
   onBack: () => void;
   onComplete: (jobId: string) => void;
 }
 
 export default function JobCalibration({
+  jobId,
   basicJobData,
   onBack,
   onComplete,
@@ -38,7 +40,7 @@ export default function JobCalibration({
   // This state ensures user MUST click button to proceed - prevents any auto-transition
   const [userConfirmedStart, setUserConfirmedStart] = useState(false);
   const [error, setError] = useState<string | undefined>();
-  const [jobId, setJobId] = useState<string | undefined>();
+  const [aiJobId, setAiJobId] = useState<string | undefined>(); // AI-generated job ID for tracking
   const [roleAnalysis, setRoleAnalysis] = useState<RoleAnalysis | undefined>();
   const [calibrationQuestions, setCalibrationQuestions] = useState<
     CalibrationQuestionsPayload | undefined
@@ -79,7 +81,7 @@ export default function JobCalibration({
           experienceMin: basicJobData.experienceRange.min,
           experienceMax: basicJobData.experienceRange.max,
         });
-        setJobId(response.jobId);
+        setAiJobId(response.jobId);
         setRoleAnalysis(response.roleAnalysis);
         setCalibrationQuestions(response.calibrationQuestions);
 
@@ -152,16 +154,16 @@ export default function JobCalibration({
   };
 
   const handleSummaryComplete = async () => {
-    if (!jobId || !roleAnalysis || !calibrationQuestions) return;
+    if (!aiJobId || !roleAnalysis || !calibrationQuestions) return;
 
     try {
       setCurrentStep("generating_framework");
       setIsLoading(true);
       setError(undefined);
 
-      // Generate the calibration summary JSON
+      // Generate the calibration summary JSON (uses AI job ID for internal tracking)
       const summaryJSON = generateCalibrationSummaryJSON(
-        jobId,
+        aiJobId,
         basicJobData,
         roleAnalysis,
         calibrationQuestions,
@@ -183,17 +185,38 @@ export default function JobCalibration({
   };
 
   const handleFrameworkComplete = async () => {
-    if (!jobId) return;
+    if (
+      !aiJobId ||
+      !roleAnalysis ||
+      !calibrationQuestions ||
+      !evaluationFramework
+    )
+      return;
 
     try {
       setCurrentStep("saving");
       setIsLoading(true);
-      // TODO: Implement save endpoint when backend is ready
-      // For now, just complete the flow
+
+      // Generate calibration summary for persistence (uses AI job ID for internal tracking)
+      const calibrationSummary = generateCalibrationSummaryJSON(
+        aiJobId,
+        basicJobData,
+        roleAnalysis,
+        calibrationQuestions,
+        calibrationData
+      );
+
+      // Save calibration results to backend using actual database job ID
+      await jobsAPI.saveCalibration(jobId, {
+        calibration_summary: calibrationSummary,
+        evaluation_framework: evaluationFramework,
+      });
+
       setCurrentStep("complete");
       onComplete(jobId);
-    } catch {
-      setError("Failed to save job. Please try again.");
+    } catch (err) {
+      console.error("Failed to save calibration:", err);
+      setError("Failed to save calibration. Please try again.");
       setCurrentStep("framework_view");
     } finally {
       setIsLoading(false);
@@ -224,13 +247,13 @@ export default function JobCalibration({
   // Render summary/complete screen with JSON output
   if (
     (currentStep === "summary" || currentStep === "generating_framework") &&
-    jobId &&
+    aiJobId &&
     roleAnalysis &&
     calibrationQuestions
   ) {
     return (
       <CalibrationComplete
-        jobId={jobId}
+        jobId={aiJobId}
         basicJobData={basicJobData}
         roleAnalysis={roleAnalysis}
         calibrationQuestions={calibrationQuestions}

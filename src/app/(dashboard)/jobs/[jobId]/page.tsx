@@ -445,11 +445,17 @@ export default function JobDetailPage() {
 
             <Link href={`/jobs/${job.id}/calibrate`}>
               <button
-                className="flex items-center gap-1.5 px-3 h-8 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 transition-colors text-purple-700"
-                title="AI Calibration"
+                className={`flex items-center gap-1.5 px-3 h-8 rounded-lg border transition-colors ${
+                  job.calibrated_at
+                    ? "border-green-200 bg-green-50 hover:bg-green-100 text-green-700"
+                    : "border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700"
+                }`}
+                title={job.calibrated_at ? "Re-calibrate AI" : "AI Calibration"}
               >
                 <SparklesIcon className="h-3.5 w-3.5" />
-                <span className="text-sm font-medium">Calibrate</span>
+                <span className="text-sm font-medium">
+                  {job.calibrated_at ? "Calibrated" : "Calibrate"}
+                </span>
               </button>
             </Link>
 
@@ -464,6 +470,32 @@ export default function JobDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Calibration Warning Banner */}
+      {!job.calibrated_at && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <SparklesIcon className="h-5 w-5 text-amber-600 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-amber-800">
+                AI candidate analysis unavailable
+              </p>
+              <p className="text-xs text-amber-600">
+                Calibrate this job to enable AI-powered candidate scoring and
+                analysis
+              </p>
+            </div>
+          </div>
+          <Link href={`/jobs/${job.id}/calibrate`}>
+            <Button
+              size="sm"
+              className="bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              Calibrate Now
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Tab Content */}
       {activeTab === "overview" && (

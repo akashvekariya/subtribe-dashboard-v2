@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { Icons } from "../Icons";
 import {
   BasicJobData,
@@ -29,9 +29,7 @@ export default function CalibrationComplete({
   onDone,
   isGenerating = false,
 }: CalibrationCompleteProps) {
-  const [copied, setCopied] = useState(false);
-
-  // Generate the summary JSON
+  // Generate the summary JSON (still needed for stats calculation)
   const summaryJSON = useMemo(() => {
     return generateCalibrationSummaryJSON(
       jobId,
@@ -47,35 +45,6 @@ export default function CalibrationComplete({
     calibrationQuestions,
     calibrationData,
   ]);
-
-  // Format JSON for display
-  const formattedJSON = useMemo(() => {
-    return JSON.stringify(summaryJSON, null, 2);
-  }, [summaryJSON]);
-
-  // Copy to clipboard
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(formattedJSON);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
-    }
-  };
-
-  // Download as JSON file
-  const handleDownload = () => {
-    const blob = new Blob([formattedJSON], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `calibration-${jobId}-${new Date().toISOString().split("T")[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
 
   // Calculate stats for the summary header
   const stats = useMemo(() => {
@@ -141,15 +110,16 @@ export default function CalibrationComplete({
                 Calibration Complete
               </h2>
               <p className="text-green-700 text-sm">
-                Your job calibration has been saved. Below is the complete JSON
-                output showing all LLM suggestions and your selections.
+                {
+                  'Your job calibration has been saved. Click "Generate Framework" to create the AI evaluation framework for scoring candidates.'
+                }
               </p>
             </div>
           </div>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-xl border border-zinc-200 p-4">
             <div className="text-2xl font-bold text-zinc-900">
               {stats.selectedSkills}
@@ -186,101 +156,6 @@ export default function CalibrationComplete({
             </div>
             <div className="text-xs text-zinc-500 uppercase tracking-wider">
               Day 60 Goals
-            </div>
-          </div>
-        </div>
-
-        {/* JSON Output Card */}
-        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
-          {/* Card Header */}
-          <div className="flex items-center justify-between px-6 py-4 bg-zinc-50 border-b border-zinc-200">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-zinc-200 rounded-lg flex items-center justify-center">
-                <Icons.Code2 className="w-4 h-4 text-zinc-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-zinc-900">
-                  Calibration Summary JSON
-                </h3>
-                <p className="text-xs text-zinc-500">
-                  Complete output with LLM suggestions and user selections
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleCopy}
-                className={`
-                  px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2
-                  ${
-                    copied
-                      ? "bg-green-100 text-green-700"
-                      : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
-                  }
-                `}
-              >
-                {copied ? (
-                  <>
-                    <Icons.Check className="w-4 h-4" /> Copied!
-                  </>
-                ) : (
-                  <>
-                    <Icons.Copy className="w-4 h-4" /> Copy
-                  </>
-                )}
-              </button>
-              <button
-                onClick={handleDownload}
-                className="px-4 py-2 bg-zinc-900 text-white rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors flex items-center gap-2"
-              >
-                <Icons.Download className="w-4 h-4" /> Download
-              </button>
-            </div>
-          </div>
-
-          {/* JSON Content */}
-          <div className="p-6 max-h-[600px] overflow-auto bg-zinc-900">
-            <pre className="text-sm text-zinc-100 font-mono whitespace-pre-wrap">
-              <code>{formattedJSON}</code>
-            </pre>
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="mt-6 bg-zinc-50 rounded-xl border border-zinc-200 p-4">
-          <h4 className="text-sm font-semibold text-zinc-700 mb-3">
-            Understanding the JSON
-          </h4>
-          <div className="grid md:grid-cols-2 gap-4 text-sm">
-            <div className="flex items-start gap-2">
-              <code className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
-                {'"source": "llm"'}
-              </code>
-              <span className="text-zinc-600">
-                Item suggested by AI based on job description
-              </span>
-            </div>
-            <div className="flex items-start gap-2">
-              <code className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs">
-                {'"source": "custom"'}
-              </code>
-              <span className="text-zinc-600">Item manually added by you</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <code className="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs">
-                {'"selected": true'}
-              </code>
-              <span className="text-zinc-600">
-                Item was confirmed/selected by you
-              </span>
-            </div>
-            <div className="flex items-start gap-2">
-              <code className="px-2 py-0.5 bg-zinc-200 text-zinc-600 rounded text-xs">
-                {'"selected": false'}
-              </code>
-              <span className="text-zinc-600">
-                Item suggested but not selected
-              </span>
             </div>
           </div>
         </div>

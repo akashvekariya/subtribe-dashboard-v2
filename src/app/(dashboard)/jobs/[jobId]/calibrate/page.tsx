@@ -104,6 +104,7 @@ export default function CalibratePage() {
 
   return (
     <JobCalibration
+      jobId={jobId}
       basicJobData={basicJobData}
       onBack={handleBack}
       onComplete={handleComplete}

@@ -103,6 +103,11 @@ export interface Job {
   created_at: string;
   updated_at: string;
 
+  // AI Calibration
+  calibration_summary?: Record<string, unknown>;
+  evaluation_framework?: Record<string, unknown>;
+  calibrated_at?: string;
+
   // Nested objects from backend
   creator?: {
     id: string;

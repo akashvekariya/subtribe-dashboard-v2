@@ -384,6 +384,37 @@ export const jobsAPI = {
       method: "GET",
     });
   },
+
+  async saveCalibration(
+    jobId: string,
+    data: {
+      calibration_summary: object;
+      evaluation_framework: object;
+    }
+  ): Promise<{
+    id: string;
+    calibration_summary: object | null;
+    evaluation_framework: object | null;
+    calibrated_at: string | null;
+    message: string;
+  }> {
+    return apiFetch(`/jobs/${jobId}/calibration`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  async getCalibration(jobId: string): Promise<{
+    id: string;
+    calibration_summary: object | null;
+    evaluation_framework: object | null;
+    calibrated_at: string | null;
+    message: string;
+  }> {
+    return apiFetch(`/jobs/${jobId}/calibration`, {
+      method: "GET",
+    });
+  },
 };
 
 export const applicationsAPI = {
