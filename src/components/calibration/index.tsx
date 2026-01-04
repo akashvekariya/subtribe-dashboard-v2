@@ -10,10 +10,7 @@ import {
   createInitialCalibrationData,
 } from "../../types";
 import { aiAPI, jobsAPI } from "../../lib/api-client";
-import {
-  EvaluationFramework,
-  PostProcessingResult,
-} from "../../types/evaluationFramework";
+import { EvaluationFramework } from "../../types/evaluationFramework";
 import { generateCalibrationSummaryJSON } from "../../lib/calibrationSummary";
 import CalibrationStep1 from "./CalibrationStep1";
 import CalibrationStep2 from "./CalibrationStep2";
@@ -50,9 +47,6 @@ export default function JobCalibration({
   );
   const [evaluationFramework, setEvaluationFramework] = useState<
     EvaluationFramework | undefined
-  >();
-  const [postProcessingResult, setPostProcessingResult] = useState<
-    PostProcessingResult | undefined
   >();
 
   // Prevent double-fetch in StrictMode
@@ -173,7 +167,6 @@ export default function JobCalibration({
       // Call the framework generation API - now returns { framework, post_processing }
       const response = await aiAPI.createFramework(summaryJSON);
       setEvaluationFramework(response.framework);
-      setPostProcessingResult(response.post_processing);
       setCurrentStep("framework_view");
     } catch (err) {
       console.error("Framework generation error:", err);
@@ -270,7 +263,6 @@ export default function JobCalibration({
     return (
       <EvaluationFrameworkView
         framework={evaluationFramework}
-        postProcessing={postProcessingResult}
         onBack={() => setCurrentStep("summary")}
         onDone={handleFrameworkComplete}
       />

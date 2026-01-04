@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useMemo,
-  Component,
-  ErrorInfo,
-  ReactNode,
-} from "react";
+import React, { useState, useMemo, Component, ErrorInfo, ReactNode } from "react";
 import { Icons } from "../Icons";
 import {
   EvaluationFramework,
@@ -12,13 +6,10 @@ import {
   TradeoffPreference,
   HardConstraint,
   DimensionWeight,
-  PostProcessingResult,
-  SuspiciousItem,
 } from "../../types/evaluationFramework";
 
 interface EvaluationFrameworkViewProps {
   framework: EvaluationFramework;
-  postProcessing?: PostProcessingResult;
   onBack: () => void;
   onDone: () => void;
 }
@@ -469,77 +460,14 @@ const DimensionBar: React.FC<{ dimension: DimensionWeight }> = ({
   );
 };
 
-// Suspicious Item Card Component
-const SuspiciousItemCard: React.FC<{ item: SuspiciousItem }> = ({ item }) => {
-  const actionColors: Record<string, string> = {
-    Excluded: "bg-red-100 text-red-700",
-    Sanitized: "bg-amber-100 text-amber-700",
-    Flagged: "bg-blue-100 text-blue-700",
-  };
-
-  const actionLabels: Record<string, string> = {
-    Excluded: "Excluded",
-    Sanitized: "Sanitized",
-    Flagged: "Flagged for Review",
-  };
-
-  return (
-    <div className="p-3 rounded-lg border border-amber-200 bg-amber-50">
-      <div className="flex items-center gap-2 mb-2">
-        <Icons.AlertTriangle className="w-4 h-4 text-amber-500" />
-        <span
-          className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${actionColors[item.action_taken] || "bg-zinc-100 text-zinc-700"}`}
-        >
-          {actionLabels[item.action_taken] || item.action_taken}
-        </span>
-        <span className="text-xs text-zinc-500">in {item.section_found}</span>
-      </div>
-      <p className="text-sm text-zinc-700 line-through">{item.original_text}</p>
-      {item.sanitized_text && (
-        <p className="text-sm text-zinc-900 mt-1">{item.sanitized_text}</p>
-      )}
-    </div>
-  );
-};
-
 export default function EvaluationFrameworkView({
   framework,
-  postProcessing,
   onBack,
   onDone,
 }: EvaluationFrameworkViewProps) {
-  const [copied, setCopied] = useState(false);
-
   // Debug logging
   console.log("[EvaluationFrameworkView] Framework received:", framework);
   console.log("[EvaluationFrameworkView] Keys:", Object.keys(framework || {}));
-
-  const formattedJSON = useMemo(
-    () => JSON.stringify(framework, null, 2),
-    [framework]
-  );
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(formattedJSON);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
-    }
-  };
-
-  const handleDownload = () => {
-    const blob = new Blob([formattedJSON], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `evaluation-framework-${new Date().toISOString().split("T")[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
 
   // Group skills by category
   const skillsByCategory = useMemo(() => {
@@ -629,35 +557,12 @@ export default function EvaluationFrameworkView({
           >
             <Icons.ArrowLeft className="w-4 h-4" /> Back to Summary
           </button>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleCopy}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-                copied
-                  ? "bg-green-100 text-green-700"
-                  : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
-              }`}
-            >
-              {copied ? (
-                <Icons.Check className="w-4 h-4" />
-              ) : (
-                <Icons.Copy className="w-4 h-4" />
-              )}
-              {copied ? "Copied!" : "Copy JSON"}
-            </button>
-            <button
-              onClick={handleDownload}
-              className="px-3 py-2 bg-zinc-100 text-zinc-700 rounded-lg text-sm font-medium hover:bg-zinc-200 transition-colors flex items-center gap-2"
-            >
-              <Icons.Download className="w-4 h-4" /> Download
-            </button>
-            <button
-              onClick={onDone}
-              className="px-6 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
-            >
-              <Icons.Check className="w-4 h-4" /> Done
-            </button>
-          </div>
+          <button
+            onClick={onDone}
+            className="px-6 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
+          >
+            <Icons.Check className="w-4 h-4" /> Done
+          </button>
         </div>
 
         {/* Title */}
@@ -670,89 +575,6 @@ export default function EvaluationFrameworkView({
             to consistently evaluate candidates.
           </p>
         </div>
-
-        {/* Post-Processing Alerts */}
-        {postProcessing &&
-          (postProcessing.errors.length > 0 ||
-            postProcessing.warnings.length > 0 ||
-            postProcessing.requires_human_review) && (
-            <div className="mb-6 space-y-3">
-              {postProcessing.requires_human_review && (
-                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
-                  <Icons.AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-                  <div>
-                    <h3 className="font-semibold text-amber-800">
-                      Human Review Recommended
-                    </h3>
-                    <p className="text-sm text-amber-700 mt-1">
-                      The post-processing pipeline flagged this framework for
-                      review. Please verify the generated content.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {postProcessing.errors.length > 0 && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Icons.X className="w-4 h-4 text-red-500" />
-                    <h3 className="font-semibold text-red-800">
-                      Processing Errors
-                    </h3>
-                  </div>
-                  <ul className="space-y-1 text-sm text-red-700">
-                    {postProcessing.errors.map((err, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <span className="text-red-400">-</span>
-                        <span>
-                          <strong>{err.stage}:</strong> {err.message}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {postProcessing.warnings.length > 0 && (
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Icons.AlertTriangle className="w-4 h-4 text-yellow-600" />
-                    <h3 className="font-semibold text-yellow-800">
-                      Processing Warnings
-                    </h3>
-                  </div>
-                  <ul className="space-y-1 text-sm text-yellow-700">
-                    {postProcessing.warnings.map((warn, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <span className="text-yellow-500">-</span>
-                        <span>
-                          <strong>{warn.stage}:</strong> {warn.message}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-
-        {/* Suspicious Items Alert */}
-        {framework.suspicious_items &&
-          framework.suspicious_items.length > 0 && (
-            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-              <div className="flex items-center gap-2 mb-3">
-                <Icons.AlertTriangle className="w-5 h-5 text-amber-500" />
-                <h3 className="font-semibold text-amber-800">
-                  Flagged Items ({framework.suspicious_items.length})
-                </h3>
-              </div>
-              <div className="space-y-2">
-                {framework.suspicious_items.map((item, i) => (
-                  <SuspiciousItemCard key={i} item={item} />
-                ))}
-              </div>
-            </div>
-          )}
 
         {/* Sections */}
         <div className="space-y-4">
