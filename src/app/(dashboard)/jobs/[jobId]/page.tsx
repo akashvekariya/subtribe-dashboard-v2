@@ -15,6 +15,7 @@ import { getCandidatesByJobId, updateCandidateStatus } from "@/lib/candidates";
 import { CandidateCard } from "@/components/shared/CandidateCard";
 import { Button } from "@/components/ui/Button";
 import { ApplicationDetailsDrawer } from "@/components/applications/ApplicationDetailsDrawer";
+import { EvaluationProgressBanner } from "@/components/applications/evaluation";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import { BulkEmailModal } from "@/components/applications/BulkEmailModal";
 import showToast from "@/lib/toast";
@@ -1087,406 +1088,427 @@ export default function JobDetailPage() {
       )}
 
       {activeTab === "applications" && (
-        <div className="flex gap-4 h-[calc(100vh-160px)]">
-          {/* Applications List */}
-          <div
-            className={`bg-white shadow rounded-lg transition-all duration-300 h-full ${
-              isLeftSidebarCollapsed
-                ? "w-12"
-                : isDrawerOpen
-                  ? "w-[35%]"
-                  : "w-1/2"
-            }`}
-          >
-            {isLeftSidebarCollapsed ? (
-              // Collapsed state - show expand button
-              <div className="h-full flex items-center justify-center">
-                <button
-                  onClick={() => setIsLeftSidebarCollapsed(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  title="Expand sidebar"
-                >
-                  <ChevronRightIcon className="h-5 w-5 text-gray-600" />
-                </button>
-              </div>
-            ) : (
-              <div className="p-3 h-full flex flex-col">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    {isDrawerOpen && (
-                      <button
-                        onClick={() => setIsLeftSidebarCollapsed(true)}
-                        className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Collapse sidebar"
-                      >
-                        <ChevronLeftIcon className="h-4 w-4 text-gray-600" />
-                      </button>
-                    )}
-                    <h3 className="text-base font-semibold text-gray-900">
-                      Applications
-                      <span className="ml-1 text-sm font-normal text-gray-500">
-                        ({totalCandidates})
-                      </span>
-                    </h3>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {/* Filter Popover */}
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button
-                          className={`relative h-8 px-3 text-sm font-medium rounded-md transition-colors inline-flex items-center gap-1.5 ${
-                            debouncedSearch ||
-                            statusFilter ||
-                            sortBy !== "applied_at" ||
-                            sortDir !== "desc"
-                              ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
-                              : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                          }`}
-                        >
-                          <FunnelIcon className="h-4 w-4" />
-                          <span>Filter</span>
-                          {(debouncedSearch ||
-                            statusFilter ||
-                            sortBy !== "applied_at" ||
-                            sortDir !== "desc") && (
-                            <span className="absolute -top-1 -right-1 h-4 w-4 text-[10px] font-bold bg-blue-600 text-white rounded-full flex items-center justify-center">
-                              {
-                                [
-                                  debouncedSearch,
-                                  statusFilter,
-                                  sortBy !== "applied_at" || sortDir !== "desc",
-                                ].filter(Boolean).length
-                              }
-                            </span>
-                          )}
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent align="end" className="w-72 p-4">
-                        <div className="space-y-4">
-                          {/* Search */}
-                          <div>
-                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                              Search
-                            </label>
-                            <div className="relative mt-1.5">
-                              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                              <input
-                                type="text"
-                                placeholder="Name or email..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full h-9 pl-9 pr-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                              />
-                            </div>
-                          </div>
+        <div className="space-y-4">
+          {/* Evaluation Progress Banner */}
+          <EvaluationProgressBanner
+            jobId={jobId}
+            isCalibrated={!!job.calibrated_at}
+            onEvaluationComplete={() => {
+              // Refresh the candidates list when evaluation completes
+              loadCandidates(1, false);
+            }}
+          />
 
-                          {/* Status Filter */}
-                          <div>
-                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                              Status
-                            </label>
-                            <select
-                              className="mt-1.5 w-full h-9 text-sm border border-gray-300 rounded-lg px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              value={statusFilter}
-                              onChange={(e) => setStatusFilter(e.target.value)}
-                            >
-                              <option value="">All Statuses</option>
-                              <option value="applied">Applied</option>
-                              <option value="screening">Screening</option>
-                              <option value="interviewing">Interviewing</option>
-                              <option value="offer">Offer</option>
-                              <option value="hired">Hired</option>
-                              <option value="rejected">Rejected</option>
-                            </select>
-                          </div>
-
-                          {/* Sort */}
-                          <div>
-                            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                              Sort By
-                            </label>
-                            <select
-                              className="mt-1.5 w-full h-9 text-sm border border-gray-300 rounded-lg px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              value={`${sortBy}-${sortDir}`}
-                              onChange={(e) => {
-                                const [newSortBy, newSortDir] =
-                                  e.target.value.split("-") as [
-                                    (
-                                      | "applied_at"
-                                      | "name"
-                                      | "status"
-                                      | "ai_score"
-                                    ),
-                                    "asc" | "desc",
-                                  ];
-                                setSortBy(newSortBy);
-                                setSortDir(newSortDir);
-                              }}
-                            >
-                              <option value="applied_at-desc">
-                                Newest First
-                              </option>
-                              <option value="applied_at-asc">
-                                Oldest First
-                              </option>
-                              <option value="name-asc">Name (A-Z)</option>
-                              <option value="name-desc">Name (Z-A)</option>
-                              <option value="ai_score-desc">
-                                Score (High-Low)
-                              </option>
-                              <option value="ai_score-asc">
-                                Score (Low-High)
-                              </option>
-                              <option value="status-asc">Status (A-Z)</option>
-                            </select>
-                          </div>
-
-                          {/* Clear Filters */}
-                          {(debouncedSearch ||
-                            statusFilter ||
-                            sortBy !== "applied_at" ||
-                            sortDir !== "desc") && (
-                            <button
-                              onClick={() => {
-                                setSearchQuery("");
-                                setStatusFilter("");
-                                setSortBy("applied_at");
-                                setSortDir("desc");
-                              }}
-                              className="w-full h-9 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-center gap-1.5"
-                            >
-                              <XMarkIcon className="h-4 w-4" />
-                              Clear Filters
-                            </button>
-                          )}
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-
-                    <button
-                      onClick={handleToggleSelectMode}
-                      className={`h-8 px-3 text-sm font-medium rounded-md transition-colors ${
-                        isSelectMode
-                          ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
-                          : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                      }`}
-                    >
-                      {isSelectMode ? "Cancel" : "Select"}
-                    </button>
-                  </div>
+          <div className="flex gap-4 h-[calc(100vh-200px)]">
+            {/* Applications List */}
+            <div
+              className={`bg-white shadow rounded-lg transition-all duration-300 h-full ${
+                isLeftSidebarCollapsed
+                  ? "w-12"
+                  : isDrawerOpen
+                    ? "w-[35%]"
+                    : "w-1/2"
+              }`}
+            >
+              {isLeftSidebarCollapsed ? (
+                // Collapsed state - show expand button
+                <div className="h-full flex items-center justify-center">
+                  <button
+                    onClick={() => setIsLeftSidebarCollapsed(false)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    title="Expand sidebar"
+                  >
+                    <ChevronRightIcon className="h-5 w-5 text-gray-600" />
+                  </button>
                 </div>
-
-                {/* Active Filters Display */}
-                {(debouncedSearch || statusFilter) && (
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {debouncedSearch && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-full">
-                        Search: {debouncedSearch}
+              ) : (
+                <div className="p-3 h-full flex flex-col">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      {isDrawerOpen && (
                         <button
-                          onClick={() => setSearchQuery("")}
-                          className="hover:bg-blue-100 rounded-full p-0.5"
+                          onClick={() => setIsLeftSidebarCollapsed(true)}
+                          className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                          title="Collapse sidebar"
                         >
-                          <XMarkIcon className="h-3 w-3" />
+                          <ChevronLeftIcon className="h-4 w-4 text-gray-600" />
                         </button>
-                      </span>
-                    )}
-                    {statusFilter && (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-full capitalize">
-                        {statusFilter}
-                        <button
-                          onClick={() => setStatusFilter("")}
-                          className="hover:bg-blue-100 rounded-full p-0.5"
-                        >
-                          <XMarkIcon className="h-3 w-3" />
-                        </button>
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                {/* Bulk Action Bar */}
-                {isSelectMode && (
-                  <div className="flex items-center justify-between mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-center gap-3">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={
-                            selectedCandidateIds.size === candidates.length &&
-                            candidates.length > 0
-                          }
-                          onChange={handleSelectAllCandidates}
-                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm font-medium text-gray-700">
-                          All
+                      )}
+                      <h3 className="text-base font-semibold text-gray-900">
+                        Applications
+                        <span className="ml-1 text-sm font-normal text-gray-500">
+                          ({totalCandidates})
                         </span>
-                      </label>
-                      <span className="text-sm text-gray-500">
-                        {selectedCandidateIds.size} selected
-                      </span>
+                      </h3>
                     </div>
-                    {selectedCandidateIds.size > 0 && (
-                      <select
-                        className="h-8 text-sm border border-gray-300 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        value=""
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            handleBulkStatusChange(
-                              e.target.value as Application["status"]
-                            );
-                            e.target.value = "";
-                          }
-                        }}
+                    <div className="flex items-center gap-2">
+                      {/* Filter Popover */}
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button
+                            className={`relative h-8 px-3 text-sm font-medium rounded-md transition-colors inline-flex items-center gap-1.5 ${
+                              debouncedSearch ||
+                              statusFilter ||
+                              sortBy !== "applied_at" ||
+                              sortDir !== "desc"
+                                ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
+                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                            }`}
+                          >
+                            <FunnelIcon className="h-4 w-4" />
+                            <span>Filter</span>
+                            {(debouncedSearch ||
+                              statusFilter ||
+                              sortBy !== "applied_at" ||
+                              sortDir !== "desc") && (
+                              <span className="absolute -top-1 -right-1 h-4 w-4 text-[10px] font-bold bg-blue-600 text-white rounded-full flex items-center justify-center">
+                                {
+                                  [
+                                    debouncedSearch,
+                                    statusFilter,
+                                    sortBy !== "applied_at" ||
+                                      sortDir !== "desc",
+                                  ].filter(Boolean).length
+                                }
+                              </span>
+                            )}
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent align="end" className="w-72 p-4">
+                          <div className="space-y-4">
+                            {/* Search */}
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                Search
+                              </label>
+                              <div className="relative mt-1.5">
+                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <input
+                                  type="text"
+                                  placeholder="Name or email..."
+                                  value={searchQuery}
+                                  onChange={(e) =>
+                                    setSearchQuery(e.target.value)
+                                  }
+                                  className="w-full h-9 pl-9 pr-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Status Filter */}
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                Status
+                              </label>
+                              <select
+                                className="mt-1.5 w-full h-9 text-sm border border-gray-300 rounded-lg px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                value={statusFilter}
+                                onChange={(e) =>
+                                  setStatusFilter(e.target.value)
+                                }
+                              >
+                                <option value="">All Statuses</option>
+                                <option value="applied">Applied</option>
+                                <option value="screening">Screening</option>
+                                <option value="interviewing">
+                                  Interviewing
+                                </option>
+                                <option value="offer">Offer</option>
+                                <option value="hired">Hired</option>
+                                <option value="rejected">Rejected</option>
+                              </select>
+                            </div>
+
+                            {/* Sort */}
+                            <div>
+                              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                Sort By
+                              </label>
+                              <select
+                                className="mt-1.5 w-full h-9 text-sm border border-gray-300 rounded-lg px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                value={`${sortBy}-${sortDir}`}
+                                onChange={(e) => {
+                                  const [newSortBy, newSortDir] =
+                                    e.target.value.split("-") as [
+                                      (
+                                        | "applied_at"
+                                        | "name"
+                                        | "status"
+                                        | "ai_score"
+                                      ),
+                                      "asc" | "desc",
+                                    ];
+                                  setSortBy(newSortBy);
+                                  setSortDir(newSortDir);
+                                }}
+                              >
+                                <option value="applied_at-desc">
+                                  Newest First
+                                </option>
+                                <option value="applied_at-asc">
+                                  Oldest First
+                                </option>
+                                <option value="name-asc">Name (A-Z)</option>
+                                <option value="name-desc">Name (Z-A)</option>
+                                <option value="ai_score-desc">
+                                  Score (High-Low)
+                                </option>
+                                <option value="ai_score-asc">
+                                  Score (Low-High)
+                                </option>
+                                <option value="status-asc">Status (A-Z)</option>
+                              </select>
+                            </div>
+
+                            {/* Clear Filters */}
+                            {(debouncedSearch ||
+                              statusFilter ||
+                              sortBy !== "applied_at" ||
+                              sortDir !== "desc") && (
+                              <button
+                                onClick={() => {
+                                  setSearchQuery("");
+                                  setStatusFilter("");
+                                  setSortBy("applied_at");
+                                  setSortDir("desc");
+                                }}
+                                className="w-full h-9 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                              >
+                                <XMarkIcon className="h-4 w-4" />
+                                Clear Filters
+                              </button>
+                            )}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+
+                      <button
+                        onClick={handleToggleSelectMode}
+                        className={`h-8 px-3 text-sm font-medium rounded-md transition-colors ${
+                          isSelectMode
+                            ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
+                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                        }`}
                       >
-                        <option value="">Change Status</option>
-                        <option value="screening">Screening</option>
-                        <option value="interviewing">Interviewing</option>
-                        <option value="offer">Offer</option>
-                        <option value="hired">Hired</option>
-                        <option value="rejected">Rejected</option>
-                      </select>
-                    )}
+                        {isSelectMode ? "Cancel" : "Select"}
+                      </button>
+                    </div>
                   </div>
-                )}
 
-                {candidates.length === 0 && !isLoadingMore ? (
-                  <div className="text-center py-12">
-                    <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
-                    <h4 className="mt-2 text-sm font-semibold text-gray-900">
-                      {debouncedSearch || statusFilter
-                        ? "No matching applications"
-                        : "No applications yet"}
-                    </h4>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {debouncedSearch || statusFilter
-                        ? "Try adjusting your search or filters."
-                        : "Applications will appear here once candidates start applying to this job."}
-                    </p>
-                    {!debouncedSearch && !statusFilter && (
-                      <div className="mt-4">
-                        <a
-                          href={publicUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Button variant="outline" size="sm">
-                            Share Job Posting
-                          </Button>
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex-1 overflow-y-auto space-y-3">
-                    {candidates.map((candidate, index) => (
-                      <CandidateCard
-                        key={candidate.id}
-                        candidate={candidate}
-                        rank={index + 1}
-                        onStatusChange={handleCandidateStatusChange}
-                        onClick={() => handleViewApplication(candidate.id)}
-                        isSelected={selectedApplicationId === candidate.id}
-                        isSelectMode={isSelectMode}
-                        isChecked={selectedCandidateIds.has(candidate.id)}
-                        onToggleSelect={() =>
-                          handleToggleCandidateSelection(candidate.id)
-                        }
-                      />
-                    ))}
+                  {/* Active Filters Display */}
+                  {(debouncedSearch || statusFilter) && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {debouncedSearch && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-full">
+                          Search: {debouncedSearch}
+                          <button
+                            onClick={() => setSearchQuery("")}
+                            className="hover:bg-blue-100 rounded-full p-0.5"
+                          >
+                            <XMarkIcon className="h-3 w-3" />
+                          </button>
+                        </span>
+                      )}
+                      {statusFilter && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-full capitalize">
+                          {statusFilter}
+                          <button
+                            onClick={() => setStatusFilter("")}
+                            className="hover:bg-blue-100 rounded-full p-0.5"
+                          >
+                            <XMarkIcon className="h-3 w-3" />
+                          </button>
+                        </span>
+                      )}
+                    </div>
+                  )}
 
-                    {/* Infinite scroll trigger and loading indicator */}
-                    <div ref={loadMoreRef} className="py-4">
-                      {isLoadingMore && (
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                          <span className="text-sm text-gray-500">
-                            Loading more...
+                  {/* Bulk Action Bar */}
+                  {isSelectMode && (
+                    <div className="flex items-center justify-between mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex items-center gap-3">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={
+                              selectedCandidateIds.size === candidates.length &&
+                              candidates.length > 0
+                            }
+                            onChange={handleSelectAllCandidates}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-sm font-medium text-gray-700">
+                            All
                           </span>
+                        </label>
+                        <span className="text-sm text-gray-500">
+                          {selectedCandidateIds.size} selected
+                        </span>
+                      </div>
+                      {selectedCandidateIds.size > 0 && (
+                        <select
+                          className="h-8 text-sm border border-gray-300 rounded-md px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          value=""
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              handleBulkStatusChange(
+                                e.target.value as Application["status"]
+                              );
+                              e.target.value = "";
+                            }
+                          }}
+                        >
+                          <option value="">Change Status</option>
+                          <option value="screening">Screening</option>
+                          <option value="interviewing">Interviewing</option>
+                          <option value="offer">Offer</option>
+                          <option value="hired">Hired</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                      )}
+                    </div>
+                  )}
+
+                  {candidates.length === 0 && !isLoadingMore ? (
+                    <div className="text-center py-12">
+                      <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
+                      <h4 className="mt-2 text-sm font-semibold text-gray-900">
+                        {debouncedSearch || statusFilter
+                          ? "No matching applications"
+                          : "No applications yet"}
+                      </h4>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {debouncedSearch || statusFilter
+                          ? "Try adjusting your search or filters."
+                          : "Applications will appear here once candidates start applying to this job."}
+                      </p>
+                      {!debouncedSearch && !statusFilter && (
+                        <div className="mt-4">
+                          <a
+                            href={publicUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Button variant="outline" size="sm">
+                              Share Job Posting
+                            </Button>
+                          </a>
                         </div>
                       )}
-                      {!hasMore && candidates.length > 0 && (
-                        <p className="text-center text-sm text-gray-400">
-                          All {totalCandidates} applications loaded
-                        </p>
-                      )}
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="flex-1 overflow-y-auto space-y-3">
+                      {candidates.map((candidate, index) => (
+                        <CandidateCard
+                          key={candidate.id}
+                          candidate={candidate}
+                          rank={index + 1}
+                          onStatusChange={handleCandidateStatusChange}
+                          onClick={() => handleViewApplication(candidate.id)}
+                          isSelected={selectedApplicationId === candidate.id}
+                          isSelectMode={isSelectMode}
+                          isChecked={selectedCandidateIds.has(candidate.id)}
+                          onToggleSelect={() =>
+                            handleToggleCandidateSelection(candidate.id)
+                          }
+                        />
+                      ))}
+
+                      {/* Infinite scroll trigger and loading indicator */}
+                      <div ref={loadMoreRef} className="py-4">
+                        {isLoadingMore && (
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                            <span className="text-sm text-gray-500">
+                              Loading more...
+                            </span>
+                          </div>
+                        )}
+                        {!hasMore && candidates.length > 0 && (
+                          <p className="text-center text-sm text-gray-400">
+                            All {totalCandidates} applications loaded
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Placeholder when no application is selected */}
+            {!isDrawerOpen && !isLeftSidebarCollapsed && (
+              <div className="w-1/2 h-full bg-white shadow rounded-lg flex items-center justify-center">
+                <div className="text-center px-8">
+                  <svg
+                    className="mx-auto h-16 w-16 text-gray-300 mb-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No Application Selected
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Click on &quot;View details&quot; on any candidate card to
+                    see their full application details here
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Application Details Panel */}
+            {isDrawerOpen && selectedApplicationId && (
+              <div
+                className={`h-full bg-white shadow rounded-lg overflow-y-auto relative transition-all duration-300 ${
+                  isLeftSidebarCollapsed
+                    ? "w-[calc(100%-3rem-1rem)]"
+                    : "w-[65%]"
+                }`}
+              >
+                <button
+                  onClick={() => {
+                    setIsDrawerOpen(false);
+                    setSelectedApplicationId(null);
+                    setIsLeftSidebarCollapsed(false);
+                  }}
+                  className="absolute top-4 right-4 z-20 p-2 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors shadow-sm"
+                >
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+                <ApplicationDetailsDrawer
+                  applicationId={selectedApplicationId}
+                  onStatusChange={handleCandidateStatusChange}
+                />
               </div>
             )}
           </div>
-
-          {/* Placeholder when no application is selected */}
-          {!isDrawerOpen && !isLeftSidebarCollapsed && (
-            <div className="w-1/2 h-full bg-white shadow rounded-lg flex items-center justify-center">
-              <div className="text-center px-8">
-                <svg
-                  className="mx-auto h-16 w-16 text-gray-300 mb-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                  />
-                </svg>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No Application Selected
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Click on &quot;View details&quot; on any candidate card to see
-                  their full application details here
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Application Details Panel */}
-          {isDrawerOpen && selectedApplicationId && (
-            <div
-              className={`h-full bg-white shadow rounded-lg overflow-y-auto relative transition-all duration-300 ${
-                isLeftSidebarCollapsed ? "w-[calc(100%-3rem-1rem)]" : "w-[65%]"
-              }`}
-            >
-              <button
-                onClick={() => {
-                  setIsDrawerOpen(false);
-                  setSelectedApplicationId(null);
-                  setIsLeftSidebarCollapsed(false);
-                }}
-                className="absolute top-4 right-4 z-20 p-2 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors shadow-sm"
-              >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-              <ApplicationDetailsDrawer
-                applicationId={selectedApplicationId}
-                onStatusChange={handleCandidateStatusChange}
-              />
-            </div>
-          )}
         </div>
       )}
 

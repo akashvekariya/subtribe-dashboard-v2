@@ -116,6 +116,12 @@ export interface Job {
   company?: Company;
 }
 
+// Import evaluation types
+import type {
+  EvaluationJSON,
+  EvaluationTier,
+} from "@/components/applications/evaluation/types";
+
 // Enhanced Application/Candidate interface matching backend
 export interface Application {
   id: string;
@@ -141,6 +147,20 @@ export interface Application {
   // AI evaluation fields (frontend-specific for now)
   ai_score?: number;
   ai_evaluation?: string;
+
+  // AI Resume Evaluation fields (from backend)
+  ai_resume_eval_status?:
+    | "pending"
+    | "queued"
+    | "processing"
+    | "completed"
+    | "failed"
+    | "skipped";
+  ai_resume_eval_batch_id?: string;
+  evaluation_json?: EvaluationJSON | null;
+  evaluation_score?: number | null;
+  evaluation_tier?: EvaluationTier | null;
+  evaluated_at?: string | null;
 
   // Job reference for nested data
   job?: Partial<Job>;

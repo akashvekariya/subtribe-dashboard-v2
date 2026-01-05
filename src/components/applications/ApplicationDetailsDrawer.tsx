@@ -360,7 +360,10 @@ export function ApplicationDetailsDrawer({
             </TabsList>
 
             <TabsContent value="analysis" className="mt-2 space-y-2">
-              <SkillsAnalysis applicationId={applicationId} />
+              <SkillsAnalysis
+                applicationId={applicationId}
+                application={application}
+              />
             </TabsContent>
 
             <TabsContent value="overview" className="mt-2 space-y-4">

@@ -16,6 +16,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { Application } from "@/types";
+import { EvaluationContainer } from "./evaluation";
 
 const chartConfig = {
   score: {
@@ -26,11 +28,16 @@ const chartConfig = {
 
 interface SkillsAnalysisProps {
   applicationId: string;
+  application?: Application | null;
+  jobFramework?: Record<string, unknown> | null;
 }
 
-export function SkillsAnalysis({ applicationId }: SkillsAnalysisProps) {
+/**
+ * LegacySkillsAnalysis - Original mock-data based component
+ * Used as fallback when no real evaluation data is available
+ */
+function LegacySkillsAnalysis({ applicationId }: { applicationId: string }) {
   // Find candidate data from mock JSON
-  // In production, this would come from API based on applicationId
   const candidateIndex = parseInt(applicationId) % mockData.candidates.length;
   const candidateData = mockData.candidates[candidateIndex];
 
@@ -365,4 +372,32 @@ export function SkillsAnalysis({ applicationId }: SkillsAnalysisProps) {
       </div>
     </TooltipProvider>
   );
+}
+
+/**
+ * SkillsAnalysis - Main component that decides between real evaluation data and mock data
+ *
+ * When application has evaluation_json, shows the new interactive EvaluationContainer
+ * Otherwise falls back to mock data for backwards compatibility
+ */
+export function SkillsAnalysis({
+  applicationId,
+  application,
+  jobFramework,
+}: SkillsAnalysisProps) {
+  // Check if we have real evaluation data
+  const hasEvaluationData = application?.evaluation_json != null;
+
+  // Use the new EvaluationContainer when we have real data
+  if (hasEvaluationData || application) {
+    return (
+      <EvaluationContainer
+        application={application ?? null}
+        jobFramework={jobFramework}
+      />
+    );
+  }
+
+  // Fallback to legacy mock-based UI
+  return <LegacySkillsAnalysis applicationId={applicationId} />;
 }
