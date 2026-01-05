@@ -167,6 +167,7 @@ function transformToTechStack(
   return skillMatches.map((match) => ({
     id: match.skill_id,
     name: match.skill_id
+      .replace(/^skill_/, "") // Remove "skill_" prefix
       .replace(/_/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase()),
     icon: getSkillIcon(match.skill_id),

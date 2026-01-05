@@ -11,6 +11,17 @@ import {
 } from "../types";
 
 /**
+ * Format a skill_id like "skill_stealth" into readable text like "Stealth"
+ */
+function formatSkillId(skillId: string): string {
+  return skillId
+    .replace(/^skill_/, "") // Remove "skill_" prefix
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+/**
  * ScoreHeader - Displays the main score, tier badge, and verification confidence
  *
  * Shows:
@@ -78,12 +89,15 @@ export function ScoreHeader({
               <ul className="mt-1 space-y-1">
                 {blockers.map((blocker, idx) => (
                   <li key={idx} className="text-sm text-red-700">
-                    {blocker.type === "dealbreaker_skill" && (
-                      <>
-                        Missing required skill:{" "}
-                        <span className="font-medium">{blocker.skill_id}</span>
-                      </>
-                    )}
+                    {blocker.type === "dealbreaker_skill" &&
+                      blocker.skill_id && (
+                        <>
+                          Missing required skill:{" "}
+                          <span className="font-medium">
+                            {formatSkillId(blocker.skill_id)}
+                          </span>
+                        </>
+                      )}
                     {blocker.type === "dealbreaker_constraint" && (
                       <>{blocker.description}</>
                     )}

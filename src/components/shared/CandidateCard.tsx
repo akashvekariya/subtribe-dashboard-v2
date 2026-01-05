@@ -208,7 +208,9 @@ export function CandidateCard({
               <p className="text-sm text-gray-600">{candidate.email}</p>
 
               <div className="mt-2">
-                {renderProgressBar(candidate.ai_score || 0)}
+                {renderProgressBar(
+                  candidate.evaluation_score ?? candidate.ai_score ?? 0
+                )}
               </div>
 
               <div className="mt-2 flex items-center text-gray-500 text-xs">
