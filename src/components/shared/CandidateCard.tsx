@@ -207,11 +207,14 @@ export function CandidateCard({
               </h3>
               <p className="text-sm text-gray-600">{candidate.email}</p>
 
-              <div className="mt-2">
-                {renderProgressBar(
-                  candidate.evaluation_score ?? candidate.ai_score ?? 0
-                )}
-              </div>
+              {(candidate.evaluation_score != null ||
+                candidate.ai_score != null) && (
+                <div className="mt-2">
+                  {renderProgressBar(
+                    candidate.evaluation_score ?? candidate.ai_score ?? 0
+                  )}
+                </div>
+              )}
 
               <div className="mt-2 flex items-center text-gray-500 text-xs">
                 <CalendarIcon className="h-3.5 w-3.5 mr-1" />

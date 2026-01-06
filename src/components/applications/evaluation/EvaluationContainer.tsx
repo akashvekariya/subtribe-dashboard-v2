@@ -1,6 +1,7 @@
 "use client";
 
-import { Loader2, Clock, AlertCircle, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, Clock } from "lucide-react";
 import { ScoreHeader } from "./score/ScoreHeader";
 import { DimensionRadarChart } from "./dimensions/DimensionRadarChart";
 import { SkillsGrid } from "./skills/SkillsGrid";
@@ -9,11 +10,13 @@ import { ExperienceTimeline } from "./experience/ExperienceTimeline";
 import { RedFlagsSection } from "./flags/RedFlagsSection";
 import { AssessmentSummary } from "./summary/AssessmentSummary";
 import { useEvaluationData } from "./useEvaluationData";
+import { getCandidateById } from "@/lib/candidates";
 import type { Application } from "@/types";
 
 interface EvaluationContainerProps {
   application: Application | null;
   jobFramework?: Record<string, unknown> | null;
+  onApplicationUpdate?: (application: Application) => void;
 }
 
 /**
@@ -21,34 +24,34 @@ interface EvaluationContainerProps {
  */
 function EvaluationSkeleton() {
   return (
-    <div className="space-y-6 animate-pulse">
+    <div className="space-y-4 animate-pulse">
       {/* Score skeleton */}
-      <div className="flex items-center gap-4">
-        <div className="h-10 w-20 bg-gray-200 rounded" />
-        <div className="h-8 w-28 bg-gray-200 rounded-full" />
-        <div className="ml-auto h-6 w-24 bg-gray-200 rounded-full" />
+      <div className="flex items-center gap-3">
+        <div className="h-8 w-16 bg-gray-200 rounded" />
+        <div className="h-6 w-24 bg-gray-200 rounded-full" />
+        <div className="ml-auto h-5 w-20 bg-gray-200 rounded-full" />
       </div>
 
       {/* Radar chart skeleton */}
-      <div className="h-[300px] bg-gray-100 rounded-lg flex items-center justify-center">
-        <div className="w-48 h-48 bg-gray-200 rounded-full opacity-50" />
+      <div className="h-[250px] bg-gray-100 rounded-lg flex items-center justify-center">
+        <div className="w-40 h-40 bg-gray-200 rounded-full opacity-50" />
       </div>
 
       {/* Skills skeleton */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <div className="h-4 w-24 bg-gray-200 rounded" />
-          <div className="flex gap-2">
-            <div className="h-8 w-20 bg-gray-200 rounded-full" />
-            <div className="h-8 w-24 bg-gray-200 rounded-full" />
-            <div className="h-8 w-16 bg-gray-200 rounded-full" />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <div className="h-3 w-20 bg-gray-200 rounded" />
+          <div className="flex gap-1.5">
+            <div className="h-6 w-16 bg-gray-200 rounded-full" />
+            <div className="h-6 w-20 bg-gray-200 rounded-full" />
+            <div className="h-6 w-14 bg-gray-200 rounded-full" />
           </div>
         </div>
-        <div className="space-y-2">
-          <div className="h-4 w-28 bg-gray-200 rounded" />
-          <div className="flex gap-2">
-            <div className="h-8 w-20 bg-gray-200 rounded-full" />
-            <div className="h-8 w-18 bg-gray-200 rounded-full" />
+        <div className="space-y-1.5">
+          <div className="h-3 w-24 bg-gray-200 rounded" />
+          <div className="flex gap-1.5">
+            <div className="h-6 w-16 bg-gray-200 rounded-full" />
+            <div className="h-6 w-16 bg-gray-200 rounded-full" />
           </div>
         </div>
       </div>
@@ -57,61 +60,65 @@ function EvaluationSkeleton() {
 }
 
 /**
- * Pending state component
+ * Compact status banner for pending evaluation (non-blocking)
  */
-function PendingEvaluationState() {
+function PendingStatusBanner() {
   return (
-    <div className="py-12 px-6 text-center">
-      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 flex items-center justify-center">
-        <Clock className="w-8 h-8 text-blue-500" />
+    <div className="p-2 bg-blue-50 border border-blue-200 rounded-md flex items-center gap-2">
+      <div className="flex-shrink-0">
+        <Clock className="w-4 h-4 text-blue-500" />
       </div>
-      <h3 className="text-lg font-medium text-gray-900 mb-2">
-        Evaluation Pending
-      </h3>
-      <p className="text-gray-500 max-w-md mx-auto">
-        AI evaluation will appear here once the job is calibrated and the resume
-        has been processed.
-      </p>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-blue-800">Evaluation Pending</p>
+        <p className="text-[10px] text-blue-600">
+          AI evaluation will start once the job is calibrated.
+        </p>
+      </div>
     </div>
   );
 }
 
 /**
- * Processing state component
+ * Compact status banner for processing evaluation (non-blocking)
  */
-function ProcessingEvaluationState() {
+function ProcessingStatusBanner() {
   return (
-    <div className="py-12 px-6 text-center">
-      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+    <div className="p-2 bg-blue-50 border border-blue-200 rounded-md flex items-center gap-2">
+      <div className="flex-shrink-0">
+        <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
       </div>
-      <h3 className="text-lg font-medium text-gray-900 mb-2">
-        Evaluating Resume
-      </h3>
-      <p className="text-gray-500 max-w-md mx-auto">
-        AI is analyzing the resume against the job requirements. This usually
-        takes 15-30 seconds.
-      </p>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-blue-800">Evaluating Resume</p>
+        <p className="text-[10px] text-blue-600">
+          AI is analyzing the resume. Results will appear automatically.
+        </p>
+      </div>
     </div>
   );
 }
 
 /**
- * Failed state component
+ * Failed state component - Neutral, non-alarming design
  */
 function FailedEvaluationState() {
   return (
-    <div className="py-12 px-6 text-center">
-      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
-        <XCircle className="w-8 h-8 text-red-500" />
+    <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
+      <div className="flex items-start gap-2">
+        <div className="flex-shrink-0">
+          <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
+            <Clock className="w-3.5 h-3.5 text-gray-600" />
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-xs font-medium text-gray-900 mb-0.5">
+            Evaluation Not Available
+          </h3>
+          <p className="text-[10px] text-gray-600">
+            The AI evaluation couldn&apos;t be completed. This doesn&apos;t
+            affect the application.
+          </p>
+        </div>
       </div>
-      <h3 className="text-lg font-medium text-gray-900 mb-2">
-        Evaluation Failed
-      </h3>
-      <p className="text-gray-500 max-w-md mx-auto">
-        There was an error processing this resume. Please try again or contact
-        support if the issue persists.
-      </p>
     </div>
   );
 }
@@ -127,11 +134,25 @@ function FailedEvaluationState() {
  * - Experience timeline
  * - Red flags section
  * - Assessment summary with interview questions
+ *
+ * Non-blocking: Shows status banners for pending/processing states
+ * and automatically polls for updates when evaluation is in progress.
  */
 export function EvaluationContainer({
-  application,
+  application: initialApplication,
   jobFramework,
+  onApplicationUpdate,
 }: EvaluationContainerProps) {
+  // Local state for application data (allows polling updates)
+  const [application, setApplication] = useState<Application | null>(
+    initialApplication
+  );
+
+  // Update local state when prop changes
+  useEffect(() => {
+    setApplication(initialApplication);
+  }, [initialApplication]);
+
   const {
     isEvaluated,
     isPending,
@@ -150,22 +171,56 @@ export function EvaluationContainer({
     experienceTimeline,
   } = useEvaluationData(application, jobFramework);
 
-  // Handle various states
+  // Auto-poll when evaluation is in progress (processing, queued, or pending)
+  const shouldPoll = isProcessing || isPending;
+
+  useEffect(() => {
+    if (!shouldPoll || !application?.id) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const updatedApplication = await getCandidateById(application.id);
+        if (updatedApplication) {
+          // Check if evaluation completed or failed
+          const newStatus = updatedApplication.ai_resume_eval_status;
+          if (
+            newStatus === "completed" ||
+            newStatus === "failed" ||
+            newStatus === "skipped"
+          ) {
+            setApplication(updatedApplication);
+            onApplicationUpdate?.(updatedApplication);
+            clearInterval(pollInterval);
+          } else if (newStatus !== application.ai_resume_eval_status) {
+            // Status changed (e.g., pending -> processing), update state
+            setApplication(updatedApplication);
+          }
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+      }
+    }, 3000); // Poll every 3 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [
+    shouldPoll,
+    application?.id,
+    application?.ai_resume_eval_status,
+    onApplicationUpdate,
+  ]);
+
+  // Handle no application
   if (!application) {
     return <EvaluationSkeleton />;
   }
 
+  // Handle failed state - show neutral message
   if (isFailed) {
     return <FailedEvaluationState />;
   }
 
-  if (isProcessing) {
-    return <ProcessingEvaluationState />;
-  }
-
-  if (isPending || !isEvaluated) {
-    return <PendingEvaluationState />;
-  }
+  // Determine if we should show skeleton content (no evaluation data yet)
+  const showSkeletonContent = !isEvaluated && (isPending || isProcessing);
 
   // Extract framework data for components that need it
   const frameworkSkills = (
@@ -187,77 +242,93 @@ export function EvaluationContainer({
     }>) || [];
 
   return (
-    <div className="space-y-8">
-      {/* Score Header */}
-      {scores && (
-        <ScoreHeader
-          finalScore={scores.final_score}
-          tier={scores.tier}
-          verificationConfidence={scores.verification_confidence}
-          canProceed={canProceed}
-          blockers={blockers}
-          redFlagsSummary={redFlags?.summary}
-        />
-      )}
+    <div className="space-y-4">
+      {/* Status Banner - Non-blocking indication of evaluation state */}
+      {isProcessing && <ProcessingStatusBanner />}
+      {isPending && !isProcessing && <PendingStatusBanner />}
 
-      {/* Radar Chart - Interactive Dimensions */}
-      <div className="p-4 bg-white rounded-lg border border-gray-100">
-        <DimensionRadarChart
-          data={radarChartData}
-          dimensionAssessments={dimensionAssessments}
-        />
-      </div>
+      {/* Show skeleton content when no evaluation data yet */}
+      {showSkeletonContent ? (
+        <EvaluationSkeleton />
+      ) : (
+        <>
+          {/* Score Header */}
+          {scores && (
+            <ScoreHeader
+              finalScore={scores.final_score}
+              tier={scores.tier}
+              verificationConfidence={scores.verification_confidence}
+              canProceed={canProceed}
+              blockers={blockers}
+              redFlagsSummary={redFlags?.summary}
+            />
+          )}
 
-      {/* Skills Grid */}
-      <div>
-        <h3 className="font-medium text-gray-900 mb-4">Technical Skills</h3>
-        <SkillsGrid
-          skills={techStackItems}
-          skillAnalysis={analysis?.skill_analysis}
-        />
-      </div>
-
-      {/* Requirements Checklist */}
-      {evaluationDetails?.constraint_results &&
-        evaluationDetails.constraint_results.length > 0 && (
-          <div className="p-4 bg-white rounded-lg border border-gray-100">
-            <RequirementsChecklist
-              constraintResults={evaluationDetails.constraint_results}
-              constraintAnalysis={analysis?.constraint_analysis}
-              frameworkConstraints={frameworkConstraints}
+          {/* Radar Chart - Interactive Dimensions */}
+          <div className="p-3 bg-white rounded-lg border border-gray-100">
+            <DimensionRadarChart
+              data={radarChartData}
+              dimensionAssessments={dimensionAssessments}
             />
           </div>
-        )}
 
-      {/* Experience Timeline */}
-      <div className="p-4 bg-white rounded-lg border border-gray-100">
-        <ExperienceTimeline
-          entries={experienceTimeline.entries}
-          summary={analysis?.experience_summary}
-          requiredMin={experienceTimeline.requiredMin}
-          requiredMax={experienceTimeline.requiredMax}
-        />
-      </div>
+          {/* Skills Grid */}
+          <div>
+            <h3 className="font-medium text-gray-900 mb-2 text-sm">
+              Technical Skills
+            </h3>
+            <SkillsGrid
+              skills={techStackItems}
+              skillAnalysis={analysis?.skill_analysis}
+            />
+          </div>
 
-      {/* Red Flags */}
-      {redFlags && (
-        <div className="p-4 bg-white rounded-lg border border-gray-100">
-          <RedFlagsSection flags={redFlags.flags} summary={redFlags.summary} />
-        </div>
-      )}
+          {/* Requirements Checklist */}
+          {evaluationDetails?.constraint_results &&
+            evaluationDetails.constraint_results.length > 0 && (
+              <div className="p-3 bg-white rounded-lg border border-gray-100">
+                <RequirementsChecklist
+                  constraintResults={evaluationDetails.constraint_results}
+                  constraintAnalysis={analysis?.constraint_analysis}
+                  frameworkConstraints={frameworkConstraints}
+                />
+              </div>
+            )}
 
-      {/* Assessment Summary */}
-      {summary && (
-        <div className="p-4 bg-white rounded-lg border border-gray-100">
-          <h3 className="font-medium text-gray-900 mb-4">
-            Candidate Assessment
-          </h3>
-          <AssessmentSummary
-            strengths={summary.strengths}
-            concerns={summary.concerns}
-            interviewQuestions={summary.interview_questions}
-          />
-        </div>
+          {/* Experience Timeline */}
+          <div className="p-3 bg-white rounded-lg border border-gray-100">
+            <ExperienceTimeline
+              entries={experienceTimeline.entries}
+              summary={analysis?.experience_summary}
+              requiredMin={experienceTimeline.requiredMin}
+              requiredMax={experienceTimeline.requiredMax}
+            />
+          </div>
+
+          {/* Red Flags */}
+          {redFlags && (
+            <div className="p-3 bg-white rounded-lg border border-gray-100">
+              <RedFlagsSection
+                flags={redFlags.flags}
+                summary={redFlags.summary}
+              />
+            </div>
+          )}
+
+          {/* Assessment Summary */}
+          {summary && (
+            <div className="p-3 bg-white rounded-lg border border-gray-100">
+              <h3 className="font-medium text-gray-900 mb-3 text-sm">
+                Candidate Assessment
+              </h3>
+              <AssessmentSummary
+                strengths={summary.strengths}
+                concerns={summary.concerns}
+                interviewQuestions={summary.interview_questions}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

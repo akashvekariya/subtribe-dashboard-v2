@@ -30,6 +30,7 @@ interface SkillsAnalysisProps {
   applicationId: string;
   application?: Application | null;
   jobFramework?: Record<string, unknown> | null;
+  onApplicationUpdate?: (application: Application) => void;
 }
 
 /**
@@ -384,6 +385,7 @@ export function SkillsAnalysis({
   applicationId,
   application,
   jobFramework,
+  onApplicationUpdate,
 }: SkillsAnalysisProps) {
   // Check if we have real evaluation data
   const hasEvaluationData = application?.evaluation_json != null;
@@ -394,6 +396,7 @@ export function SkillsAnalysis({
       <EvaluationContainer
         application={application ?? null}
         jobFramework={jobFramework}
+        onApplicationUpdate={onApplicationUpdate}
       />
     );
   }

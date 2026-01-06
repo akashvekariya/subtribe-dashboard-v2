@@ -53,11 +53,13 @@ interface ApplicationDetailsDrawerProps {
     applicationId: string,
     newStatus: ApplicationStatus
   ) => void;
+  onApplicationUpdate?: (application: Application) => void;
 }
 
 export function ApplicationDetailsDrawer({
   applicationId,
   onStatusChange,
+  onApplicationUpdate,
 }: ApplicationDetailsDrawerProps) {
   const [application, setApplication] = useState<Application | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -363,6 +365,10 @@ export function ApplicationDetailsDrawer({
               <SkillsAnalysis
                 applicationId={applicationId}
                 application={application}
+                onApplicationUpdate={(updatedApp) => {
+                  setApplication(updatedApp);
+                  onApplicationUpdate?.(updatedApp);
+                }}
               />
             </TabsContent>
 

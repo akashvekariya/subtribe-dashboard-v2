@@ -21,7 +21,6 @@ import { BulkEmailModal } from "@/components/applications/BulkEmailModal";
 import showToast from "@/lib/toast";
 import { api } from "@/lib/api-client";
 import { getPublicJobUrl } from "@/lib/env";
-import mockCandidateData from "@/data/mockCandidateAnalysis.json";
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -152,31 +151,10 @@ export default function JobDetailPage() {
 
         const response = await getCandidatesByJobId(jobId, params);
 
-        // Add mock AI scores from mock data (for demo purposes)
-        const candidatesWithScores = (response.data || []).map(
-          (candidate, index) => {
-            // Get mock candidate data by index (cycling through available mock data)
-            const mockIndex = index % mockCandidateData.candidates.length;
-            const mockCandidate = mockCandidateData.candidates[mockIndex];
-
-            // Calculate average score from analysisData
-            const avgScore =
-              mockCandidate.analysisData.reduce(
-                (sum, item) => sum + item.score,
-                0
-              ) / mockCandidate.analysisData.length;
-
-            return {
-              ...candidate,
-              ai_score: candidate.ai_score || Math.round(avgScore),
-            };
-          }
-        );
-
         if (append) {
-          setCandidates((prev) => [...prev, ...candidatesWithScores]);
+          setCandidates((prev) => [...prev, ...(response.data || [])]);
         } else {
-          setCandidates(candidatesWithScores);
+          setCandidates(response.data || []);
         }
 
         if (response.pagination) {
@@ -221,6 +199,81 @@ export default function JobDetailPage() {
     return () => observer.disconnect();
   }, [hasMore, isLoadingMore]);
 
+  // Poll for new applicants and evaluation updates
+  useEffect(() => {
+    if (!jobId || activeTab !== "applications") return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        // Only poll first page to check for new applicants and score updates
+        const params: {
+          status?: string;
+          search?: string;
+          sort_by?: "applied_at" | "name" | "status" | "ai_score";
+          sort_dir?: "asc" | "desc";
+          page?: number;
+          limit?: number;
+        } = {
+          page: 1,
+          limit: 20,
+          sort_by: sortBy,
+          sort_dir: sortDir,
+        };
+        if (statusFilter) {
+          params.status = statusFilter;
+        }
+        if (debouncedSearch) {
+          params.search = debouncedSearch;
+        }
+
+        const response = await getCandidatesByJobId(jobId, params);
+
+        if (response.data && response.data.length > 0) {
+          // Update candidates on first page (this includes new applicants and score updates)
+          setCandidates((prev) => {
+            // If we're on page 1, replace the first page data
+            if (currentPage === 1) {
+              return response.data || [];
+            } else {
+              // For other pages, merge smartly - update existing, prepend new
+              const existingIds = new Set(prev.map((c) => c.id));
+              const newCandidates = (response.data || []).filter(
+                (c) => !existingIds.has(c.id)
+              );
+
+              // Update existing candidates with fresh data
+              const updatedPrev = prev.map((candidate) => {
+                const freshData = response.data?.find(
+                  (c) => c.id === candidate.id
+                );
+                return freshData || candidate;
+              });
+
+              return [...newCandidates, ...updatedPrev];
+            }
+          });
+
+          // Update total count
+          if (response.pagination) {
+            setTotalCandidates(response.pagination.total);
+          }
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+      }
+    }, 10000); // Poll every 10 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [
+    jobId,
+    activeTab,
+    currentPage,
+    statusFilter,
+    debouncedSearch,
+    sortBy,
+    sortDir,
+  ]);
+
   const handleCandidateStatusChange = async (
     candidateId: string,
     newStatus: Application["status"]
@@ -246,6 +299,15 @@ export default function JobDetailPage() {
   const handleViewApplication = (applicationId: string) => {
     setSelectedApplicationId(applicationId);
     setIsDrawerOpen(true);
+  };
+
+  // Update candidate in list when application data changes (e.g., evaluation completes)
+  const handleApplicationUpdate = (updatedApplication: Application) => {
+    setCandidates((prev) =>
+      prev.map((candidate) =>
+        candidate.id === updatedApplication.id ? updatedApplication : candidate
+      )
+    );
   };
 
   const loadStats = async () => {
@@ -1505,6 +1567,7 @@ export default function JobDetailPage() {
                 <ApplicationDetailsDrawer
                   applicationId={selectedApplicationId}
                   onStatusChange={handleCandidateStatusChange}
+                  onApplicationUpdate={handleApplicationUpdate}
                 />
               </div>
             )}
