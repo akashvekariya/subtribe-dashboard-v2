@@ -5,7 +5,7 @@ import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { jobSchema, type JobInput } from "@/lib/validations";
-import { type PositionType, type LocationType, type Job } from "@/types";
+import { type PositionType, type LocationType, type Job, createInitialCalibrationData } from "@/types";
 import { createJob } from "@/lib/jobs";
 import { getCachedUserData } from "@/lib/auth";
 import { Button } from "@/components/ui/Button";
@@ -14,13 +14,11 @@ import { Label } from "@/components/ui/Label";
 import { MultiSelect } from "@/components/ui/MultiSelect";
 import { ScreeningQuestionsBuilder } from "@/components/ui/ScreeningQuestionsBuilder";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
-import {
-  ArrowLeftIcon,
-  SparklesIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import showToast from "@/lib/toast";
+import { aiAPI, jobsAPI } from "@/lib/api-client";
+import { generateCalibrationSummaryJSON } from "@/lib/calibrationSummary";
 
 // Common skills for suggestions
 const COMMON_SKILLS = [
@@ -92,8 +90,6 @@ const CURRENCIES = [
 export default function CreateJobPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showCalibrationModal, setShowCalibrationModal] = useState(false);
-  const [createdJobId, setCreatedJobId] = useState<string | null>(null);
 
   const form = useForm<JobInput>({
     resolver: zodResolver(jobSchema) as Resolver<JobInput>,
@@ -205,10 +201,58 @@ export default function CreateJobPage() {
         >
       );
 
-      showToast.success("Job created successfully!");
-      setCreatedJobId(createdJob.id);
-      setShowCalibrationModal(true);
-    } catch {
+      showToast.success("Job created! Generating AI evaluation framework...");
+
+      // Automatically generate framework
+      try {
+        // Step 1: Parse job description
+        const parseResult = await aiAPI.parseJob({
+          title: data.title,
+          description: data.description,
+          positionType: data.position_type,
+          locationType: data.location_type,
+          department: data.department || undefined,
+          experienceMin: data.min_experience_years,
+          experienceMax: data.max_experience_years,
+        });
+
+        // Step 2: Generate calibration summary with empty selections (LLM suggestions only, no defaults)
+        const calibrationSummary = generateCalibrationSummaryJSON(
+          createdJob.id,
+          {
+            title: data.title,
+            description: data.description,
+            positionType: data.position_type,
+            department: data.department,
+            locationType: data.location_type,
+            experienceRange: {
+              min: data.min_experience_years,
+              max: data.max_experience_years,
+            },
+          },
+          parseResult.roleAnalysis,
+          parseResult.calibrationQuestions,
+          createInitialCalibrationData()
+        );
+
+        const frameworkResult = await aiAPI.createFramework(calibrationSummary);
+
+        // Step 3: Save to job
+        await jobsAPI.saveCalibration(createdJob.id, {
+          calibration_summary: calibrationSummary,
+          evaluation_framework: frameworkResult.framework,
+        });
+
+        showToast.success("Job created with AI evaluation framework!");
+      } catch (error) {
+        console.error("Framework generation failed:", error);
+        showToast.error("Job created, but framework generation failed.");
+      }
+
+      // Navigate to job detail page
+      router.push(`/jobs/${createdJob.id}`);
+    } catch (error) {
+      console.error("Job creation failed:", error);
       showToast.error("Failed to create job. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -671,82 +715,6 @@ You can use Markdown formatting for better presentation."
           </div>
         </div>
       </form>
-
-      {/* Calibration Prompt Modal */}
-      {showCalibrationModal && createdJobId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 relative animate-in fade-in zoom-in-95 duration-200">
-            <button
-              onClick={() => {
-                setShowCalibrationModal(false);
-                router.push(`/jobs/${createdJobId}`);
-              }}
-              className="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 transition-colors"
-            >
-              <XMarkIcon className="h-5 w-5 text-gray-400" />
-            </button>
-
-            <div className="text-center mb-6">
-              <div className="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <SparklesIcon className="h-7 w-7 text-purple-600" />
-              </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Calibrate AI for this job?
-              </h2>
-              <p className="text-sm text-gray-600">
-                AI calibration takes ~3 minutes and enables intelligent
-                candidate ranking and analysis.
-              </p>
-            </div>
-
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-              <p className="text-sm text-amber-800 font-medium mb-2">
-                Without calibration, you won&apos;t be able to:
-              </p>
-              <ul className="text-sm text-amber-700 space-y-1">
-                <li className="flex items-start gap-2">
-                  <span className="text-amber-500 mt-0.5">•</span>
-                  See AI-powered candidate scores and rankings
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-amber-500 mt-0.5">•</span>
-                  Get skill match analysis for applicants
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-amber-500 mt-0.5">•</span>
-                  Receive AI recommendations on candidates
-                </li>
-              </ul>
-            </div>
-
-            <div className="space-y-3">
-              <Button
-                className="w-full bg-purple-600 hover:bg-purple-700"
-                onClick={() => {
-                  setShowCalibrationModal(false);
-                  router.push(`/jobs/${createdJobId}/calibrate`);
-                }}
-              >
-                <SparklesIcon className="h-4 w-4 mr-2" />
-                Calibrate Now
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  setShowCalibrationModal(false);
-                  router.push(`/jobs/${createdJobId}`);
-                }}
-              >
-                Skip for Now
-              </Button>
-              <p className="text-xs text-center text-gray-500">
-                You can calibrate later from the job details page
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
