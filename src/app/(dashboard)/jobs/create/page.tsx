@@ -5,12 +5,7 @@ import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { jobSchema, type JobInput } from "@/lib/validations";
-import {
-  type PositionType,
-  type LocationType,
-  type Job,
-  createInitialCalibrationData,
-} from "@/types";
+import { type PositionType, type LocationType, type Job, createInitialCalibrationData } from "@/types";
 import { createJob } from "@/lib/jobs";
 import { getCachedUserData } from "@/lib/auth";
 import { Button } from "@/components/ui/Button";
@@ -19,7 +14,7 @@ import { Label } from "@/components/ui/Label";
 import { MultiSelect } from "@/components/ui/MultiSelect";
 import { ScreeningQuestionsBuilder } from "@/components/ui/ScreeningQuestionsBuilder";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import showToast from "@/lib/toast";
 import { aiAPI, jobsAPI } from "@/lib/api-client";
