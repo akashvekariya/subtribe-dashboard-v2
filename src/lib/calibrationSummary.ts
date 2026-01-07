@@ -478,9 +478,7 @@ export function generateCalibrationSummaryJSON(
       ),
       tradeoffs: {
         experience: {
-          items: experienceTradeoffsProcessed.items.filter(
-            (item) => item.answered
-          ),
+          items: experienceTradeoffsProcessed.items.filter(item => item.answered),
           stats: {
             total: experienceTradeoffsProcessed.stats.total,
             answered: experienceTradeoffsProcessed.stats.answered,
@@ -488,9 +486,7 @@ export function generateCalibrationSummaryJSON(
         },
         roleSpecific: {
           instruction: roleSpecificTradeoffs.instruction,
-          items: roleSpecificTradeoffsProcessed.items.filter(
-            (item) => item.answered
-          ),
+          items: roleSpecificTradeoffsProcessed.items.filter(item => item.answered),
           stats: {
             total: roleSpecificTradeoffsProcessed.stats.total,
             answered: roleSpecificTradeoffsProcessed.stats.answered,
