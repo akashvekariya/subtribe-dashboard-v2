@@ -95,6 +95,9 @@ const CURRENCIES = [
 export default function CreateJobPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [generationStep, setGenerationStep] = useState<
+    "" | "parsing" | "generating" | "saving"
+  >("");
 
   const form = useForm<JobInput>({
     resolver: zodResolver(jobSchema) as Resolver<JobInput>,
@@ -211,6 +214,7 @@ export default function CreateJobPage() {
       // Automatically generate framework
       try {
         // Step 1: Parse job description
+        setGenerationStep("parsing");
         const parseResult = await aiAPI.parseJob({
           title: data.title,
           description: data.description,
@@ -222,6 +226,7 @@ export default function CreateJobPage() {
         });
 
         // Step 2: Generate calibration summary with empty selections (LLM suggestions only, no defaults)
+        setGenerationStep("generating");
         const calibrationSummary = generateCalibrationSummaryJSON(
           createdJob.id,
           {
@@ -243,19 +248,24 @@ export default function CreateJobPage() {
         const frameworkResult = await aiAPI.createFramework(calibrationSummary);
 
         // Step 3: Save to job
+        setGenerationStep("saving");
         await jobsAPI.saveCalibration(createdJob.id, {
           calibration_summary: calibrationSummary,
           evaluation_framework: frameworkResult.framework,
         });
 
         showToast.success("Job created with AI evaluation framework!");
+
+        // Navigate to job detail page
+        router.push(`/jobs/${createdJob.id}`);
       } catch (error) {
         console.error("Framework generation failed:", error);
         showToast.error("Job created, but framework generation failed.");
-      }
+        setGenerationStep("");
 
-      // Navigate to job detail page
-      router.push(`/jobs/${createdJob.id}`);
+        // Navigate to job detail page even on framework failure
+        router.push(`/jobs/${createdJob.id}`);
+      }
     } catch (error) {
       console.error("Job creation failed:", error);
       showToast.error("Failed to create job. Please try again.");
@@ -266,6 +276,34 @@ export default function CreateJobPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* Loading Overlay */}
+      {generationStep && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  {generationStep === "parsing" &&
+                    "Analyzing Job Description..."}
+                  {generationStep === "generating" &&
+                    "Generating Evaluation Framework..."}
+                  {generationStep === "saving" && "Saving Framework..."}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {generationStep === "parsing" &&
+                    "AI is parsing your job description and extracting key requirements"}
+                  {generationStep === "generating" &&
+                    "Creating calibration questions and evaluation criteria"}
+                  {generationStep === "saving" &&
+                    "Finalizing and saving the framework"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center space-x-4">
         <Link href="/jobs">
