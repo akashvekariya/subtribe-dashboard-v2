@@ -425,6 +425,16 @@ export function generateCalibrationSummaryJSON(
       (a) => a.id === calibrationData.roleContext?.autonomyLevel
     )?.label || null;
 
+  // Process tradeoffs and filter out unanswered ones
+  const experienceTradeoffsProcessed = processTradeoffs(
+    relevantExperienceTradeoffs,
+    calibrationData.experienceTradeoffs
+  );
+  const roleSpecificTradeoffsProcessed = processTradeoffs(
+    roleSpecificTradeoffs.scenarios,
+    calibrationData.experienceTradeoffs
+  );
+
   return {
     meta: {
       generatedAt: new Date().toISOString(),
@@ -467,16 +477,20 @@ export function generateCalibrationSummaryJSON(
         calibrationData.pipelineCalibration?.problemTypes || []
       ),
       tradeoffs: {
-        experience: processTradeoffs(
-          relevantExperienceTradeoffs,
-          calibrationData.experienceTradeoffs
-        ),
+        experience: {
+          items: experienceTradeoffsProcessed.items.filter(item => item.answered),
+          stats: {
+            total: experienceTradeoffsProcessed.stats.total,
+            answered: experienceTradeoffsProcessed.stats.answered,
+          },
+        },
         roleSpecific: {
           instruction: roleSpecificTradeoffs.instruction,
-          ...processTradeoffs(
-            roleSpecificTradeoffs.scenarios,
-            calibrationData.experienceTradeoffs
-          ),
+          items: roleSpecificTradeoffsProcessed.items.filter(item => item.answered),
+          stats: {
+            total: roleSpecificTradeoffsProcessed.stats.total,
+            answered: roleSpecificTradeoffsProcessed.stats.answered,
+          },
         },
       },
       redFlags: {
@@ -495,7 +509,7 @@ export function generateCalibrationSummaryJSON(
       },
       trajectory: {
         items: trajectoryItems,
-        selectedId: calibrationData.pipelineCalibration?.trajectory || null,
+        selectedId: calibrationData.pipelineCalibration?.trajectory || "",
       },
       challenges: processStringOptions(
         honestAssessment.challengeOptions,
@@ -510,12 +524,12 @@ export function generateCalibrationSummaryJSON(
       },
       roleContext: {
         roleOpenReason: {
-          id: calibrationData.roleContext?.roleOpenReason || null,
-          label: roleOpenReasonLabel,
+          id: calibrationData.roleContext?.roleOpenReason || "",
+          label: roleOpenReasonLabel || "",
         },
         autonomyLevel: {
-          id: calibrationData.roleContext?.autonomyLevel || null,
-          label: autonomyLevelLabel,
+          id: calibrationData.roleContext?.autonomyLevel || "",
+          label: autonomyLevelLabel || "",
         },
       },
     },
