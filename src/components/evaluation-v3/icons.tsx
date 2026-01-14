@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo } from "react";
 
 // ============================================
 // Stroke-based Icons (outline style)
@@ -9,20 +9,22 @@ interface StrokeIconProps {
   className?: string;
 }
 
-const createStrokeIcon = (paths: React.ReactNode, viewBox = '0 0 24 24') => {
-  const Icon: React.FC<StrokeIconProps> = memo(({ strokeWidth = 2, className }) => (
-    <svg
-      viewBox={viewBox}
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={strokeWidth}
-      className={className}
-    >
-      {paths}
-    </svg>
-  ));
+const createStrokeIcon = (paths: React.ReactNode, viewBox = "0 0 24 24") => {
+  const Icon: React.FC<StrokeIconProps> = memo(
+    ({ strokeWidth = 2, className }) => (
+      <svg
+        viewBox={viewBox}
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={strokeWidth}
+        className={className}
+      >
+        {paths}
+      </svg>
+    )
+  );
   return Icon;
 };
 
@@ -36,7 +38,7 @@ export const GraduationIcon = createStrokeIcon(
     <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
     <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
   </>,
-  '1 2 22 20'
+  "1 2 22 20"
 );
 
 export const DocumentIcon = createStrokeIcon(
@@ -72,9 +74,7 @@ export const HourglassIcon = createStrokeIcon(
   </>
 );
 
-export const CheckIcon = createStrokeIcon(
-  <polyline points="20 6 9 17 4 12" />
-);
+export const CheckIcon = createStrokeIcon(<polyline points="20 6 9 17 4 12" />);
 
 export const WarningIcon = createStrokeIcon(
   <>
@@ -91,9 +91,7 @@ export const FlagIcon = createStrokeIcon(
   </>
 );
 
-export const CloseIcon = createStrokeIcon(
-  <path d="M6 18L18 6M6 6l12 12" />
-);
+export const CloseIcon = createStrokeIcon(<path d="M6 18L18 6M6 6l12 12" />);
 
 export const ChevronDownIcon = createStrokeIcon(
   <polyline points="6 9 12 15 18 9" />
@@ -166,7 +164,7 @@ interface FilledIconProps {
   className?: string;
 }
 
-const createFilledIcon = (d: string, viewBox = '0 0 20 20') => {
+const createFilledIcon = (d: string, viewBox = "0 0 20 20") => {
   const Icon: React.FC<FilledIconProps> = memo(({ className }) => (
     <svg viewBox={viewBox} fill="currentColor" className={className}>
       <path fillRule="evenodd" clipRule="evenodd" d={d} />

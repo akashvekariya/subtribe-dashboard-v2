@@ -10,7 +10,7 @@ import type {
   PersonalInfo,
   QuickStats,
   Tier,
-} from '../types';
+} from "../types";
 
 // Re-export Tier for convenience
 export type { Tier };
@@ -54,7 +54,7 @@ export interface CandidateEvaluation {
     skill_matches: SkillMatch[];
     constraint_results: Array<{
       evidence: string;
-      status: 'pass' | 'fail' | 'deferred';
+      status: "pass" | "fail" | "deferred";
       constraint_text: string;
     }>;
     summary: {
@@ -80,7 +80,7 @@ export interface CandidateData {
 }
 
 // Loading states
-export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
+export type LoadingState = "idle" | "loading" | "success" | "error";
 
 export interface CandidateState {
   currentCandidateId: string | null;

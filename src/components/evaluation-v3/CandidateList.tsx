@@ -1,4 +1,11 @@
-import React, { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react';
+import React, {
+  memo,
+  useMemo,
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
 import {
   EmailFilledIcon,
   PhoneFilledIcon,
@@ -10,11 +17,16 @@ import {
   CheckIcon,
   SearchIcon,
   RefreshIcon,
-} from './icons';
-import type { Tier, PersonalInfo, ApplicationStatus, CandidateSortOption } from './types';
-import { tierStyles, statusStyles, sortOptions } from './config';
-import { getInitials, formatRelativeDate, formatTimeAgo } from './utils';
-import './styles.css';
+} from "./icons";
+import type {
+  Tier,
+  PersonalInfo,
+  ApplicationStatus,
+  CandidateSortOption,
+} from "./types";
+import { tierStyles, statusStyles, sortOptions } from "./config";
+import { getInitials, formatRelativeDate, formatTimeAgo } from "./utils";
+import "./styles.css";
 
 // Candidate item type for the list
 export interface CandidateListItem {
@@ -84,17 +96,20 @@ const FilterDropdown = <T extends string>({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleToggle = (value: T) => {
     const newSelected = selected.includes(value)
-      ? selected.filter(v => v !== value)
+      ? selected.filter((v) => v !== value)
       : [...selected, value];
     onChange(newSelected);
   };
@@ -105,13 +120,18 @@ const FilterDropdown = <T extends string>({
     <div ref={dropdownRef} className="candidate-filter-dropdown">
       <button
         type="button"
-        className={`candidate-filter-trigger ${activeCount > 0 ? 'active' : ''}`}
+        className={`candidate-filter-trigger ${activeCount > 0 ? "active" : ""}`}
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
       >
         <span>{label}</span>
-        {activeCount > 0 && <span className="candidate-filter-count">{activeCount}</span>}
-        <ChevronDownIcon className={`candidate-filter-chevron ${isOpen ? 'open' : ''}`} strokeWidth={2} />
+        {activeCount > 0 && (
+          <span className="candidate-filter-count">{activeCount}</span>
+        )}
+        <ChevronDownIcon
+          className={`candidate-filter-chevron ${isOpen ? "open" : ""}`}
+          strokeWidth={2}
+        />
       </button>
 
       {isOpen && (
@@ -120,12 +140,17 @@ const FilterDropdown = <T extends string>({
             <button
               key={option.value}
               type="button"
-              className={`candidate-filter-option ${selected.includes(option.value) ? 'selected' : ''}`}
+              className={`candidate-filter-option ${selected.includes(option.value) ? "selected" : ""}`}
               onClick={() => handleToggle(option.value)}
             >
-              <span className="candidate-filter-dot" style={{ backgroundColor: option.color }} />
+              <span
+                className="candidate-filter-dot"
+                style={{ backgroundColor: option.color }}
+              />
               <span className="candidate-filter-label">{option.label}</span>
-              {selected.includes(option.value) && <CheckIcon strokeWidth={2.5} />}
+              {selected.includes(option.value) && (
+                <CheckIcon strokeWidth={2.5} />
+              )}
             </button>
           ))}
           {activeCount > 0 && (
@@ -156,12 +181,15 @@ const SortDropdown = memo<{
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
@@ -174,7 +202,10 @@ const SortDropdown = memo<{
         aria-label="Sort candidates"
       >
         <SortIcon strokeWidth={2} />
-        <ChevronDownIcon className={`candidate-sort-chevron ${isOpen ? 'open' : ''}`} strokeWidth={2} />
+        <ChevronDownIcon
+          className={`candidate-sort-chevron ${isOpen ? "open" : ""}`}
+          strokeWidth={2}
+        />
       </button>
 
       {isOpen && (
@@ -183,8 +214,11 @@ const SortDropdown = memo<{
             <button
               key={option.value}
               type="button"
-              className={`candidate-sort-option ${value === option.value ? 'selected' : ''}`}
-              onClick={() => { onChange(option.value); setIsOpen(false); }}
+              className={`candidate-sort-option ${value === option.value ? "selected" : ""}`}
+              onClick={() => {
+                onChange(option.value);
+                setIsOpen(false);
+              }}
             >
               {option.label}
               {value === option.value && <CheckIcon strokeWidth={2.5} />}
@@ -246,15 +280,19 @@ const EmptyState = memo<{
       <SearchIcon strokeWidth={1.5} />
     </div>
     <h3 className="candidate-empty-title">
-      {hasFilters ? 'No candidates found' : 'No candidates yet'}
+      {hasFilters ? "No candidates found" : "No candidates yet"}
     </h3>
     <p className="candidate-empty-desc">
       {hasFilters
-        ? 'Try adjusting your search or filters'
-        : 'Candidates will appear here once they apply'}
+        ? "Try adjusting your search or filters"
+        : "Candidates will appear here once they apply"}
     </p>
     {hasFilters && onClearFilters && (
-      <button type="button" className="candidate-empty-btn" onClick={onClearFilters}>
+      <button
+        type="button"
+        className="candidate-empty-btn"
+        onClick={onClearFilters}
+      >
         Clear filters
       </button>
     )}
@@ -267,7 +305,14 @@ const StatusSelect = memo<{
   onChange?: (status: ApplicationStatus) => void;
   isUpdating?: boolean;
 }>(({ status, onChange, isUpdating = false }) => {
-  const statusOptions: ApplicationStatus[] = ['applied', 'screening', 'interviewing', 'offer', 'hired', 'rejected'];
+  const statusOptions: ApplicationStatus[] = [
+    "applied",
+    "screening",
+    "interviewing",
+    "offer",
+    "hired",
+    "rejected",
+  ];
   const style = statusStyles[status];
   const selectRef = useRef<HTMLSelectElement>(null);
   const measureRef = useRef<HTMLSpanElement>(null);
@@ -280,10 +325,13 @@ const StatusSelect = memo<{
     }
   }, [status]);
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    e.stopPropagation();
-    onChange?.(e.target.value as ApplicationStatus);
-  }, [onChange]);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      e.stopPropagation();
+      onChange?.(e.target.value as ApplicationStatus);
+    },
+    [onChange]
+  );
 
   const handleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -296,7 +344,7 @@ const StatusSelect = memo<{
       </span>
       <select
         ref={selectRef}
-        className={`candidate-status-select ${style.className} ${isUpdating ? 'candidate-status-updating' : ''}`}
+        className={`candidate-status-select ${style.className} ${isUpdating ? "candidate-status-updating" : ""}`}
         value={status}
         onChange={handleChange}
         onClick={handleClick}
@@ -313,14 +361,16 @@ const StatusSelect = memo<{
 });
 
 // Avatar component
-const Avatar = memo<{ name?: string; className?: string }>(({ name, className = '' }) => {
-  const initials = getInitials(name);
-  return (
-    <div className={`candidate-avatar ${className}`}>
-      <span className="candidate-avatar-initials">{initials}</span>
-    </div>
-  );
-});
+const Avatar = memo<{ name?: string; className?: string }>(
+  ({ name, className = "" }) => {
+    const initials = getInitials(name);
+    return (
+      <div className={`candidate-avatar ${className}`}>
+        <span className="candidate-avatar-initials">{initials}</span>
+      </div>
+    );
+  }
+);
 
 // Action button component
 const ActionButton = memo<{
@@ -351,59 +401,103 @@ const CandidateCard = memo<{
   onResumeClick?: () => void;
   onStatusChange?: (status: ApplicationStatus) => void;
   isStatusUpdating?: boolean;
-}>(({ candidate, isSelected, onSelect, onEmailClick, onPhoneClick, onResumeClick, onStatusChange, isStatusUpdating }) => {
-  const scoreDisplay = (candidate.score / 10).toFixed(1);
-  const hasEmail = !!candidate.personalInfo.email;
-  const hasPhone = !!candidate.personalInfo.phone;
+}>(
+  ({
+    candidate,
+    isSelected,
+    onSelect,
+    onEmailClick,
+    onPhoneClick,
+    onResumeClick,
+    onStatusChange,
+    isStatusUpdating,
+  }) => {
+    const scoreDisplay = (candidate.score / 10).toFixed(1);
+    const hasEmail = !!candidate.personalInfo.email;
+    const hasPhone = !!candidate.personalInfo.phone;
 
-  const handleEmailClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEmailClick?.();
-  }, [onEmailClick]);
+    const handleEmailClick = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onEmailClick?.();
+      },
+      [onEmailClick]
+    );
 
-  const handlePhoneClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onPhoneClick?.();
-  }, [onPhoneClick]);
+    const handlePhoneClick = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onPhoneClick?.();
+      },
+      [onPhoneClick]
+    );
 
-  const handleResumeClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onResumeClick?.();
-  }, [onResumeClick]);
+    const handleResumeClick = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onResumeClick?.();
+      },
+      [onResumeClick]
+    );
 
-  return (
-    <div
-      className={`candidate-card ${isSelected ? 'candidate-card-selected' : ''}`}
-      onClick={onSelect}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && onSelect()}
-    >
-      <Avatar name={candidate.personalInfo.full_name} />
+    return (
+      <div
+        className={`candidate-card ${isSelected ? "candidate-card-selected" : ""}`}
+        onClick={onSelect}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && onSelect()}
+      >
+        <Avatar name={candidate.personalInfo.full_name} />
 
-      <div className="candidate-content">
-        <div className="candidate-header">
-          <span className="candidate-name">{candidate.personalInfo.full_name}</span>
-          {candidate.appliedDate && (
-            <span className="candidate-date">{formatRelativeDate(candidate.appliedDate)}</span>
+        <div className="candidate-content">
+          <div className="candidate-header">
+            <span className="candidate-name">
+              {candidate.personalInfo.full_name}
+            </span>
+            {candidate.appliedDate && (
+              <span className="candidate-date">
+                {formatRelativeDate(candidate.appliedDate)}
+              </span>
+            )}
+          </div>
+          {candidate.personalInfo.email && (
+            <span className="candidate-email">
+              {candidate.personalInfo.email}
+            </span>
           )}
-        </div>
-        {candidate.personalInfo.email && (
-          <span className="candidate-email">{candidate.personalInfo.email}</span>
-        )}
-        <div className="candidate-meta">
-          <span className="candidate-score">{scoreDisplay}</span>
-          <StatusSelect status={candidate.applicationStatus} onChange={onStatusChange} isUpdating={isStatusUpdating} />
-          <div className="candidate-actions">
-            <ActionButton icon={<EmailFilledIcon />} label="Email" onClick={handleEmailClick} disabled={!hasEmail} />
-            <ActionButton icon={<PhoneFilledIcon />} label="Call" onClick={handlePhoneClick} disabled={!hasPhone} />
-            <ActionButton icon={<DocumentFilledIcon />} label="Resume" onClick={handleResumeClick} />
+          <div className="candidate-meta">
+            <span className="candidate-score">{scoreDisplay}</span>
+            <StatusSelect
+              status={candidate.applicationStatus}
+              onChange={onStatusChange}
+              isUpdating={isStatusUpdating}
+            />
+            <div className="candidate-actions">
+              <ActionButton
+                icon={<EmailFilledIcon />}
+                label="Email"
+                onClick={handleEmailClick}
+                disabled={!hasEmail}
+              />
+              <ActionButton
+                icon={<PhoneFilledIcon />}
+                label="Call"
+                onClick={handlePhoneClick}
+                disabled={!hasPhone}
+              />
+              <ActionButton
+                icon={<DocumentFilledIcon />}
+                label="Resume"
+                onClick={handleResumeClick}
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 // Skeleton loading item
 const CandidateCardSkeleton = memo(() => (
@@ -411,12 +505,18 @@ const CandidateCardSkeleton = memo(() => (
     <div className="candidate-avatar skeleton-shimmer" />
     <div className="candidate-content">
       <div className="candidate-header">
-        <span className="skeleton-shimmer" style={{ width: '60%', height: 16 }} />
+        <span
+          className="skeleton-shimmer"
+          style={{ width: "60%", height: 16 }}
+        />
         <span className="skeleton-shimmer" style={{ width: 50, height: 14 }} />
       </div>
       <div className="candidate-meta">
         <span className="skeleton-shimmer" style={{ width: 28, height: 16 }} />
-        <span className="skeleton-shimmer" style={{ width: 70, height: 20, borderRadius: 4 }} />
+        <span
+          className="skeleton-shimmer"
+          style={{ width: 70, height: 20, borderRadius: 4 }}
+        />
       </div>
     </div>
   </div>
@@ -426,265 +526,323 @@ const CandidateCardSkeleton = memo(() => (
 // Main Component
 // ============================================
 
-export const CandidateList = memo<CandidateListProps>(({
-  candidates,
-  selectedId,
-  onSelect,
-  onEmailClick,
-  onPhoneClick,
-  onResumeClick,
-  onStatusChange,
-  isLoading = false,
-  title = 'Candidates',
-  className = '',
-  pageSize = 20,
-  showFilters = true,
-  showPagination = true,
-  onRefresh,
-  lastRefreshedAt,
-  isRefreshing = false,
-  updatingStatusId,
-  // Controlled props
-  selectedTiers: controlledTiers,
-  onTiersChange,
-  selectedStatuses: controlledStatuses,
-  onStatusesChange,
-  sortOption: controlledSort,
-  onSortChange,
-  // Controlled pagination props
-  currentPage: controlledPage,
-  onPageChange,
-  totalItems: controlledTotalItems,
-}) => {
-  // Internal state (used when not controlled)
-  const [internalTiers, setInternalTiers] = useState<Tier[]>([]);
-  const [internalStatuses, setInternalStatuses] = useState<ApplicationStatus[]>([]);
-  const [internalSort, setInternalSort] = useState<CandidateSortOption>('score_desc');
-  const [internalPage, setInternalPage] = useState(1);
+export const CandidateList = memo<CandidateListProps>(
+  ({
+    candidates,
+    selectedId,
+    onSelect,
+    onEmailClick,
+    onPhoneClick,
+    onResumeClick,
+    onStatusChange,
+    isLoading = false,
+    title = "Candidates",
+    className = "",
+    pageSize = 20,
+    showFilters = true,
+    showPagination = true,
+    onRefresh,
+    lastRefreshedAt,
+    isRefreshing = false,
+    updatingStatusId,
+    // Controlled props
+    selectedTiers: controlledTiers,
+    onTiersChange,
+    selectedStatuses: controlledStatuses,
+    onStatusesChange,
+    sortOption: controlledSort,
+    onSortChange,
+    // Controlled pagination props
+    currentPage: controlledPage,
+    onPageChange,
+    totalItems: controlledTotalItems,
+  }) => {
+    // Internal state (used when not controlled)
+    const [internalTiers, setInternalTiers] = useState<Tier[]>([]);
+    const [internalStatuses, setInternalStatuses] = useState<
+      ApplicationStatus[]
+    >([]);
+    const [internalSort, setInternalSort] =
+      useState<CandidateSortOption>("score_desc");
+    const [internalPage, setInternalPage] = useState(1);
 
-  // Determine if controlled mode
-  const isControlled = onTiersChange !== undefined || onStatusesChange !== undefined || onSortChange !== undefined;
-  const isPaginationControlled = onPageChange !== undefined;
+    // Determine if controlled mode
+    const isControlled =
+      onTiersChange !== undefined ||
+      onStatusesChange !== undefined ||
+      onSortChange !== undefined;
+    const isPaginationControlled = onPageChange !== undefined;
 
-  // Use controlled or internal values
-  const selectedTiers = controlledTiers ?? internalTiers;
-  const selectedStatuses = controlledStatuses ?? internalStatuses;
-  const sortOption = controlledSort ?? internalSort;
-  const currentPage = controlledPage ?? internalPage;
+    // Use controlled or internal values
+    const selectedTiers = controlledTiers ?? internalTiers;
+    const selectedStatuses = controlledStatuses ?? internalStatuses;
+    const sortOption = controlledSort ?? internalSort;
+    const currentPage = controlledPage ?? internalPage;
 
-  // Handlers that work for both controlled and uncontrolled modes
-  const handleTiersChange = useCallback((tiers: Tier[]) => {
-    if (onTiersChange) {
-      onTiersChange(tiers);
-    } else {
-      setInternalTiers(tiers);
-    }
-  }, [onTiersChange]);
+    // Handlers that work for both controlled and uncontrolled modes
+    const handleTiersChange = useCallback(
+      (tiers: Tier[]) => {
+        if (onTiersChange) {
+          onTiersChange(tiers);
+        } else {
+          setInternalTiers(tiers);
+        }
+      },
+      [onTiersChange]
+    );
 
-  const handleStatusesChange = useCallback((statuses: ApplicationStatus[]) => {
-    if (onStatusesChange) {
-      onStatusesChange(statuses);
-    } else {
-      setInternalStatuses(statuses);
-    }
-  }, [onStatusesChange]);
+    const handleStatusesChange = useCallback(
+      (statuses: ApplicationStatus[]) => {
+        if (onStatusesChange) {
+          onStatusesChange(statuses);
+        } else {
+          setInternalStatuses(statuses);
+        }
+      },
+      [onStatusesChange]
+    );
 
-  const handleSortChange = useCallback((sort: CandidateSortOption) => {
-    if (onSortChange) {
-      onSortChange(sort);
-    } else {
-      setInternalSort(sort);
-    }
-  }, [onSortChange]);
+    const handleSortChange = useCallback(
+      (sort: CandidateSortOption) => {
+        if (onSortChange) {
+          onSortChange(sort);
+        } else {
+          setInternalSort(sort);
+        }
+      },
+      [onSortChange]
+    );
 
-  const handlePageChange = useCallback((page: number) => {
-    if (onPageChange) {
-      onPageChange(page);
-    } else {
-      setInternalPage(page);
-    }
-  }, [onPageChange]);
+    const handlePageChange = useCallback(
+      (page: number) => {
+        if (onPageChange) {
+          onPageChange(page);
+        } else {
+          setInternalPage(page);
+        }
+      },
+      [onPageChange]
+    );
 
-  // Time tracking for refresh indicator (triggers re-render every 10 seconds)
-  const [, setTimeTick] = useState(0);
-  useEffect(() => {
-    if (!lastRefreshedAt) return;
-    const interval = setInterval(() => {
-      setTimeTick(t => t + 1);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [lastRefreshedAt]);
+    // Time tracking for refresh indicator (triggers re-render every 10 seconds)
+    const [, setTimeTick] = useState(0);
+    useEffect(() => {
+      if (!lastRefreshedAt) return;
+      const interval = setInterval(() => {
+        setTimeTick((t) => t + 1);
+      }, 10000);
+      return () => clearInterval(interval);
+    }, [lastRefreshedAt]);
 
-  // Reset to page 1 when filters change (only for uncontrolled pagination)
-  useEffect(() => {
-    if (!isPaginationControlled) {
-      setInternalPage(1);
-    }
-  }, [selectedTiers, selectedStatuses, sortOption, isPaginationControlled]);
-
-  // Filter options
-  const tierOptions: FilterOption<Tier>[] = useMemo(() => [
-    { value: 'excellent_match', label: 'Excellent', color: '#059669' },
-    { value: 'good_match', label: 'Good', color: '#2563eb' },
-    { value: 'average_match', label: 'Average', color: '#d97706' },
-    { value: 'poor_match', label: 'Poor', color: '#ea580c' },
-    { value: 'mismatch', label: 'Mismatch', color: '#dc2626' },
-  ], []);
-
-  const statusOptions: FilterOption<ApplicationStatus>[] = useMemo(() => [
-    { value: 'applied', label: 'Applied', color: '#71717a' },
-    { value: 'screening', label: 'Screening', color: '#7c3aed' },
-    { value: 'interviewing', label: 'Interviewing', color: '#0891b2' },
-    { value: 'offer', label: 'Offer', color: '#059669' },
-    { value: 'hired', label: 'Hired', color: '#16a34a' },
-    { value: 'rejected', label: 'Rejected', color: '#dc2626' },
-  ], []);
-
-  // In controlled mode, data is already filtered/sorted by parent (via API)
-  // In uncontrolled mode, do client-side filtering/sorting
-  const processedCandidates = useMemo(() => {
-    if (isControlled) {
-      // Data already filtered/sorted by API
-      return candidates;
-    }
-
-    // Client-side filtering
-    let result = candidates.filter((candidate) => {
-      if (selectedTiers.length > 0 && !selectedTiers.includes(candidate.tier)) {
-        return false;
+    // Reset to page 1 when filters change (only for uncontrolled pagination)
+    useEffect(() => {
+      if (!isPaginationControlled) {
+        setInternalPage(1);
       }
-      if (selectedStatuses.length > 0 && !selectedStatuses.includes(candidate.applicationStatus)) {
-        return false;
+    }, [selectedTiers, selectedStatuses, sortOption, isPaginationControlled]);
+
+    // Filter options
+    const tierOptions: FilterOption<Tier>[] = useMemo(
+      () => [
+        { value: "excellent_match", label: "Excellent", color: "#059669" },
+        { value: "good_match", label: "Good", color: "#2563eb" },
+        { value: "average_match", label: "Average", color: "#d97706" },
+        { value: "poor_match", label: "Poor", color: "#ea580c" },
+        { value: "mismatch", label: "Mismatch", color: "#dc2626" },
+      ],
+      []
+    );
+
+    const statusOptions: FilterOption<ApplicationStatus>[] = useMemo(
+      () => [
+        { value: "applied", label: "Applied", color: "#71717a" },
+        { value: "screening", label: "Screening", color: "#7c3aed" },
+        { value: "interviewing", label: "Interviewing", color: "#0891b2" },
+        { value: "offer", label: "Offer", color: "#059669" },
+        { value: "hired", label: "Hired", color: "#16a34a" },
+        { value: "rejected", label: "Rejected", color: "#dc2626" },
+      ],
+      []
+    );
+
+    // In controlled mode, data is already filtered/sorted by parent (via API)
+    // In uncontrolled mode, do client-side filtering/sorting
+    const processedCandidates = useMemo(() => {
+      if (isControlled) {
+        // Data already filtered/sorted by API
+        return candidates;
       }
-      return true;
-    });
 
-    // Client-side sorting
-    result = [...result].sort((a, b) => {
-      switch (sortOption) {
-        case 'score_desc':
-          return b.score - a.score;
-        case 'score_asc':
-          return a.score - b.score;
-        case 'date_desc':
-          return new Date(b.appliedDate || 0).getTime() - new Date(a.appliedDate || 0).getTime();
-        case 'date_asc':
-          return new Date(a.appliedDate || 0).getTime() - new Date(b.appliedDate || 0).getTime();
-        case 'name_asc':
-          return (a.personalInfo.full_name || '').localeCompare(b.personalInfo.full_name || '');
-        case 'name_desc':
-          return (b.personalInfo.full_name || '').localeCompare(a.personalInfo.full_name || '');
-        default:
-          return 0;
+      // Client-side filtering
+      let result = candidates.filter((candidate) => {
+        if (
+          selectedTiers.length > 0 &&
+          !selectedTiers.includes(candidate.tier)
+        ) {
+          return false;
+        }
+        if (
+          selectedStatuses.length > 0 &&
+          !selectedStatuses.includes(candidate.applicationStatus)
+        ) {
+          return false;
+        }
+        return true;
+      });
+
+      // Client-side sorting
+      result = [...result].sort((a, b) => {
+        switch (sortOption) {
+          case "score_desc":
+            return b.score - a.score;
+          case "score_asc":
+            return a.score - b.score;
+          case "date_desc":
+            return (
+              new Date(b.appliedDate || 0).getTime() -
+              new Date(a.appliedDate || 0).getTime()
+            );
+          case "date_asc":
+            return (
+              new Date(a.appliedDate || 0).getTime() -
+              new Date(b.appliedDate || 0).getTime()
+            );
+          case "name_asc":
+            return (a.personalInfo.full_name || "").localeCompare(
+              b.personalInfo.full_name || ""
+            );
+          case "name_desc":
+            return (b.personalInfo.full_name || "").localeCompare(
+              a.personalInfo.full_name || ""
+            );
+          default:
+            return 0;
+        }
+      });
+
+      return result;
+    }, [candidates, selectedTiers, selectedStatuses, sortOption, isControlled]);
+
+    // Paginate - use server total when controlled, otherwise calculate from local data
+    const totalItems = controlledTotalItems ?? processedCandidates.length;
+    const totalPages = Math.ceil(totalItems / pageSize);
+    const paginatedCandidates = useMemo(() => {
+      if (isPaginationControlled) {
+        // Server-side pagination - candidates are already paginated
+        return processedCandidates;
       }
-    });
+      // Client-side pagination
+      const start = (currentPage - 1) * pageSize;
+      return processedCandidates.slice(start, start + pageSize);
+    }, [processedCandidates, currentPage, pageSize, isPaginationControlled]);
 
-    return result;
-  }, [candidates, selectedTiers, selectedStatuses, sortOption, isControlled]);
+    // Check if any filters are active
+    const hasActiveFilters =
+      selectedTiers.length > 0 || selectedStatuses.length > 0;
 
-  // Paginate - use server total when controlled, otherwise calculate from local data
-  const totalItems = controlledTotalItems ?? processedCandidates.length;
-  const totalPages = Math.ceil(totalItems / pageSize);
-  const paginatedCandidates = useMemo(() => {
-    if (isPaginationControlled) {
-      // Server-side pagination - candidates are already paginated
-      return processedCandidates;
-    }
-    // Client-side pagination
-    const start = (currentPage - 1) * pageSize;
-    return processedCandidates.slice(start, start + pageSize);
-  }, [processedCandidates, currentPage, pageSize, isPaginationControlled]);
+    // Clear all filters
+    const handleClearFilters = useCallback(() => {
+      handleTiersChange([]);
+      handleStatusesChange([]);
+      handleSortChange("score_desc");
+    }, [handleTiersChange, handleStatusesChange, handleSortChange]);
 
-  // Check if any filters are active
-  const hasActiveFilters = selectedTiers.length > 0 || selectedStatuses.length > 0;
+    return (
+      <div className={`candidate-list ${className}`}>
+        {/* Header */}
+        <div className="candidate-list-header">
+          <h2 className="candidate-list-title">
+            {title} <span className="candidate-list-count">{totalItems}</span>
+          </h2>
 
-  // Clear all filters
-  const handleClearFilters = useCallback(() => {
-    handleTiersChange([]);
-    handleStatusesChange([]);
-    handleSortChange('score_desc');
-  }, [handleTiersChange, handleStatusesChange, handleSortChange]);
+          {/* Refresh section */}
+          {onRefresh && (
+            <div className="candidate-refresh-section">
+              <span className="candidate-refresh-text">
+                {formatTimeAgo(lastRefreshedAt ?? null)}
+              </span>
+              <button
+                type="button"
+                className={`candidate-refresh-btn ${isRefreshing ? "refreshing" : ""}`}
+                onClick={onRefresh}
+                disabled={isRefreshing}
+                aria-label="Refresh candidates"
+              >
+                <RefreshIcon strokeWidth={2} />
+              </button>
+            </div>
+          )}
 
-  return (
-    <div className={`candidate-list ${className}`}>
-      {/* Header */}
-      <div className="candidate-list-header">
-        <h2 className="candidate-list-title">
-          {title} <span className="candidate-list-count">{totalItems}</span>
-        </h2>
+          {showFilters && (
+            <div className="candidate-list-filters">
+              <FilterDropdown
+                label="Tier"
+                options={tierOptions}
+                selected={selectedTiers}
+                onChange={handleTiersChange}
+              />
+              <FilterDropdown
+                label="Status"
+                options={statusOptions}
+                selected={selectedStatuses}
+                onChange={handleStatusesChange}
+              />
+              <SortDropdown value={sortOption} onChange={handleSortChange} />
+            </div>
+          )}
+        </div>
 
-        {/* Refresh section */}
-        {onRefresh && (
-          <div className="candidate-refresh-section">
-            <span className="candidate-refresh-text">
-              {formatTimeAgo(lastRefreshedAt ?? null)}
-            </span>
-            <button
-              type="button"
-              className={`candidate-refresh-btn ${isRefreshing ? 'refreshing' : ''}`}
-              onClick={onRefresh}
-              disabled={isRefreshing}
-              aria-label="Refresh candidates"
-            >
-              <RefreshIcon strokeWidth={2} />
-            </button>
-          </div>
-        )}
-
-        {showFilters && (
-          <div className="candidate-list-filters">
-            <FilterDropdown
-              label="Tier"
-              options={tierOptions}
-              selected={selectedTiers}
-              onChange={handleTiersChange}
+        {/* List items */}
+        <div className="candidate-list-items">
+          {isLoading ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <CandidateCardSkeleton key={i} />
+            ))
+          ) : paginatedCandidates.length === 0 ? (
+            <EmptyState
+              hasFilters={hasActiveFilters}
+              onClearFilters={handleClearFilters}
             />
-            <FilterDropdown
-              label="Status"
-              options={statusOptions}
-              selected={selectedStatuses}
-              onChange={handleStatusesChange}
-            />
-            <SortDropdown value={sortOption} onChange={handleSortChange} />
-          </div>
+          ) : (
+            paginatedCandidates.map((candidate) => (
+              <CandidateCard
+                key={candidate.id}
+                candidate={candidate}
+                isSelected={selectedId === candidate.id}
+                onSelect={() => onSelect(candidate.id)}
+                onEmailClick={
+                  onEmailClick ? () => onEmailClick(candidate) : undefined
+                }
+                onPhoneClick={
+                  onPhoneClick ? () => onPhoneClick(candidate) : undefined
+                }
+                onResumeClick={
+                  onResumeClick ? () => onResumeClick(candidate) : undefined
+                }
+                onStatusChange={
+                  onStatusChange
+                    ? (status) => onStatusChange(candidate.id, status)
+                    : undefined
+                }
+                isStatusUpdating={updatingStatusId === candidate.id}
+              />
+            ))
+          )}
+        </div>
+
+        {/* Pagination */}
+        {showPagination && !isLoading && totalItems > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+          />
         )}
       </div>
-
-      {/* List items */}
-      <div className="candidate-list-items">
-        {isLoading ? (
-          Array.from({ length: 5 }).map((_, i) => <CandidateCardSkeleton key={i} />)
-        ) : paginatedCandidates.length === 0 ? (
-          <EmptyState hasFilters={hasActiveFilters} onClearFilters={handleClearFilters} />
-        ) : (
-          paginatedCandidates.map((candidate) => (
-            <CandidateCard
-              key={candidate.id}
-              candidate={candidate}
-              isSelected={selectedId === candidate.id}
-              onSelect={() => onSelect(candidate.id)}
-              onEmailClick={onEmailClick ? () => onEmailClick(candidate) : undefined}
-              onPhoneClick={onPhoneClick ? () => onPhoneClick(candidate) : undefined}
-              onResumeClick={onResumeClick ? () => onResumeClick(candidate) : undefined}
-              onStatusChange={onStatusChange ? (status) => onStatusChange(candidate.id, status) : undefined}
-              isStatusUpdating={updatingStatusId === candidate.id}
-            />
-          ))
-        )}
-      </div>
-
-      {/* Pagination */}
-      {showPagination && !isLoading && totalItems > 0 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          pageSize={pageSize}
-          onPageChange={handlePageChange}
-        />
-      )}
-    </div>
-  );
-});
+    );
+  }
+);
 
 export default CandidateList;

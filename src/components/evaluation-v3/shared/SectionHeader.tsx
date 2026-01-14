@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo } from "react";
 
 /**
  * SectionHeader - Shared header component for accordion and card sections
@@ -12,19 +12,16 @@ export interface SectionHeaderProps {
   className?: string;
 }
 
-export const SectionHeader = memo<SectionHeaderProps>(({
-  title,
-  icon,
-  trailing,
-  className = '',
-}) => (
-  <div className={`eval-section-header ${className}`}>
-    <div className="eval-section-header-left">
-      {icon && <span className="eval-section-header-icon">{icon}</span>}
-      <h3 className="eval-section-header-title">{title}</h3>
+export const SectionHeader = memo<SectionHeaderProps>(
+  ({ title, icon, trailing, className = "" }) => (
+    <div className={`eval-section-header ${className}`}>
+      <div className="eval-section-header-left">
+        {icon && <span className="eval-section-header-icon">{icon}</span>}
+        <h3 className="eval-section-header-title">{title}</h3>
+      </div>
+      {trailing && <div className="eval-section-header-right">{trailing}</div>}
     </div>
-    {trailing && <div className="eval-section-header-right">{trailing}</div>}
-  </div>
-));
+  )
+);
 
 export default SectionHeader;

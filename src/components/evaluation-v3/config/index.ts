@@ -21,7 +21,13 @@ export {
   type TierStyleConfig,
   type StatusStyleConfig,
   type SortOptionConfig,
-} from './variants';
+} from "./variants";
 
 // Re-export colors
-export { colors, getColor, getScoreColor, type ColorName, type ColorSet } from '../colors';
+export {
+  colors,
+  getColor,
+  getScoreColor,
+  type ColorName,
+  type ColorSet,
+} from "../colors";

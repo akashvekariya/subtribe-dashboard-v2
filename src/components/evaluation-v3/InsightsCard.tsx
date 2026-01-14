@@ -1,6 +1,6 @@
-import React, { memo } from 'react';
-import { CheckCircleFilledIcon, AlertTriangleFilledIcon } from './icons';
-import './styles.css';
+import React, { memo } from "react";
+import { CheckCircleFilledIcon, AlertTriangleFilledIcon } from "./icons";
+import "./styles.css";
 
 export interface InsightsCardProps {
   strengths: string[];
@@ -9,22 +9,26 @@ export interface InsightsCardProps {
 }
 
 // List item component
-const InsightItem = memo<{ text: string; type: 'strength' | 'concern' }>(({ text, type }) => (
-  <li className={`insights-item insights-item-${type}`}>
-    <span className={`insights-bullet insights-bullet-${type}`} />
-    <span>{text}</span>
-  </li>
-));
+const InsightItem = memo<{ text: string; type: "strength" | "concern" }>(
+  ({ text, type }) => (
+    <li className={`insights-item insights-item-${type}`}>
+      <span className={`insights-bullet insights-bullet-${type}`} />
+      <span>{text}</span>
+    </li>
+  )
+);
 
 // Column component
 const InsightsColumn = memo<{
-  type: 'strength' | 'concern';
+  type: "strength" | "concern";
   items: string[];
   title: string;
   Icon: React.FC<{ className?: string }>;
 }>(({ type, items, title, Icon }) => (
   <div className="insights-column">
-    <div className={`insights-column-header insights-column-header-${type === 'strength' ? 'strengths' : 'concerns'}`}>
+    <div
+      className={`insights-column-header insights-column-header-${type === "strength" ? "strengths" : "concerns"}`}
+    >
       <Icon className="insights-icon" />
       <span>{title}</span>
       <span className="insights-count">{items.length}</span>
@@ -37,32 +41,30 @@ const InsightsColumn = memo<{
   </div>
 ));
 
-export const InsightsCard = memo<InsightsCardProps>(({
-  strengths,
-  concerns,
-  className = '',
-}) => (
-  <div className={`insights-card ${className}`}>
-    <div className="insights-header">
-      <h3 className="eval-accordion-title">Key Insights</h3>
-    </div>
+export const InsightsCard = memo<InsightsCardProps>(
+  ({ strengths, concerns, className = "" }) => (
+    <div className={`insights-card ${className}`}>
+      <div className="insights-header">
+        <h3 className="eval-accordion-title">Key Insights</h3>
+      </div>
 
-    <div className="insights-content">
-      <InsightsColumn
-        type="strength"
-        items={strengths}
-        title="Strengths"
-        Icon={CheckCircleFilledIcon}
-      />
-      <div className="insights-divider" />
-      <InsightsColumn
-        type="concern"
-        items={concerns}
-        title="Areas to Verify"
-        Icon={AlertTriangleFilledIcon}
-      />
+      <div className="insights-content">
+        <InsightsColumn
+          type="strength"
+          items={strengths}
+          title="Strengths"
+          Icon={CheckCircleFilledIcon}
+        />
+        <div className="insights-divider" />
+        <InsightsColumn
+          type="concern"
+          items={concerns}
+          title="Areas to Verify"
+          Icon={AlertTriangleFilledIcon}
+        />
+      </div>
     </div>
-  </div>
-));
+  )
+);
 
 export default InsightsCard;

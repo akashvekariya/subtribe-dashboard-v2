@@ -1,41 +1,43 @@
 // Zustand store for candidate data with LRU caching
 // Keeps RAM usage low by caching max 7 candidates
 
-import { create } from 'zustand';
-import { LRUCache } from './lru-cache';
+import { create } from "zustand";
+import { LRUCache } from "./lru-cache";
 import type {
   CandidateData,
   CandidateOverview,
   CandidateEvaluation,
   LoadingState,
   Tier,
-} from './types';
-import type { CategoryScore } from '../ScoreRing';
-import type { Constraint } from '../ConstraintAccordion';
-import type { QuickStats, PersonalInfo } from '../ScoreSummaryPanel';
+} from "./types";
+import type { CategoryScore } from "../ScoreRing";
+import type { Constraint } from "../ConstraintAccordion";
+import type { QuickStats, PersonalInfo } from "../ScoreSummaryPanel";
 
 // LRU Cache instance (max 7 candidates)
 const cache = new LRUCache<CandidateData>(7);
 
 // Dimension color mapping
 const dimensionColors: Record<string, string> = {
-  technical_fit: 'emerald',
-  problem_solving_fit: 'orange',
-  experience_fit: 'blue',
-  trajectory_fit: 'violet',
-  culture_fit: 'red',
+  technical_fit: "emerald",
+  problem_solving_fit: "orange",
+  experience_fit: "blue",
+  trajectory_fit: "violet",
+  culture_fit: "red",
 };
 
 const dimensionNames: Record<string, string> = {
-  technical_fit: 'Technical Fit',
-  problem_solving_fit: 'Problem Solving',
-  experience_fit: 'Experience Fit',
-  trajectory_fit: 'Trajectory Fit',
-  culture_fit: 'Culture Fit',
+  technical_fit: "Technical Fit",
+  problem_solving_fit: "Problem Solving",
+  experience_fit: "Experience Fit",
+  trajectory_fit: "Trajectory Fit",
+  culture_fit: "Culture Fit",
 };
 
 // Transform raw API data to component-ready format
-function transformToCategories(evaluation: CandidateEvaluation): CategoryScore[] {
+function transformToCategories(
+  evaluation: CandidateEvaluation
+): CategoryScore[] {
   const { dimension_scores, dimension_weights } = evaluation.scores;
 
   return Object.entries(dimension_scores).map(([key, score]) => ({
@@ -44,7 +46,7 @@ function transformToCategories(evaluation: CandidateEvaluation): CategoryScore[]
     weight: Math.round((dimension_weights[key] || 0) * 100),
     score: score,
     maxScore: 10,
-    color: dimensionColors[key] || 'emerald',
+    color: dimensionColors[key] || "emerald",
   }));
 }
 
@@ -53,7 +55,8 @@ function transformToConstraints(evaluation: CandidateEvaluation): Constraint[] {
     id: String(i + 1),
     question: c.constraint_text,
     answer: c.evidence,
-    eligible: c.status === 'pass' ? true : c.status === 'fail' ? false : 'review',
+    eligible:
+      c.status === "pass" ? true : c.status === "fail" ? false : "review",
   }));
 }
 
@@ -68,9 +71,10 @@ function computeStats(evaluation: CandidateEvaluation): QuickStats {
     constraintsReview: constraint_analysis.deferred_count,
     constraintsTotal: constraint_analysis.total_assessed,
     redFlagsCount: red_flags.summary.total_flags,
-    redFlagsSeverity: red_flags.summary.total_flags > 0
-      ? `${red_flags.summary.by_severity.investigate || 0} investigate`
-      : undefined,
+    redFlagsSeverity:
+      red_flags.summary.total_flags > 0
+        ? `${red_flags.summary.by_severity.investigate || 0} investigate`
+        : undefined,
   };
 }
 
@@ -83,7 +87,11 @@ interface CandidateStore {
 
   // Actions
   setCurrentCandidate: (id: string) => void;
-  fetchCandidate: (id: string, overviewUrl: string, evaluationUrl: string) => Promise<void>;
+  fetchCandidate: (
+    id: string,
+    overviewUrl: string,
+    evaluationUrl: string
+  ) => Promise<void>;
   getCachedCandidate: (id: string) => CandidateData | undefined;
   clearCache: () => void;
 
@@ -96,7 +104,7 @@ interface CandidateStore {
 export const useCandidateStore = create<CandidateStore>((set, get) => ({
   // Initial state
   currentCandidateId: null,
-  loadingState: 'idle',
+  loadingState: "idle",
   error: null,
 
   // Set current candidate (triggers UI update)
@@ -105,16 +113,20 @@ export const useCandidateStore = create<CandidateStore>((set, get) => ({
   },
 
   // Fetch candidate data (checks cache first)
-  fetchCandidate: async (id: string, overviewUrl: string, evaluationUrl: string) => {
+  fetchCandidate: async (
+    id: string,
+    overviewUrl: string,
+    evaluationUrl: string
+  ) => {
     // Check cache first
     const cached = cache.get(id);
     if (cached) {
-      set({ currentCandidateId: id, loadingState: 'success', error: null });
+      set({ currentCandidateId: id, loadingState: "success", error: null });
       return;
     }
 
     // Fetch from backend
-    set({ loadingState: 'loading', error: null });
+    set({ loadingState: "loading", error: null });
 
     try {
       const [overviewRes, evaluationRes] = await Promise.all([
@@ -123,7 +135,7 @@ export const useCandidateStore = create<CandidateStore>((set, get) => ({
       ]);
 
       if (!overviewRes.ok || !evaluationRes.ok) {
-        throw new Error('Failed to fetch candidate data');
+        throw new Error("Failed to fetch candidate data");
       }
 
       const overview: CandidateOverview = await overviewRes.json();
@@ -144,12 +156,11 @@ export const useCandidateStore = create<CandidateStore>((set, get) => ({
       };
 
       cache.set(id, candidateData);
-      set({ currentCandidateId: id, loadingState: 'success', error: null });
-
+      set({ currentCandidateId: id, loadingState: "success", error: null });
     } catch (err) {
       set({
-        loadingState: 'error',
-        error: err instanceof Error ? err.message : 'Unknown error',
+        loadingState: "error",
+        error: err instanceof Error ? err.message : "Unknown error",
       });
     }
   },
@@ -160,7 +171,7 @@ export const useCandidateStore = create<CandidateStore>((set, get) => ({
   // Clear entire cache
   clearCache: () => {
     cache.clear();
-    set({ loadingState: 'idle', currentCandidateId: null });
+    set({ loadingState: "idle", currentCandidateId: null });
   },
 
   // Get current candidate data
@@ -181,5 +192,6 @@ export const useCurrentCandidate = () => {
   return store.getCurrentCandidate();
 };
 
-export const useLoadingState = () => useCandidateStore((state) => state.loadingState);
+export const useLoadingState = () =>
+  useCandidateStore((state) => state.loadingState);
 export const useError = () => useCandidateStore((state) => state.error);

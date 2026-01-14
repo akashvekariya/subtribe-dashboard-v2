@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
-import { ChevronLeftIcon } from './icons';
-import { EvaluationTabs, type TabId } from './EvaluationTabs';
-import { CandidateList, type CandidateListItem } from './CandidateList';
-import { mapBackendTierToUI } from './utils';
-import { api } from '@/lib/api-client';
-import type { ApplicationStatus, Tier, CandidateSortOption } from './types';
-import './styles.css';
+import React, { memo, useState, useCallback, useEffect } from "react";
+import { ChevronLeftIcon } from "./icons";
+import { EvaluationTabs, type TabId } from "./EvaluationTabs";
+import { CandidateList, type CandidateListItem } from "./CandidateList";
+import { mapBackendTierToUI } from "./utils";
+import { api } from "@/lib/api-client";
+import type { ApplicationStatus, Tier, CandidateSortOption } from "./types";
+import "./styles.css";
 
 interface EvaluationPanelProps {
   jobId: string;
@@ -27,33 +27,53 @@ interface ApplicationListItem {
 }
 
 // Map frontend sort option to API params
-const mapSortToAPI = (sortOption: CandidateSortOption): { sort_by: 'ai_score' | 'applied_at' | 'name'; sort_dir: 'asc' | 'desc' } => {
+const mapSortToAPI = (
+  sortOption: CandidateSortOption
+): {
+  sort_by: "ai_score" | "applied_at" | "name";
+  sort_dir: "asc" | "desc";
+} => {
   switch (sortOption) {
-    case 'score_desc': return { sort_by: 'ai_score', sort_dir: 'desc' };
-    case 'score_asc': return { sort_by: 'ai_score', sort_dir: 'asc' };
-    case 'date_desc': return { sort_by: 'applied_at', sort_dir: 'desc' };
-    case 'date_asc': return { sort_by: 'applied_at', sort_dir: 'asc' };
-    case 'name_asc': return { sort_by: 'name', sort_dir: 'asc' };
-    case 'name_desc': return { sort_by: 'name', sort_dir: 'desc' };
-    default: return { sort_by: 'ai_score', sort_dir: 'desc' };
+    case "score_desc":
+      return { sort_by: "ai_score", sort_dir: "desc" };
+    case "score_asc":
+      return { sort_by: "ai_score", sort_dir: "asc" };
+    case "date_desc":
+      return { sort_by: "applied_at", sort_dir: "desc" };
+    case "date_asc":
+      return { sort_by: "applied_at", sort_dir: "asc" };
+    case "name_asc":
+      return { sort_by: "name", sort_dir: "asc" };
+    case "name_desc":
+      return { sort_by: "name", sort_dir: "desc" };
+    default:
+      return { sort_by: "ai_score", sort_dir: "desc" };
   }
 };
 
 // Map UI tier to backend tier
 const mapUITierToBackend = (uiTier: Tier): string => {
   switch (uiTier) {
-    case 'excellent_match': return 'strong_match';
-    case 'good_match': return 'good_match';
-    case 'average_match': return 'moderate_match';
-    case 'poor_match': return 'weak_match';
-    case 'mismatch': return 'mismatch';
-    default: return '';
+    case "excellent_match":
+      return "strong_match";
+    case "good_match":
+      return "good_match";
+    case "average_match":
+      return "moderate_match";
+    case "poor_match":
+      return "weak_match";
+    case "mismatch":
+      return "mismatch";
+    default:
+      return "";
   }
 };
 
 const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
-  const [currentCandidateId, setCurrentCandidateId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<TabId>('ai');
+  const [currentCandidateId, setCurrentCandidateId] = useState<string | null>(
+    null
+  );
+  const [activeTab, setActiveTab] = useState<TabId>("ai");
   const [isMobileDetailOpen, setIsMobileDetailOpen] = useState(false);
 
   // Candidates list state
@@ -63,9 +83,12 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
 
   // Filter/sort state (controlled from here, passed to CandidateList)
-  const [selectedStatuses, setSelectedStatuses] = useState<ApplicationStatus[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<ApplicationStatus[]>(
+    []
+  );
   const [selectedTiers, setSelectedTiers] = useState<Tier[]>([]);
-  const [sortOption, setSortOption] = useState<CandidateSortOption>('score_desc');
+  const [sortOption, setSortOption] =
+    useState<CandidateSortOption>("score_desc");
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -75,66 +98,73 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
   useEffect(() => {
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', '#ffffff');
+      metaThemeColor.setAttribute("content", "#ffffff");
     } else {
-      const meta = document.createElement('meta');
-      meta.name = 'theme-color';
-      meta.content = '#ffffff';
+      const meta = document.createElement("meta");
+      meta.name = "theme-color";
+      meta.content = "#ffffff";
       document.head.appendChild(meta);
     }
   }, []);
 
   // Fetch candidates from API
-  const fetchCandidates = useCallback(async (
-    statuses: ApplicationStatus[],
-    tiers: Tier[],
-    sort: CandidateSortOption,
-    page: number
-  ) => {
-    setIsListLoading(true);
-    setListError(null);
+  const fetchCandidates = useCallback(
+    async (
+      statuses: ApplicationStatus[],
+      tiers: Tier[],
+      sort: CandidateSortOption,
+      page: number
+    ) => {
+      setIsListLoading(true);
+      setListError(null);
 
-    try {
-      const { sort_by, sort_dir } = mapSortToAPI(sort);
+      try {
+        const { sort_by, sort_dir } = mapSortToAPI(sort);
 
-      // API supports comma-separated statuses and tiers
-      const statusFilter = statuses.length > 0 ? statuses.join(',') : undefined;
-      const tierFilter = tiers.length > 0
-        ? tiers.map(mapUITierToBackend).join(',')
-        : undefined;
+        // API supports comma-separated statuses and tiers
+        const statusFilter =
+          statuses.length > 0 ? statuses.join(",") : undefined;
+        const tierFilter =
+          tiers.length > 0
+            ? tiers.map(mapUITierToBackend).join(",")
+            : undefined;
 
-      const response = await api.applications.getJobApplications(jobId, {
-        status: statusFilter,
-        tier: tierFilter,
-        sort_by,
-        sort_dir,
-        page,
-        limit: 20,
-      });
+        const response = await api.applications.getJobApplications(jobId, {
+          status: statusFilter,
+          tier: tierFilter,
+          sort_by,
+          sort_dir,
+          page,
+          limit: 20,
+        });
 
-      // Transform API response to CandidateListItem format
-      const items: CandidateListItem[] = (response.data as ApplicationListItem[]).map((app) => ({
-        id: app.id,
-        personalInfo: {
-          full_name: `${app.first_name} ${app.last_name}`.trim(),
-          email: app.email,
-          phone: app.phone || undefined,
-        },
-        tier: mapBackendTierToUI(app.evaluation_tier),
-        score: app.evaluation_score !== null ? app.evaluation_score * 10 : 0,
-        appliedDate: app.applied_at,
-        applicationStatus: app.status,
-      }));
+        // Transform API response to CandidateListItem format
+        const items: CandidateListItem[] = (
+          response.data as ApplicationListItem[]
+        ).map((app) => ({
+          id: app.id,
+          personalInfo: {
+            full_name: `${app.first_name} ${app.last_name}`.trim(),
+            email: app.email,
+            phone: app.phone || undefined,
+          },
+          tier: mapBackendTierToUI(app.evaluation_tier),
+          score: app.evaluation_score !== null ? app.evaluation_score * 10 : 0,
+          appliedDate: app.applied_at,
+          applicationStatus: app.status,
+        }));
 
-      setCandidates(items);
-      setTotalItems(response.pagination?.total ?? items.length);
-    } catch (error) {
-      console.error('Failed to fetch candidates:', error);
-      setListError('Failed to load candidates');
-    } finally {
-      setIsListLoading(false);
-    }
-  }, [jobId]);
+        setCandidates(items);
+        setTotalItems(response.pagination?.total ?? items.length);
+      } catch (error) {
+        console.error("Failed to fetch candidates:", error);
+        setListError("Failed to load candidates");
+      } finally {
+        setIsListLoading(false);
+      }
+    },
+    [jobId]
+  );
 
   // Reset page to 1 when filters/sort change
   useEffect(() => {
@@ -144,23 +174,34 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
   // Fetch candidates on mount and when filters/sort/page change
   useEffect(() => {
     fetchCandidates(selectedStatuses, selectedTiers, sortOption, currentPage);
-  }, [fetchCandidates, selectedStatuses, selectedTiers, sortOption, currentPage]);
+  }, [
+    fetchCandidates,
+    selectedStatuses,
+    selectedTiers,
+    sortOption,
+    currentPage,
+  ]);
 
   // Handle status change - call API to update
-  const handleStatusChange = useCallback(async (candidateId: string, status: ApplicationStatus) => {
-    setUpdatingStatusId(candidateId);
-    try {
-      await api.applications.updateApplicationStatus(candidateId, status);
-      // Update local state after success
-      setCandidates(prev =>
-        prev.map(c => (c.id === candidateId ? { ...c, applicationStatus: status } : c))
-      );
-    } catch (error) {
-      console.error('Failed to update status:', error);
-    } finally {
-      setUpdatingStatusId(null);
-    }
-  }, []);
+  const handleStatusChange = useCallback(
+    async (candidateId: string, status: ApplicationStatus) => {
+      setUpdatingStatusId(candidateId);
+      try {
+        await api.applications.updateApplicationStatus(candidateId, status);
+        // Update local state after success
+        setCandidates((prev) =>
+          prev.map((c) =>
+            c.id === candidateId ? { ...c, applicationStatus: status } : c
+          )
+        );
+      } catch (error) {
+        console.error("Failed to update status:", error);
+      } finally {
+        setUpdatingStatusId(null);
+      }
+    },
+    []
+  );
 
   // Close mobile detail panel
   const closeMobileDetail = useCallback(() => {
@@ -170,12 +211,12 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
   // Select a candidate (details not implemented yet)
   const selectCandidate = useCallback((id: string) => {
     setIsMobileDetailOpen(true);
-    setActiveTab('ai');
+    setActiveTab("ai");
     setCurrentCandidateId(id);
   }, []);
 
   // Find selected candidate for email/phone actions
-  const selectedCandidate = candidates.find(c => c.id === currentCandidateId);
+  const selectedCandidate = candidates.find((c) => c.id === currentCandidateId);
 
   return (
     <div className="eval-panel-inline">
@@ -187,7 +228,14 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
             <div className="p-4 text-center">
               <p className="text-red-500 text-sm">{listError}</p>
               <button
-                onClick={() => fetchCandidates(selectedStatuses, selectedTiers, sortOption, currentPage)}
+                onClick={() =>
+                  fetchCandidates(
+                    selectedStatuses,
+                    selectedTiers,
+                    sortOption,
+                    currentPage
+                  )
+                }
                 className="mt-2 text-sm text-blue-600 hover:underline"
               >
                 Try again
@@ -200,17 +248,17 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
               onSelect={selectCandidate}
               onEmailClick={(c) => {
                 if (c.personalInfo.email) {
-                  window.open(`mailto:${c.personalInfo.email}`, '_blank');
+                  window.open(`mailto:${c.personalInfo.email}`, "_blank");
                 }
               }}
               onPhoneClick={(c) => {
                 if (c.personalInfo.phone) {
-                  window.open(`tel:${c.personalInfo.phone}`, '_blank');
+                  window.open(`tel:${c.personalInfo.phone}`, "_blank");
                 }
               }}
               onResumeClick={(c) => {
                 selectCandidate(c.id);
-                setActiveTab('resume');
+                setActiveTab("resume");
               }}
               onStatusChange={handleStatusChange}
               updatingStatusId={updatingStatusId}
@@ -232,7 +280,9 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
         </div>
 
         {/* Main Content */}
-        <div className={`eval-layout-main ${isMobileDetailOpen ? 'mobile-detail-open' : ''}`}>
+        <div
+          className={`eval-layout-main ${isMobileDetailOpen ? "mobile-detail-open" : ""}`}
+        >
           {/* Mobile header with back button and tabs */}
           <div className="eval-mobile-header">
             <button className="eval-mobile-back" onClick={closeMobileDetail}>
@@ -240,14 +290,14 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
             </button>
             <div className="eval-mobile-tabs">
               <button
-                className={`eval-mobile-tab ${activeTab === 'ai' ? 'eval-mobile-tab-active' : ''}`}
-                onClick={() => setActiveTab('ai')}
+                className={`eval-mobile-tab ${activeTab === "ai" ? "eval-mobile-tab-active" : ""}`}
+                onClick={() => setActiveTab("ai")}
               >
                 AI Evaluation
               </button>
               <button
-                className={`eval-mobile-tab ${activeTab === 'resume' ? 'eval-mobile-tab-active' : ''}`}
-                onClick={() => setActiveTab('resume')}
+                className={`eval-mobile-tab ${activeTab === "resume" ? "eval-mobile-tab-active" : ""}`}
+                onClick={() => setActiveTab("resume")}
               >
                 Resume
               </button>
@@ -262,7 +312,7 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
                 {currentCandidateId ? (
                   <>
                     <p className="text-zinc-600 text-lg font-medium">
-                      {selectedCandidate?.personalInfo.full_name || 'Candidate'}
+                      {selectedCandidate?.personalInfo.full_name || "Candidate"}
                     </p>
                     <p className="text-zinc-400 text-sm mt-2">
                       Detailed evaluation view coming soon
@@ -270,7 +320,9 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
                   </>
                 ) : (
                   <>
-                    <p className="text-zinc-400 text-lg">Select a candidate to view details</p>
+                    <p className="text-zinc-400 text-lg">
+                      Select a candidate to view details
+                    </p>
                     <p className="text-zinc-400 text-sm mt-2">
                       Click on a candidate from the list
                     </p>
@@ -285,6 +337,6 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
   );
 });
 
-EvaluationPanel.displayName = 'EvaluationPanel';
+EvaluationPanel.displayName = "EvaluationPanel";
 
 export default EvaluationPanel;

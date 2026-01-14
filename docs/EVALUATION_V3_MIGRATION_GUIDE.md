@@ -33,13 +33,13 @@ The evaluation-v3 component system is a two-panel layout for AI-powered candidat
 
 ### Current Dashboard State
 
-| Aspect | Current Dashboard | New evaluation-v3 |
-|--------|-------------------|-------------------|
-| List Component | `CandidateCard.tsx` | `CandidateList.tsx` (with embedded cards) |
-| Detail View | `ApplicationDetailsDrawer.tsx` | Multiple accordion components |
-| State Management | React hooks only | Zustand store with LRU cache |
-| Score Display | Simple number (0-10) | Animated ring chart with categories |
-| Styling | Tailwind + inline | CSS file + Tailwind |
+| Aspect           | Current Dashboard              | New evaluation-v3                         |
+| ---------------- | ------------------------------ | ----------------------------------------- |
+| List Component   | `CandidateCard.tsx`            | `CandidateList.tsx` (with embedded cards) |
+| Detail View      | `ApplicationDetailsDrawer.tsx` | Multiple accordion components             |
+| State Management | React hooks only               | Zustand store with LRU cache              |
+| Score Display    | Simple number (0-10)           | Animated ring chart with categories       |
+| Styling          | Tailwind + inline              | CSS file + Tailwind                       |
 
 ### Migration Strategy
 
@@ -56,6 +56,7 @@ Full replacement. The new evaluation-v3 UI will completely replace the current A
 4. **No Communications Tab** - The email/communication features are removed in the new design.
 
 **Features NOT included in new UI:**
+
 - Communications tab (emails)
 - Multi-select mode
 - Bulk status changes
@@ -169,60 +170,60 @@ Copy ALL files from the POC evaluation-v3 folder. Here is the complete file list
 
 #### Root Component Files (14 files)
 
-| Source File | Description |
-|-------------|-------------|
-| `ComponentsDebugPage.tsx` | Main orchestrator with mock data |
-| `CandidateList.tsx` | Left panel candidate list |
-| `EvaluationTabs.tsx` | Tab navigation component |
-| `ScoreSummaryPanel.tsx` | Score overview with ring chart |
-| `ScoreRing.tsx` | Animated donut chart |
-| `InsightsCard.tsx` | Strengths and concerns display |
-| `SkillsGrid.tsx` | Skill assessment grid |
-| `ConstraintAccordion.tsx` | Pass/Review/Fail constraints |
-| `InterviewQuestionsAccordion.tsx` | Interview question suggestions |
-| `RedFlagsAccordion.tsx` | Risk assessment flags |
-| `ResumeView.tsx` | Formatted resume display |
-| `StatusPill.tsx` | Status indicator pills |
-| `Skeleton.tsx` | Loading state components |
-| `index.ts` | Central exports |
+| Source File                       | Description                      |
+| --------------------------------- | -------------------------------- |
+| `ComponentsDebugPage.tsx`         | Main orchestrator with mock data |
+| `CandidateList.tsx`               | Left panel candidate list        |
+| `EvaluationTabs.tsx`              | Tab navigation component         |
+| `ScoreSummaryPanel.tsx`           | Score overview with ring chart   |
+| `ScoreRing.tsx`                   | Animated donut chart             |
+| `InsightsCard.tsx`                | Strengths and concerns display   |
+| `SkillsGrid.tsx`                  | Skill assessment grid            |
+| `ConstraintAccordion.tsx`         | Pass/Review/Fail constraints     |
+| `InterviewQuestionsAccordion.tsx` | Interview question suggestions   |
+| `RedFlagsAccordion.tsx`           | Risk assessment flags            |
+| `ResumeView.tsx`                  | Formatted resume display         |
+| `StatusPill.tsx`                  | Status indicator pills           |
+| `Skeleton.tsx`                    | Loading state components         |
+| `index.ts`                        | Central exports                  |
 
 #### Supporting Files (4 files)
 
-| Source File | Description |
-|-------------|-------------|
-| `icons.tsx` | SVG icon components |
-| `colors.ts` | Color definitions |
-| `utils.ts` | Utility functions |
-| `styles.css` | Component styles |
+| Source File  | Description         |
+| ------------ | ------------------- |
+| `icons.tsx`  | SVG icon components |
+| `colors.ts`  | Color definitions   |
+| `utils.ts`   | Utility functions   |
+| `styles.css` | Component styles    |
 
 #### Types Folder (1 file)
 
-| Source File | Description |
-|-------------|-------------|
+| Source File      | Description           |
+| ---------------- | --------------------- |
 | `types/index.ts` | TypeScript interfaces |
 
 #### Config Folder (2 files)
 
-| Source File | Description |
-|-------------|-------------|
-| `config/index.ts` | Config exports |
+| Source File          | Description            |
+| -------------------- | ---------------------- |
+| `config/index.ts`    | Config exports         |
 | `config/variants.ts` | Styling configurations |
 
 #### Shared Folder (4 files)
 
-| Source File | Description |
-|-------------|-------------|
-| `shared/index.ts` | Shared component exports |
-| `shared/AnimatedPill.tsx` | Animated pill component |
-| `shared/PersonalInfoDisplay.tsx` | Contact info display |
-| `shared/SectionHeader.tsx` | Section header component |
+| Source File                      | Description              |
+| -------------------------------- | ------------------------ |
+| `shared/index.ts`                | Shared component exports |
+| `shared/AnimatedPill.tsx`        | Animated pill component  |
+| `shared/PersonalInfoDisplay.tsx` | Contact info display     |
+| `shared/SectionHeader.tsx`       | Section header component |
 
 #### Store Folder (3 files)
 
-| Source File | Description |
-|-------------|-------------|
-| `store/index.ts` | Store exports |
-| `store/types.ts` | Store type definitions |
+| Source File          | Description              |
+| -------------------- | ------------------------ |
+| `store/index.ts`     | Store exports            |
+| `store/types.ts`     | Store type definitions   |
 | `store/lru-cache.ts` | LRU cache implementation |
 
 ### Copy Command
@@ -291,7 +292,7 @@ Add the CSS import to your root layout or the specific page that uses evaluation
 
 ```tsx
 // In src/app/layout.tsx or specific page
-import '@/components/evaluation-v3/styles.css';
+import "@/components/evaluation-v3/styles.css";
 ```
 
 ### Option B: Import in Component
@@ -299,7 +300,7 @@ import '@/components/evaluation-v3/styles.css';
 If you prefer scoped imports, add at the top of ComponentsDebugPage.tsx:
 
 ```tsx
-import './styles.css';
+import "./styles.css";
 ```
 
 ### CSS Variables
@@ -324,7 +325,7 @@ Create a test page to verify the migration works:
 
 ```tsx
 // src/app/(dashboard)/evaluation-debug/page.tsx
-import ComponentsDebugPage from '@/components/evaluation-v3/ComponentsDebugPage';
+import ComponentsDebugPage from "@/components/evaluation-v3/ComponentsDebugPage";
 
 export default function EvaluationDebugPage() {
   return <ComponentsDebugPage />;
@@ -357,12 +358,14 @@ import {
   ResumeView,
   EvaluationTabs,
   useEvaluationTabs,
-} from '@/components/evaluation-v3';
-import '@/components/evaluation-v3/styles.css';
+} from "@/components/evaluation-v3";
+import "@/components/evaluation-v3/styles.css";
 
 // Inside your component:
-const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
-const { activeTab, setActiveTab } = useEvaluationTabs('ai');
+const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(
+  null
+);
+const { activeTab, setActiveTab } = useEvaluationTabs("ai");
 
 // Render the two-panel layout similar to ComponentsDebugPage.tsx
 ```
@@ -442,10 +445,10 @@ function transformToCandidateListItem(app: Application): CandidateListItem {
 }
 
 function scoreTier(score: number): Tier {
-  if (score >= 85) return 'excellent_match';
-  if (score >= 70) return 'good_match';
-  if (score >= 50) return 'average_match';
-  return 'poor_match';
+  if (score >= 85) return "excellent_match";
+  if (score >= 70) return "good_match";
+  if (score >= 50) return "average_match";
+  return "poor_match";
 }
 ```
 
@@ -487,7 +490,7 @@ const mockCandidate = MOCK_CANDIDATES[currentCandidateId];
 
 // Replace with:
 const { data: candidate, isLoading } = useQuery({
-  queryKey: ['candidate', currentCandidateId],
+  queryKey: ["candidate", currentCandidateId],
   queryFn: () => api.applications.getApplicationById(currentCandidateId),
   enabled: !!currentCandidateId,
 });
@@ -499,34 +502,34 @@ const { data: candidate, isLoading } = useQuery({
 
 ### Complete File List with Line Counts
 
-| File | Lines | Purpose |
-|------|-------|---------|
-| `ComponentsDebugPage.tsx` | ~400 | Main orchestrator |
-| `CandidateList.tsx` | ~450 | Left panel list |
-| `EvaluationTabs.tsx` | ~50 | Tab navigation |
-| `ScoreSummaryPanel.tsx` | ~150 | Score display |
-| `ScoreRing.tsx` | ~300 | Animated ring |
-| `InsightsCard.tsx` | ~100 | Key insights |
-| `SkillsGrid.tsx` | ~250 | Skills assessment |
-| `ConstraintAccordion.tsx` | ~150 | Constraints |
-| `InterviewQuestionsAccordion.tsx` | ~120 | Questions |
-| `RedFlagsAccordion.tsx` | ~150 | Red flags |
-| `ResumeView.tsx` | ~350 | Resume display |
-| `StatusPill.tsx` | ~80 | Status indicators |
-| `Skeleton.tsx` | ~200 | Loading states |
-| `icons.tsx` | ~500 | SVG icons |
-| `colors.ts` | ~50 | Color system |
-| `utils.ts` | ~50 | Utilities |
-| `styles.css` | ~800 | CSS styles |
-| `types/index.ts` | ~150 | Type definitions |
-| `config/variants.ts` | ~200 | Config objects |
-| `config/index.ts` | ~10 | Re-exports |
-| `shared/AnimatedPill.tsx` | ~50 | Animated pill |
-| `shared/PersonalInfoDisplay.tsx` | ~100 | Contact display |
-| `shared/SectionHeader.tsx` | ~30 | Section header |
-| `store/index.ts` | ~20 | Store exports |
-| `store/types.ts` | ~60 | Store types |
-| `store/lru-cache.ts` | ~50 | LRU cache |
+| File                              | Lines | Purpose           |
+| --------------------------------- | ----- | ----------------- |
+| `ComponentsDebugPage.tsx`         | ~400  | Main orchestrator |
+| `CandidateList.tsx`               | ~450  | Left panel list   |
+| `EvaluationTabs.tsx`              | ~50   | Tab navigation    |
+| `ScoreSummaryPanel.tsx`           | ~150  | Score display     |
+| `ScoreRing.tsx`                   | ~300  | Animated ring     |
+| `InsightsCard.tsx`                | ~100  | Key insights      |
+| `SkillsGrid.tsx`                  | ~250  | Skills assessment |
+| `ConstraintAccordion.tsx`         | ~150  | Constraints       |
+| `InterviewQuestionsAccordion.tsx` | ~120  | Questions         |
+| `RedFlagsAccordion.tsx`           | ~150  | Red flags         |
+| `ResumeView.tsx`                  | ~350  | Resume display    |
+| `StatusPill.tsx`                  | ~80   | Status indicators |
+| `Skeleton.tsx`                    | ~200  | Loading states    |
+| `icons.tsx`                       | ~500  | SVG icons         |
+| `colors.ts`                       | ~50   | Color system      |
+| `utils.ts`                        | ~50   | Utilities         |
+| `styles.css`                      | ~800  | CSS styles        |
+| `types/index.ts`                  | ~150  | Type definitions  |
+| `config/variants.ts`              | ~200  | Config objects    |
+| `config/index.ts`                 | ~10   | Re-exports        |
+| `shared/AnimatedPill.tsx`         | ~50   | Animated pill     |
+| `shared/PersonalInfoDisplay.tsx`  | ~100  | Contact display   |
+| `shared/SectionHeader.tsx`        | ~30   | Section header    |
+| `store/index.ts`                  | ~20   | Store exports     |
+| `store/types.ts`                  | ~60   | Store types       |
+| `store/lru-cache.ts`              | ~50   | LRU cache         |
 
 ---
 
@@ -648,22 +651,22 @@ interface EvaluationTabsProps {
 
 ### Dashboard to POC Type Mapping
 
-| Dashboard Field | POC Field | Notes |
-|-----------------|-----------|-------|
-| `first_name + last_name` | `name` | Concatenate |
-| `email` | `email` | Direct |
-| `phone` | `phone` | Direct |
-| `ai_score` (0-100) | `score` | Same scale |
-| `status` | `status` | Same enum values |
-| `applied_at` | `appliedAt` | Direct |
-| `linkedin_url` | `personalInfo.linkedin_url` | Nested |
-| `github_url` | `personalInfo.github_url` | Nested |
-| `portfolio_url` | `personalInfo.portfolio_url` | Nested |
-| N/A | `tier` | Compute from score |
-| N/A | `categories` | New API needed |
-| N/A | `constraints` | New API needed |
-| N/A | `redFlags` | New API needed |
-| N/A | `skills` | New API needed |
+| Dashboard Field          | POC Field                    | Notes              |
+| ------------------------ | ---------------------------- | ------------------ |
+| `first_name + last_name` | `name`                       | Concatenate        |
+| `email`                  | `email`                      | Direct             |
+| `phone`                  | `phone`                      | Direct             |
+| `ai_score` (0-100)       | `score`                      | Same scale         |
+| `status`                 | `status`                     | Same enum values   |
+| `applied_at`             | `appliedAt`                  | Direct             |
+| `linkedin_url`           | `personalInfo.linkedin_url`  | Nested             |
+| `github_url`             | `personalInfo.github_url`    | Nested             |
+| `portfolio_url`          | `personalInfo.portfolio_url` | Nested             |
+| N/A                      | `tier`                       | Compute from score |
+| N/A                      | `categories`                 | New API needed     |
+| N/A                      | `constraints`                | New API needed     |
+| N/A                      | `redFlags`                   | New API needed     |
+| N/A                      | `skills`                     | New API needed     |
 
 ### New Data Required
 
@@ -682,12 +685,12 @@ The following data is NOT currently available in the dashboard API and will need
 
 ### Framework Differences
 
-| Aspect | POC (Vite) | Dashboard (Next.js) |
-|--------|------------|---------------------|
-| Build | Vite | Next.js with Turbopack |
-| Routing | None (SPA) | App Router |
-| SSR | No | Yes |
-| CSS | Import in component | Import in layout |
+| Aspect  | POC (Vite)          | Dashboard (Next.js)    |
+| ------- | ------------------- | ---------------------- |
+| Build   | Vite                | Next.js with Turbopack |
+| Routing | None (SPA)          | App Router             |
+| SSR     | No                  | Yes                    |
+| CSS     | Import in component | Import in layout       |
 
 ### Potential Issues
 
@@ -758,13 +761,13 @@ Use this mock data as a reference when building your API transformers.
 
 All CSS classes are namespaced. Key prefixes:
 
-| Prefix | Component |
-|--------|-----------|
-| `eval-` | General evaluation layout |
-| `candidate-` | CandidateList components |
-| `score-panel-` | ScoreSummaryPanel |
-| `insights-` | InsightsCard |
-| `resume-` | ResumeView |
+| Prefix         | Component                 |
+| -------------- | ------------------------- |
+| `eval-`        | General evaluation layout |
+| `candidate-`   | CandidateList components  |
+| `score-panel-` | ScoreSummaryPanel         |
+| `insights-`    | InsightsCard              |
+| `resume-`      | ResumeView                |
 
 ---
 
@@ -773,7 +776,10 @@ All CSS classes are namespaced. Key prefixes:
 The store provides:
 
 ```typescript
-import { useCandidateStore, useCurrentCandidate } from '@/components/evaluation-v3';
+import {
+  useCandidateStore,
+  useCurrentCandidate,
+} from "@/components/evaluation-v3";
 
 // Get current candidate data
 const candidate = useCurrentCandidate();
@@ -799,19 +805,20 @@ Note: The store implementation in the POC uses a simple LRU cache demo. For prod
 
 ### Files Modified in Dashboard
 
-| File | Change |
-|------|--------|
-| `package.json` | Add zustand dependency |
-| `src/app/layout.tsx` | Import styles.css |
-| `src/components/evaluation-v3/` | New folder (all POC files) |
-| `eslint.config.mjs` | Disable display-name rule for evaluation-v3 |
-| `src/components/evaluation-v3/CandidateList.tsx` | Added SearchIcon import |
-| `src/app/(dashboard)/evaluation-debug/page.tsx` | Debug page for testing |
-| `src/app/(dashboard)/jobs/[jobId]/page.tsx` | (Future) Replace Applications tab content |
+| File                                             | Change                                      |
+| ------------------------------------------------ | ------------------------------------------- |
+| `package.json`                                   | Add zustand dependency                      |
+| `src/app/layout.tsx`                             | Import styles.css                           |
+| `src/components/evaluation-v3/`                  | New folder (all POC files)                  |
+| `eslint.config.mjs`                              | Disable display-name rule for evaluation-v3 |
+| `src/components/evaluation-v3/CandidateList.tsx` | Added SearchIcon import                     |
+| `src/app/(dashboard)/evaluation-debug/page.tsx`  | Debug page for testing                      |
+| `src/app/(dashboard)/jobs/[jobId]/page.tsx`      | (Future) Replace Applications tab content   |
 
 ### Timeline Estimate
 
 This migration involves:
+
 - Copying ~28 files
 - Adding 1 dependency
 - Creating data transformers

@@ -845,7 +845,6 @@ export default function JobDetailPage() {
       )}
 
       {activeTab === "applications" && <EvaluationPanel jobId={jobId} />}
-
     </div>
   );
 }

@@ -4,15 +4,48 @@
  */
 
 // Status Types
-export type EligibilityStatus = true | false | 'review';
-export type FlagSeverity = 'concern' | 'investigate' | 'info';
-export type SignalStrength = 'strong' | 'moderate' | 'academic' | 'listed' | 'missing';
-export type SourceType = 'experience' | 'education' | 'project' | 'keyword_only' | 'inferred';
-export type TabId = 'ai' | 'resume';
-export type Tier = 'excellent_match' | 'good_match' | 'average_match' | 'poor_match' | 'mismatch';
-export type PillVariant = 'success' | 'warning' | 'error' | 'info' | 'purple' | 'neutral';
-export type ApplicationStatus = 'applied' | 'screening' | 'interviewing' | 'offer' | 'hired' | 'rejected';
-export type CandidateSortOption = 'score_desc' | 'score_asc' | 'date_desc' | 'date_asc' | 'name_asc' | 'name_desc';
+export type EligibilityStatus = true | false | "review";
+export type FlagSeverity = "concern" | "investigate" | "info";
+export type SignalStrength =
+  | "strong"
+  | "moderate"
+  | "academic"
+  | "listed"
+  | "missing";
+export type SourceType =
+  | "experience"
+  | "education"
+  | "project"
+  | "keyword_only"
+  | "inferred";
+export type TabId = "ai" | "resume";
+export type Tier =
+  | "excellent_match"
+  | "good_match"
+  | "average_match"
+  | "poor_match"
+  | "mismatch";
+export type PillVariant =
+  | "success"
+  | "warning"
+  | "error"
+  | "info"
+  | "purple"
+  | "neutral";
+export type ApplicationStatus =
+  | "applied"
+  | "screening"
+  | "interviewing"
+  | "offer"
+  | "hired"
+  | "rejected";
+export type CandidateSortOption =
+  | "score_desc"
+  | "score_asc"
+  | "date_desc"
+  | "date_asc"
+  | "name_asc"
+  | "name_desc";
 
 // Personal Information (unified across components)
 export interface PersonalInfo {
