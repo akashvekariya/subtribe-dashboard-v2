@@ -10,7 +10,6 @@ import { ExperienceTimeline } from "./experience/ExperienceTimeline";
 import { RedFlagsSection } from "./flags/RedFlagsSection";
 import { AssessmentSummary } from "./summary/AssessmentSummary";
 import { useEvaluationData } from "./useEvaluationData";
-import { getCandidateById } from "@/lib/candidates";
 import type { Application } from "@/types";
 
 interface EvaluationContainerProps {
@@ -170,44 +169,6 @@ export function EvaluationContainer({
     techStackItems,
     experienceTimeline,
   } = useEvaluationData(application, jobFramework);
-
-  // Auto-poll when evaluation is in progress (processing, queued, or pending)
-  const shouldPoll = isProcessing || isPending;
-
-  useEffect(() => {
-    if (!shouldPoll || !application?.id) return;
-
-    const pollInterval = setInterval(async () => {
-      try {
-        const updatedApplication = await getCandidateById(application.id);
-        if (updatedApplication) {
-          // Check if evaluation completed or failed
-          const newStatus = updatedApplication.ai_resume_eval_status;
-          if (
-            newStatus === "completed" ||
-            newStatus === "failed" ||
-            newStatus === "skipped"
-          ) {
-            setApplication(updatedApplication);
-            onApplicationUpdate?.(updatedApplication);
-            clearInterval(pollInterval);
-          } else if (newStatus !== application.ai_resume_eval_status) {
-            // Status changed (e.g., pending -> processing), update state
-            setApplication(updatedApplication);
-          }
-        }
-      } catch (error) {
-        console.error("Polling error:", error);
-      }
-    }, 3000); // Poll every 3 seconds
-
-    return () => clearInterval(pollInterval);
-  }, [
-    shouldPoll,
-    application?.id,
-    application?.ai_resume_eval_status,
-    onApplicationUpdate,
-  ]);
 
   // Handle no application
   if (!application) {

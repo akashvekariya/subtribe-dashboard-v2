@@ -437,6 +437,7 @@ export const applicationsAPI = {
     jobId: string,
     params?: {
       status?: string;
+      tier?: string;
       search?: string;
       sort_by?: "applied_at" | "name" | "status" | "ai_score";
       sort_dir?: "asc" | "desc";
@@ -446,6 +447,7 @@ export const applicationsAPI = {
   ): Promise<PaginatedResponse<Application>> {
     const searchParams = new URLSearchParams();
     if (params?.status) searchParams.append("status", params.status);
+    if (params?.tier) searchParams.append("tier", params.tier);
     if (params?.search) searchParams.append("search", params.search);
     if (params?.sort_by) searchParams.append("sort_by", params.sort_by);
     if (params?.sort_dir) searchParams.append("sort_dir", params.sort_dir);
@@ -533,6 +535,16 @@ export const applicationsAPI = {
     }>;
   }> {
     return apiFetch(`/applications/${id}/scheduled-emails`, {
+      method: "GET",
+    });
+  },
+
+  async getJobApplicationsStats(jobId: string): Promise<{
+    total_candidates: number;
+    by_status: Record<string, number>;
+    by_tier: Record<string, number>;
+  }> {
+    return apiFetch(`/jobs/${jobId}/applications/stats`, {
       method: "GET",
     });
   },

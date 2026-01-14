@@ -72,21 +72,8 @@ export function EvaluationProgressBanner({
     fetchStatus();
   }, [fetchStatus]);
 
-  // Auto-refresh while processing
-  useEffect(() => {
-    if (state !== "processing" && state !== "pending") return;
-
-    const interval = setInterval(async () => {
-      await fetchStatus();
-
-      // Check if just completed
-      if (status?.latest_batch?.status === "completed") {
-        onEvaluationComplete?.();
-      }
-    }, 5000); // Refresh every 5 seconds
-
-    return () => clearInterval(interval);
-  }, [state, fetchStatus, status, onEvaluationComplete]);
+  // TODO: Polling disabled - need to design a better approach for status updates
+  // Previously polled every 5 seconds while processing/pending
 
   // Don't show banner if not calibrated, loading, or no evaluation
   // Evaluations are automatic, so only show during processing/completed/failed
