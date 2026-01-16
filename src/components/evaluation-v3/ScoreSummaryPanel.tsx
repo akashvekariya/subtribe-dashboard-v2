@@ -17,6 +17,7 @@ export interface ScoreSummaryPanelProps {
   stats: QuickStats;
   personalInfo: PersonalInfo;
   className?: string;
+  onRingClick?: (categoryId?: string) => void;
 }
 
 // Stat Card component
@@ -51,6 +52,7 @@ export const ScoreSummaryPanel = memo<ScoreSummaryPanelProps>(
     stats,
     personalInfo,
     className = "",
+    onRingClick,
   }) => {
     const tierInfo = tierConfig[tier];
     const skillPercent = useMemo(
@@ -79,6 +81,7 @@ export const ScoreSummaryPanel = memo<ScoreSummaryPanelProps>(
               categories={categories}
               totalScore={totalScore}
               maxTotalScore={maxTotalScore}
+              onClick={onRingClick}
             />
           </div>
         </div>

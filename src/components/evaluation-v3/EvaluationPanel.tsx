@@ -10,12 +10,15 @@ import { SkillsGrid } from "./SkillsGrid";
 import { ConstraintAccordion } from "./ConstraintAccordion";
 import { RedFlagsAccordion } from "./RedFlagsAccordion";
 import { InterviewQuestionsAccordion } from "./InterviewQuestionsAccordion";
+import { TradeoffsCard } from "./TradeoffsCard";
+import { ManipulationAlert } from "./ManipulationAlert";
 import {
   ScoreSummaryPanelSkeleton,
   InsightsCardSkeleton,
   SkillsGridSkeleton,
   AccordionSkeleton,
 } from "./Skeleton";
+import { DimensionDetailModal } from "./DimensionDetailModal";
 import { mapBackendTierToUI } from "./utils";
 import { useCandidateStore } from "./store";
 import { api } from "@/lib/api-client";
@@ -106,6 +109,10 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+
+  // Dimension detail modal state
+  const [isDimensionModalOpen, setIsDimensionModalOpen] = useState(false);
+  const [dimensionIndex, setDimensionIndex] = useState(0);
 
   // Candidate store for evaluation data
   const {
@@ -232,6 +239,30 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
     setIsMobileDetailOpen(false);
   }, []);
 
+  // Dimension modal handlers
+  const openDimensionModal = useCallback(
+    (categoryId?: string) => {
+      if (categoryId && candidateData) {
+        const idx = candidateData.computed.dimensions.findIndex(
+          (d) => d.id === categoryId
+        );
+        setDimensionIndex(idx >= 0 ? idx : 0);
+      } else {
+        setDimensionIndex(0);
+      }
+      setIsDimensionModalOpen(true);
+    },
+    [candidateData]
+  );
+
+  const closeDimensionModal = useCallback(() => {
+    setIsDimensionModalOpen(false);
+  }, []);
+
+  const navigateDimension = useCallback((index: number) => {
+    setDimensionIndex(index);
+  }, []);
+
   // Select a candidate and fetch their evaluation data
   const selectCandidate = useCallback(
     async (id: string) => {
@@ -314,6 +345,9 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
 
     return (
       <div className="eval-content-scroll">
+        {/* Manipulation Alert - shown only when detected */}
+        <ManipulationAlert manipulationCheck={computed.manipulationCheck} />
+
         {/* Score Summary Panel */}
         <ScoreSummaryPanel
           categories={computed.categories}
@@ -322,6 +356,7 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
           tier={evaluation.scores.tier}
           stats={computed.stats}
           personalInfo={computed.personalInfo}
+          onRingClick={openDimensionModal}
         />
 
         {/* Key Insights */}
@@ -329,6 +364,14 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
           strengths={computed.strengths}
           concerns={computed.concerns}
         />
+
+        {/* Candidate Profile / Tradeoffs */}
+        {computed.tradeoffs.length > 0 && (
+          <TradeoffsCard
+            tradeoffs={computed.tradeoffs}
+            summary={computed.tradeoffsSummary}
+          />
+        )}
 
         {/* Skills Grid */}
         <SkillsGrid
@@ -465,6 +508,17 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
           </div>
         </div>
       </div>
+
+      {/* Dimension Detail Modal */}
+      {isDimensionModalOpen && candidateData && (
+        <DimensionDetailModal
+          dimensions={candidateData.computed.dimensions}
+          currentIndex={dimensionIndex}
+          totalScore={candidateData.evaluation.scores.final_score}
+          onClose={closeDimensionModal}
+          onNavigate={navigateDimension}
+        />
+      )}
     </div>
   );
 });

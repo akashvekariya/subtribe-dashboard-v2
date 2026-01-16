@@ -69,6 +69,21 @@ export interface CategoryScore {
   color: string;
 }
 
+// Dimension Detail (full data from API for modal)
+export type DimensionLevel = "strong" | "good" | "moderate" | "weak" | "poor";
+
+export interface DimensionDetail {
+  id: string;
+  label: string;
+  score: number;
+  weight: number;
+  level: DimensionLevel;
+  reasoning: string;
+  positive_signals: string[];
+  negative_signals: string[];
+  color: string;
+}
+
 // Constraint Types
 export interface Constraint {
   id: string;
@@ -109,6 +124,30 @@ export interface MissingSkill {
   skill_name: string;
   category: string;
   is_dealbreaker: boolean;
+}
+
+// Tradeoff Types
+export type TradeoffDirection = "option_a" | "option_b" | "balanced";
+
+export interface Tradeoff {
+  id: string;
+  title: string;
+  optionA: string;
+  optionB: string;
+  direction: TradeoffDirection;
+  evidence: string;
+}
+
+export interface TradeoffsSummary {
+  total: number;
+  aligned: number;
+  misaligned: number;
+}
+
+// Manipulation Check Types
+export interface ManipulationCheck {
+  detected: boolean;
+  details: string | null;
 }
 
 // Stats Types

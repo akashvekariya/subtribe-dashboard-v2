@@ -1186,6 +1186,20 @@ export interface ApplicationEvaluationData {
     total_seconds: number;
   };
 
+  // Tradeoffs analysis
+  tradeoffs: {
+    signals: Array<{
+      tradeoff_title: string;
+      direction: "option_a" | "option_b" | "balanced";
+      evidence: string;
+    }>;
+    summary: {
+      total: number;
+      aligned: number;
+      misaligned: number;
+    };
+  };
+
   // Blockers array (optional - only present if there are blockers)
   blockers?: Array<{
     type:

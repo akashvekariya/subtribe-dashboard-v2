@@ -11,10 +11,12 @@ import type {
 } from "./types";
 import type {
   CategoryScore,
+  DimensionDetail,
   InterviewQuestion,
   SignalStrength,
   SkillMatch,
   RedFlag,
+  Tradeoff,
 } from "../types";
 import type { Constraint } from "../ConstraintAccordion";
 import type { QuickStats } from "../ScoreSummaryPanel";
@@ -75,6 +77,27 @@ function transformToCategories(
     .sort((a, b) => b.weight - a.weight); // Largest weight first
 }
 
+// Transform dimensions from API to full DimensionDetail format for modal
+// Sort by weight descending to match categories order
+function transformToDimensions(
+  dimensions: ApplicationEvaluationData["dimensions"]
+): DimensionDetail[] {
+  return Object.entries(dimensions)
+    .map(([key, dim]) => ({
+      id: key,
+      label: dim.label || dimensionNames[key] || key,
+      score: dim.score,
+      weight: Math.round(dim.weight * 100),
+      level: dim.level,
+      reasoning: dim.reasoning,
+      // Backend may omit these arrays when empty, so default to []
+      positive_signals: dim.positive_signals ?? [],
+      negative_signals: dim.negative_signals ?? [],
+      color: dimensionColors[key] || "emerald",
+    }))
+    .sort((a, b) => b.weight - a.weight); // Largest weight first
+}
+
 function transformToConstraints(
   constraintResults: ApplicationEvaluationData["constraints"]["results"]
 ): Constraint[] {
@@ -130,6 +153,36 @@ function transformRedFlags(
     context: flag.context || undefined,
     interview_probe: flag.interview_probe,
   }));
+}
+
+// Parse tradeoff title into option_a and option_b (format: "Option A vs. Option B")
+function parseTradeoffTitle(title: string): {
+  optionA: string;
+  optionB: string;
+} {
+  const parts = title.split(" vs. ");
+  if (parts.length === 2) {
+    return { optionA: parts[0].trim(), optionB: parts[1].trim() };
+  }
+  // Fallback if format is different
+  return { optionA: title, optionB: "" };
+}
+
+// Transform backend tradeoffs to frontend format
+function transformTradeoffs(
+  backendTradeoffs: ApplicationEvaluationData["tradeoffs"]["signals"]
+): Tradeoff[] {
+  return backendTradeoffs.map((t, i) => {
+    const { optionA, optionB } = parseTradeoffTitle(t.tradeoff_title);
+    return {
+      id: String(i + 1),
+      title: t.tradeoff_title,
+      optionA,
+      optionB,
+      direction: t.direction,
+      evidence: t.evidence,
+    };
+  });
 }
 
 // Transform backend interview questions to frontend format
@@ -280,12 +333,23 @@ export const useCandidateStore = create<CandidateStore>((set, get) => ({
         evaluation,
         computed: {
           categories: transformToCategories(apiData.dimensions),
+          dimensions: transformToDimensions(apiData.dimensions),
           constraints: transformToConstraints(apiData.constraints.results),
           stats: computeStats(apiData),
           personalInfo: overview.personal_info,
           interviewQuestions: evaluation.summary.interview_questions,
           strengths: evaluation.summary.strengths,
           concerns: evaluation.summary.concerns,
+          tradeoffs: transformTradeoffs(apiData.tradeoffs?.signals ?? []),
+          tradeoffsSummary: apiData.tradeoffs?.summary ?? {
+            total: 0,
+            aligned: 0,
+            misaligned: 0,
+          },
+          manipulationCheck: {
+            detected: apiData.manipulation_check?.detected ?? false,
+            details: apiData.manipulation_check?.details ?? null,
+          },
         },
         fetchedAt: Date.now(),
       };

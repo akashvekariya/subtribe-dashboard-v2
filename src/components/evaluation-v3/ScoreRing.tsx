@@ -19,6 +19,7 @@ interface ScoreRingProps {
   size?: number;
   strokeWidth?: number;
   gapDegrees?: number;
+  onClick?: (categoryId?: string) => void;
 }
 
 // SVG Arc utilities
@@ -209,6 +210,7 @@ export const ScoreRing = memo<ScoreRingProps>(
     size = 280,
     strokeWidth = 24,
     gapDegrees = 2,
+    onClick,
   }) => {
     const [hoveredId, setHoveredId] = useState<string | null>(null);
     const [pulseId, setPulseId] = useState<string | null>(null);
@@ -307,7 +309,21 @@ export const ScoreRing = memo<ScoreRingProps>(
     return (
       <div
         className="relative inline-flex items-center justify-center overflow-hidden"
-        style={{ width: expandSize, height: expandSize }}
+        style={{
+          width: expandSize,
+          height: expandSize,
+          cursor: onClick ? "pointer" : undefined,
+        }}
+        onClick={onClick ? () => onClick() : undefined}
+        role={onClick ? "button" : undefined}
+        tabIndex={onClick ? 0 : undefined}
+        onKeyDown={
+          onClick
+            ? (e) => {
+                if (e.key === "Enter" || e.key === " ") onClick();
+              }
+            : undefined
+        }
       >
         <svg
           width={expandSize}
@@ -371,9 +387,17 @@ export const ScoreRing = memo<ScoreRingProps>(
                 6
               )}
               fill="transparent"
-              style={{ cursor: "pointer" }}
+              style={{ cursor: onClick ? "pointer" : undefined }}
               onMouseEnter={() => handleMouseEnter(s.id)}
               onMouseLeave={handleMouseLeave}
+              onClick={
+                onClick
+                  ? (e) => {
+                      e.stopPropagation();
+                      onClick(s.id);
+                    }
+                  : undefined
+              }
             />
           ))}
 

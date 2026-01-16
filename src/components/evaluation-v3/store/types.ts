@@ -11,6 +11,10 @@ import type {
   QuickStats,
   Tier,
   InterviewQuestion,
+  DimensionDetail,
+  Tradeoff,
+  TradeoffsSummary,
+  ManipulationCheck,
 } from "../types";
 
 // Re-export Tier for convenience
@@ -60,12 +64,16 @@ export interface CandidateData {
   // Pre-computed for components
   computed: {
     categories: CategoryScore[];
+    dimensions: DimensionDetail[];
     constraints: Constraint[];
     stats: QuickStats;
     personalInfo: PersonalInfo;
     interviewQuestions: InterviewQuestion[];
     strengths: string[];
     concerns: string[];
+    tradeoffs: Tradeoff[];
+    tradeoffsSummary: TradeoffsSummary;
+    manipulationCheck: ManipulationCheck;
   };
   fetchedAt: number;
 }
