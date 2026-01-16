@@ -9,7 +9,13 @@ import type {
   CandidateEvaluation,
   LoadingState,
 } from "./types";
-import type { CategoryScore, InterviewQuestion, SignalStrength, SkillMatch, RedFlag } from "../types";
+import type {
+  CategoryScore,
+  InterviewQuestion,
+  SignalStrength,
+  SkillMatch,
+  RedFlag,
+} from "../types";
 import type { Constraint } from "../ConstraintAccordion";
 import type { QuickStats } from "../ScoreSummaryPanel";
 import {
@@ -167,14 +173,18 @@ function transformBackendToEvaluation(
     summary: {
       strengths: data.summary.strengths,
       concerns: data.summary.concerns,
-      interview_questions: transformInterviewQuestions(data.summary.interview_questions),
+      interview_questions: transformInterviewQuestions(
+        data.summary.interview_questions
+      ),
     },
   };
 }
 
 // Create mock overview since we don't have the endpoint yet
 // TODO: Remove when overview endpoint is implemented
-function createMockOverview(meta: ApplicationEvaluationMeta): CandidateOverview {
+function createMockOverview(
+  meta: ApplicationEvaluationMeta
+): CandidateOverview {
   return {
     personal_info: {
       full_name: meta.candidate_name,
@@ -226,16 +236,25 @@ export const useCandidateStore = create<CandidateStore>((set, get) => ({
     // Check cache first
     const cached = cache.get(applicationId);
     if (cached) {
-      set({ currentCandidateId: applicationId, loadingState: "success", error: null });
+      set({
+        currentCandidateId: applicationId,
+        loadingState: "success",
+        error: null,
+      });
       return;
     }
 
     // Fetch from backend
-    set({ loadingState: "loading", error: null, currentCandidateId: applicationId });
+    set({
+      loadingState: "loading",
+      error: null,
+      currentCandidateId: applicationId,
+    });
 
     try {
       // Fetch evaluation data from API
-      const response = await api.aiResumeEval.getApplicationEvaluation(applicationId);
+      const response =
+        await api.aiResumeEval.getApplicationEvaluation(applicationId);
 
       // Handle case where evaluation is not yet available
       if (!response.data) {
@@ -272,7 +291,11 @@ export const useCandidateStore = create<CandidateStore>((set, get) => ({
       };
 
       cache.set(applicationId, candidateData);
-      set({ currentCandidateId: applicationId, loadingState: "success", error: null });
+      set({
+        currentCandidateId: applicationId,
+        loadingState: "success",
+        error: null,
+      });
     } catch (err) {
       set({
         loadingState: "error",

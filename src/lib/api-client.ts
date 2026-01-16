@@ -1020,7 +1020,13 @@ export interface ApplicationEvaluationMeta {
   job_id: string;
   job_title: string;
   evaluated_at: string | null;
-  status: "pending" | "queued" | "processing" | "completed" | "failed" | "skipped";
+  status:
+    | "pending"
+    | "queued"
+    | "processing"
+    | "completed"
+    | "failed"
+    | "skipped";
 }
 
 // Dimension assessment structure (same for all 5 dimensions)
@@ -1037,10 +1043,20 @@ export interface DimensionAssessment {
 // Skill match from backend
 export interface SkillMatchData {
   skill_name: string;
-  source_type: "experience" | "project" | "education" | "inferred" | "keyword_only";
+  source_type:
+    | "experience"
+    | "project"
+    | "education"
+    | "inferred"
+    | "keyword_only";
   source_reference: string;
   evidence: string;
-  signal_strength: "strong" | "demonstrated" | "contextual" | "academic" | "listed";
+  signal_strength:
+    | "strong"
+    | "demonstrated"
+    | "contextual"
+    | "academic"
+    | "listed";
   is_dealbreaker: boolean;
 }
 
@@ -1060,7 +1076,12 @@ export interface ConstraintResultData {
 
 // Red flag from backend
 export interface RedFlagData {
-  flag_type: "short_tenure" | "employment_gap" | "title_experience_mismatch" | "vague_contributions" | "unverifiable_claims";
+  flag_type:
+    | "short_tenure"
+    | "employment_gap"
+    | "title_experience_mismatch"
+    | "vague_contributions"
+    | "unverifiable_claims";
   severity: "info" | "investigate" | "concern";
   details: string;
   context?: string | null;
@@ -1079,7 +1100,12 @@ export interface ApplicationEvaluationData {
   // Top-level scoring summary
   scores: {
     final_score: number;
-    tier: "strong_match" | "good_match" | "moderate_match" | "weak_match" | "mismatch";
+    tier:
+      | "strong_match"
+      | "good_match"
+      | "moderate_match"
+      | "weak_match"
+      | "mismatch";
     is_dealbreaker: boolean;
     is_flagged: boolean;
     can_proceed: boolean;
@@ -1162,7 +1188,10 @@ export interface ApplicationEvaluationData {
 
   // Blockers array (optional - only present if there are blockers)
   blockers?: Array<{
-    type: "manipulation_attempt" | "dealbreaker_skill" | "dealbreaker_constraint";
+    type:
+      | "manipulation_attempt"
+      | "dealbreaker_skill"
+      | "dealbreaker_constraint";
     description?: string;
     skill_id?: string;
     reason?: string;

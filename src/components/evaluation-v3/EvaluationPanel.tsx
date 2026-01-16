@@ -301,9 +301,7 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
     if (!candidateData) {
       return (
         <div className="text-center py-20">
-          <p className="text-zinc-400 text-lg">
-            Evaluation data not available
-          </p>
+          <p className="text-zinc-400 text-lg">Evaluation data not available</p>
           <p className="text-zinc-400 text-sm mt-2">
             This candidate may not have been evaluated yet
           </p>
@@ -350,7 +348,9 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
 
         {/* Interview Questions */}
         {computed.interviewQuestions.length > 0 && (
-          <InterviewQuestionsAccordion questions={computed.interviewQuestions} />
+          <InterviewQuestionsAccordion
+            questions={computed.interviewQuestions}
+          />
         )}
       </div>
     );
