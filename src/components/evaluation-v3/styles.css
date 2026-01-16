@@ -2767,6 +2767,13 @@
   overflow-y: auto;
 }
 
+/* Content scroll container with gap between components */
+.eval-content-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eval-spacing-lg);
+}
+
 /* Mobile header - hidden on desktop */
 .eval-mobile-header {
   display: none;

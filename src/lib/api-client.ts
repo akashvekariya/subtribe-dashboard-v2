@@ -998,7 +998,185 @@ const aiResumeEvalAPI = {
       method: "POST",
     });
   },
+
+  /**
+   * Get evaluation detail for a specific application
+   * Returns full evaluation data including scores, skills, constraints, red flags, etc.
+   */
+  async getApplicationEvaluation(applicationId: string): Promise<{
+    data: ApplicationEvaluationData | null;
+    meta: ApplicationEvaluationMeta;
+  }> {
+    return apiFetch(`/api/ai-resume-eval/applications/${applicationId}`, {
+      method: "GET",
+    });
+  },
 };
+
+// Types for application evaluation response
+export interface ApplicationEvaluationMeta {
+  application_id: string;
+  candidate_name: string;
+  job_id: string;
+  job_title: string;
+  evaluated_at: string | null;
+  status: "pending" | "queued" | "processing" | "completed" | "failed" | "skipped";
+}
+
+// Dimension assessment structure (same for all 5 dimensions)
+export interface DimensionAssessment {
+  score: number;
+  weight: number;
+  level: "strong" | "good" | "moderate" | "weak" | "poor";
+  label: string;
+  reasoning: string;
+  positive_signals: string[];
+  negative_signals: string[];
+}
+
+// Skill match from backend
+export interface SkillMatchData {
+  skill_name: string;
+  source_type: "experience" | "project" | "education" | "inferred" | "keyword_only";
+  source_reference: string;
+  evidence: string;
+  signal_strength: "strong" | "demonstrated" | "contextual" | "academic" | "listed";
+  is_dealbreaker: boolean;
+}
+
+// Missing skill from backend
+export interface MissingSkillData {
+  skill_name: string;
+  category: string;
+  is_dealbreaker: boolean;
+}
+
+// Constraint result from backend
+export interface ConstraintResultData {
+  constraint_text: string;
+  status: "pass" | "fail" | "deferred";
+  evidence: string;
+}
+
+// Red flag from backend
+export interface RedFlagData {
+  flag_type: "short_tenure" | "employment_gap" | "title_experience_mismatch" | "vague_contributions" | "unverifiable_claims";
+  severity: "info" | "investigate" | "concern";
+  details: string;
+  context?: string | null;
+  interview_probe: string;
+}
+
+// Interview question from backend
+export interface InterviewQuestionData {
+  question: string;
+  gap_addressed: string;
+  resume_reference: string;
+}
+
+// New schema structure matching evaluation_response_schema.json
+export interface ApplicationEvaluationData {
+  // Top-level scoring summary
+  scores: {
+    final_score: number;
+    tier: "strong_match" | "good_match" | "moderate_match" | "weak_match" | "mismatch";
+    is_dealbreaker: boolean;
+    is_flagged: boolean;
+    can_proceed: boolean;
+    verification_confidence: "high" | "medium" | "low";
+  };
+
+  // High-level candidate summary (root level)
+  summary: {
+    strengths: string[];
+    concerns: string[];
+    interview_questions: InterviewQuestionData[];
+  };
+
+  // Dimension assessments (root level object with 5 dimensions)
+  dimensions: {
+    technical_fit: DimensionAssessment;
+    experience_fit: DimensionAssessment;
+    trajectory_fit: DimensionAssessment;
+    culture_fit: DimensionAssessment;
+    problem_solving_fit: DimensionAssessment;
+  };
+
+  // Skills section with summary, matches, and missing
+  skills: {
+    summary: {
+      total: number;
+      matched: number;
+      coverage: number;
+      source_breakdown: {
+        experience: number;
+        project: number;
+        education: number;
+        inferred: number;
+        keyword_only: number;
+      };
+      keyword_stuffing_flag: boolean;
+    };
+    matches: SkillMatchData[];
+    missing: MissingSkillData[];
+  };
+
+  // Constraints section with summary and results
+  constraints: {
+    summary: {
+      passed: number;
+      failed: number;
+      deferred: number;
+      total: number;
+    };
+    results: ConstraintResultData[];
+  };
+
+  // Red flags section
+  red_flags: {
+    summary: {
+      total_flags: number;
+      by_severity: {
+        info: number;
+        investigate: number;
+        concern: number;
+      };
+      by_type: Record<string, number>;
+      summary: string;
+      verification_confidence: "high" | "medium" | "low";
+    };
+    flags: RedFlagData[];
+  };
+
+  // Manipulation check
+  manipulation_check: {
+    detected: boolean;
+    details?: string | null;
+  };
+
+  // Timing info
+  timing: {
+    evaluation_seconds: number;
+    total_seconds: number;
+  };
+
+  // Blockers array (optional - only present if there are blockers)
+  blockers?: Array<{
+    type: "manipulation_attempt" | "dealbreaker_skill" | "dealbreaker_constraint";
+    description?: string;
+    skill_id?: string;
+    reason?: string;
+    details?: string;
+    evidence?: string;
+  }>;
+
+  // Warnings array (optional)
+  warnings?: Array<{
+    type: string;
+    severity: "info" | "medium" | "critical";
+    message: string;
+  }>;
+}
 
 export const api = {
   auth: authAPI,

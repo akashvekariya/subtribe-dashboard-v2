@@ -4,7 +4,20 @@ import React, { memo, useState, useCallback, useEffect } from "react";
 import { ChevronLeftIcon } from "./icons";
 import { EvaluationTabs, type TabId } from "./EvaluationTabs";
 import { CandidateList, type CandidateListItem } from "./CandidateList";
+import { ScoreSummaryPanel } from "./ScoreSummaryPanel";
+import { InsightsCard } from "./InsightsCard";
+import { SkillsGrid } from "./SkillsGrid";
+import { ConstraintAccordion } from "./ConstraintAccordion";
+import { RedFlagsAccordion } from "./RedFlagsAccordion";
+import { InterviewQuestionsAccordion } from "./InterviewQuestionsAccordion";
+import {
+  ScoreSummaryPanelSkeleton,
+  InsightsCardSkeleton,
+  SkillsGridSkeleton,
+  AccordionSkeleton,
+} from "./Skeleton";
 import { mapBackendTierToUI } from "./utils";
+import { useCandidateStore } from "./store";
 import { api } from "@/lib/api-client";
 import type { ApplicationStatus, Tier, CandidateSortOption } from "./types";
 import "./styles.css";
@@ -93,6 +106,17 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+
+  // Candidate store for evaluation data
+  const {
+    fetchCandidate,
+    getCurrentCandidate,
+    loadingState: evaluationLoadingState,
+    error: evaluationError,
+  } = useCandidateStore();
+
+  // Get current candidate data from store
+  const candidateData = getCurrentCandidate();
 
   // Set theme-color meta tag for mobile browsers
   useEffect(() => {
@@ -208,15 +232,141 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
     setIsMobileDetailOpen(false);
   }, []);
 
-  // Select a candidate (details not implemented yet)
-  const selectCandidate = useCallback((id: string) => {
-    setIsMobileDetailOpen(true);
-    setActiveTab("ai");
-    setCurrentCandidateId(id);
-  }, []);
+  // Select a candidate and fetch their evaluation data
+  const selectCandidate = useCallback(
+    async (id: string) => {
+      setIsMobileDetailOpen(true);
+      setActiveTab("ai");
+      setCurrentCandidateId(id);
+      // Fetch evaluation data (uses cache if available)
+      await fetchCandidate(id);
+    },
+    [fetchCandidate]
+  );
 
-  // Find selected candidate for email/phone actions
-  const selectedCandidate = candidates.find((c) => c.id === currentCandidateId);
+  // selectedCandidate can be used for additional actions if needed
+  // const selectedCandidate = candidates.find((c) => c.id === currentCandidateId);
+
+  // Render AI Evaluation content
+  const renderAIEvaluationContent = () => {
+    // No candidate selected
+    if (!currentCandidateId) {
+      return (
+        <div className="text-center py-20">
+          <p className="text-zinc-400 text-lg">
+            Select a candidate to view details
+          </p>
+          <p className="text-zinc-400 text-sm mt-2">
+            Click on a candidate from the list
+          </p>
+        </div>
+      );
+    }
+
+    // Loading state
+    if (evaluationLoadingState === "loading") {
+      return (
+        <div className="eval-content-scroll">
+          <ScoreSummaryPanelSkeleton />
+          <InsightsCardSkeleton />
+          <SkillsGridSkeleton />
+          <AccordionSkeleton title="Constraints" />
+          <AccordionSkeleton title="Red Flags" />
+          <AccordionSkeleton title="Interview Questions" />
+        </div>
+      );
+    }
+
+    // Error state
+    if (evaluationLoadingState === "error") {
+      return (
+        <div className="text-center py-20">
+          <p className="text-red-500 text-lg font-medium">
+            Failed to load evaluation
+          </p>
+          <p className="text-zinc-400 text-sm mt-2">
+            {evaluationError || "Unknown error occurred"}
+          </p>
+          <button
+            onClick={() => fetchCandidate(currentCandidateId)}
+            className="mt-4 px-4 py-2 bg-zinc-100 hover:bg-zinc-200 rounded-lg text-sm text-zinc-700 transition-colors"
+          >
+            Try again
+          </button>
+        </div>
+      );
+    }
+
+    // No data available
+    if (!candidateData) {
+      return (
+        <div className="text-center py-20">
+          <p className="text-zinc-400 text-lg">
+            Evaluation data not available
+          </p>
+          <p className="text-zinc-400 text-sm mt-2">
+            This candidate may not have been evaluated yet
+          </p>
+        </div>
+      );
+    }
+
+    // Render full evaluation view
+    const { computed, evaluation } = candidateData;
+
+    return (
+      <div className="eval-content-scroll">
+        {/* Score Summary Panel */}
+        <ScoreSummaryPanel
+          categories={computed.categories}
+          totalScore={evaluation.scores.final_score}
+          maxTotalScore={10}
+          tier={evaluation.scores.tier}
+          stats={computed.stats}
+          personalInfo={computed.personalInfo}
+        />
+
+        {/* Key Insights */}
+        <InsightsCard
+          strengths={computed.strengths}
+          concerns={computed.concerns}
+        />
+
+        {/* Skills Grid */}
+        <SkillsGrid
+          skills={evaluation.skills.matches}
+          matchedCount={computed.stats.skillsMatched}
+          totalSkills={computed.stats.skillsTotal}
+          missingSkills={evaluation.skills.missing}
+        />
+
+        {/* Constraints */}
+        <ConstraintAccordion constraints={computed.constraints} />
+
+        {/* Red Flags */}
+        {evaluation.red_flags.flags.length > 0 && (
+          <RedFlagsAccordion flags={evaluation.red_flags.flags} />
+        )}
+
+        {/* Interview Questions */}
+        {computed.interviewQuestions.length > 0 && (
+          <InterviewQuestionsAccordion questions={computed.interviewQuestions} />
+        )}
+      </div>
+    );
+  };
+
+  // Render Resume tab content (placeholder for now)
+  const renderResumeContent = () => {
+    return (
+      <div className="text-center py-20">
+        <p className="text-zinc-400 text-lg">Resume view coming soon</p>
+        <p className="text-zinc-400 text-sm mt-2">
+          Resume parsing endpoint not yet implemented
+        </p>
+      </div>
+    );
+  };
 
   return (
     <div className="eval-panel-inline">
@@ -304,31 +454,13 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
             </div>
           </div>
 
-          {/* Placeholder - candidate details not implemented yet */}
+          {/* Tabs and Content */}
           <div className="eval-tabs-container">
             <EvaluationTabs activeTab={activeTab} onTabChange={setActiveTab} />
             <div className="eval-tabs-content">
-              <div className="text-center py-20">
-                {currentCandidateId ? (
-                  <>
-                    <p className="text-zinc-600 text-lg font-medium">
-                      {selectedCandidate?.personalInfo.full_name || "Candidate"}
-                    </p>
-                    <p className="text-zinc-400 text-sm mt-2">
-                      Detailed evaluation view coming soon
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-zinc-400 text-lg">
-                      Select a candidate to view details
-                    </p>
-                    <p className="text-zinc-400 text-sm mt-2">
-                      Click on a candidate from the list
-                    </p>
-                  </>
-                )}
-              </div>
+              {activeTab === "ai"
+                ? renderAIEvaluationContent()
+                : renderResumeContent()}
             </div>
           </div>
         </div>

@@ -8,11 +8,16 @@ import type {
   CandidateOverview,
   CandidateEvaluation,
   LoadingState,
-  Tier,
 } from "./types";
-import type { CategoryScore } from "../ScoreRing";
+import type { CategoryScore, InterviewQuestion, SignalStrength, SkillMatch, RedFlag } from "../types";
 import type { Constraint } from "../ConstraintAccordion";
-import type { QuickStats, PersonalInfo } from "../ScoreSummaryPanel";
+import type { QuickStats } from "../ScoreSummaryPanel";
+import {
+  api,
+  type ApplicationEvaluationData,
+  type ApplicationEvaluationMeta,
+} from "@/lib/api-client";
+import { mapBackendTierToUI } from "../utils";
 
 // LRU Cache instance (max 7 candidates)
 const cache = new LRUCache<CandidateData>(7);
@@ -34,24 +39,40 @@ const dimensionNames: Record<string, string> = {
   culture_fit: "Culture Fit",
 };
 
-// Transform raw API data to component-ready format
-function transformToCategories(
-  evaluation: CandidateEvaluation
-): CategoryScore[] {
-  const { dimension_scores, dimension_weights } = evaluation.scores;
-
-  return Object.entries(dimension_scores).map(([key, score]) => ({
-    id: key,
-    name: dimensionNames[key] || key,
-    weight: Math.round((dimension_weights[key] || 0) * 100),
-    score: score,
-    maxScore: 10,
-    color: dimensionColors[key] || "emerald",
-  }));
+// Map backend signal strength to frontend SignalStrength type
+function mapSignalStrength(backendSignal: string): SignalStrength {
+  const signalMap: Record<string, SignalStrength> = {
+    strong: "strong",
+    demonstrated: "strong",
+    academic: "academic",
+    contextual: "moderate",
+    listed: "listed",
+    missing: "missing",
+  };
+  return signalMap[backendSignal] || "listed";
 }
 
-function transformToConstraints(evaluation: CandidateEvaluation): Constraint[] {
-  return evaluation.evaluation.constraint_results.map((c, i) => ({
+// Transform dimensions from API to component-ready CategoryScore format
+// Sort by weight descending so largest segment starts at 12 o'clock
+function transformToCategories(
+  dimensions: ApplicationEvaluationData["dimensions"]
+): CategoryScore[] {
+  return Object.entries(dimensions)
+    .map(([key, dim]) => ({
+      id: key,
+      name: dim.label || dimensionNames[key] || key,
+      weight: Math.round(dim.weight * 100),
+      score: dim.score,
+      maxScore: 10,
+      color: dimensionColors[key] || "emerald",
+    }))
+    .sort((a, b) => b.weight - a.weight); // Largest weight first
+}
+
+function transformToConstraints(
+  constraintResults: ApplicationEvaluationData["constraints"]["results"]
+): Constraint[] {
+  return constraintResults.map((c, i) => ({
     id: String(i + 1),
     question: c.constraint_text,
     answer: c.evidence,
@@ -60,21 +81,113 @@ function transformToConstraints(evaluation: CandidateEvaluation): Constraint[] {
   }));
 }
 
-function computeStats(evaluation: CandidateEvaluation): QuickStats {
-  const { skill_analysis, constraint_analysis } = evaluation.analysis;
-  const { red_flags } = evaluation;
+function computeStats(data: ApplicationEvaluationData): QuickStats {
+  const { skills, constraints, red_flags } = data;
 
   return {
-    skillsMatched: skill_analysis.matched_count,
-    skillsTotal: skill_analysis.total_skills,
-    constraintsPassed: constraint_analysis.passed_count,
-    constraintsReview: constraint_analysis.deferred_count,
-    constraintsTotal: constraint_analysis.total_assessed,
+    skillsMatched: skills.summary.matched,
+    skillsTotal: skills.summary.total,
+    constraintsPassed: constraints.summary.passed,
+    constraintsReview: constraints.summary.deferred,
+    constraintsTotal: constraints.summary.total,
     redFlagsCount: red_flags.summary.total_flags,
     redFlagsSeverity:
       red_flags.summary.total_flags > 0
         ? `${red_flags.summary.by_severity.investigate || 0} investigate`
         : undefined,
+  };
+}
+
+// Transform backend skill matches to frontend format
+function transformSkillMatches(
+  backendSkills: ApplicationEvaluationData["skills"]["matches"]
+): SkillMatch[] {
+  return backendSkills.map((skill) => ({
+    skill_name: skill.skill_name,
+    signal_strength: mapSignalStrength(skill.signal_strength),
+    source_type: skill.source_type,
+    source_reference: skill.source_reference || "",
+    evidence: skill.evidence || "No evidence provided",
+    is_dealbreaker: skill.is_dealbreaker ?? false,
+  }));
+}
+
+// Transform backend red flags to frontend format
+function transformRedFlags(
+  backendFlags: ApplicationEvaluationData["red_flags"]["flags"]
+): RedFlag[] {
+  return backendFlags.map((flag, i) => ({
+    id: String(i + 1),
+    flag_type: flag.flag_type,
+    severity: flag.severity,
+    details: flag.details,
+    context: flag.context || undefined,
+    interview_probe: flag.interview_probe,
+  }));
+}
+
+// Transform backend interview questions to frontend format
+function transformInterviewQuestions(
+  backendQuestions: ApplicationEvaluationData["summary"]["interview_questions"]
+): InterviewQuestion[] {
+  return backendQuestions.map((q, i) => ({
+    id: String(i + 1),
+    question: q.question,
+    gap_addressed: q.gap_addressed,
+    resume_reference: q.resume_reference,
+  }));
+}
+
+// Transform full backend response to internal CandidateEvaluation format
+function transformBackendToEvaluation(
+  data: ApplicationEvaluationData
+): CandidateEvaluation {
+  const tier = mapBackendTierToUI(data.scores.tier);
+
+  return {
+    scores: {
+      final_score: data.scores.final_score,
+      tier,
+      is_flagged: data.scores.is_flagged,
+      is_dealbreaker: data.scores.is_dealbreaker,
+      can_proceed: data.scores.can_proceed,
+      verification_confidence: data.scores.verification_confidence,
+    },
+    red_flags: {
+      flags: transformRedFlags(data.red_flags.flags),
+      summary: {
+        total_flags: data.red_flags.summary.total_flags,
+        by_severity: data.red_flags.summary.by_severity,
+      },
+    },
+    skills: {
+      matches: transformSkillMatches(data.skills.matches),
+      missing: data.skills.missing,
+    },
+    summary: {
+      strengths: data.summary.strengths,
+      concerns: data.summary.concerns,
+      interview_questions: transformInterviewQuestions(data.summary.interview_questions),
+    },
+  };
+}
+
+// Create mock overview since we don't have the endpoint yet
+// TODO: Remove when overview endpoint is implemented
+function createMockOverview(meta: ApplicationEvaluationMeta): CandidateOverview {
+  return {
+    personal_info: {
+      full_name: meta.candidate_name,
+      // Mock data - these fields should come from real API later
+      email: "MOCK_EMAIL_NOT_FROM_API",
+      phone: "MOCK_PHONE_NOT_FROM_API",
+      location: "MOCK_LOCATION_NOT_FROM_API",
+    },
+    professional_summary: undefined,
+    skills: {
+      soft: [],
+      technical: [],
+    },
   };
 }
 
@@ -87,11 +200,7 @@ interface CandidateStore {
 
   // Actions
   setCurrentCandidate: (id: string) => void;
-  fetchCandidate: (
-    id: string,
-    overviewUrl: string,
-    evaluationUrl: string
-  ) => Promise<void>;
+  fetchCandidate: (applicationId: string) => Promise<void>;
   getCachedCandidate: (id: string) => CandidateData | undefined;
   clearCache: () => void;
 
@@ -113,50 +222,57 @@ export const useCandidateStore = create<CandidateStore>((set, get) => ({
   },
 
   // Fetch candidate data (checks cache first)
-  fetchCandidate: async (
-    id: string,
-    overviewUrl: string,
-    evaluationUrl: string
-  ) => {
+  fetchCandidate: async (applicationId: string) => {
     // Check cache first
-    const cached = cache.get(id);
+    const cached = cache.get(applicationId);
     if (cached) {
-      set({ currentCandidateId: id, loadingState: "success", error: null });
+      set({ currentCandidateId: applicationId, loadingState: "success", error: null });
       return;
     }
 
     // Fetch from backend
-    set({ loadingState: "loading", error: null });
+    set({ loadingState: "loading", error: null, currentCandidateId: applicationId });
 
     try {
-      const [overviewRes, evaluationRes] = await Promise.all([
-        fetch(overviewUrl),
-        fetch(evaluationUrl),
-      ]);
+      // Fetch evaluation data from API
+      const response = await api.aiResumeEval.getApplicationEvaluation(applicationId);
 
-      if (!overviewRes.ok || !evaluationRes.ok) {
-        throw new Error("Failed to fetch candidate data");
+      // Handle case where evaluation is not yet available
+      if (!response.data) {
+        throw new Error(
+          `Evaluation not available. Status: ${response.meta.status}`
+        );
       }
 
-      const overview: CandidateOverview = await overviewRes.json();
-      const evaluation: CandidateEvaluation = await evaluationRes.json();
+      // Get API data for transformations
+      const apiData = response.data;
 
-      // Transform and cache
+      // Transform backend response to internal format
+      const evaluation = transformBackendToEvaluation(apiData);
+
+      // Create mock overview (until overview endpoint is ready)
+      const overview = createMockOverview(response.meta);
+
+      // Build candidate data with computed values
+      // Pass API data directly to transform functions for accurate mapping
       const candidateData: CandidateData = {
-        id,
+        id: applicationId,
         overview,
         evaluation,
         computed: {
-          categories: transformToCategories(evaluation),
-          constraints: transformToConstraints(evaluation),
-          stats: computeStats(evaluation),
+          categories: transformToCategories(apiData.dimensions),
+          constraints: transformToConstraints(apiData.constraints.results),
+          stats: computeStats(apiData),
           personalInfo: overview.personal_info,
+          interviewQuestions: evaluation.summary.interview_questions,
+          strengths: evaluation.summary.strengths,
+          concerns: evaluation.summary.concerns,
         },
         fetchedAt: Date.now(),
       };
 
-      cache.set(id, candidateData);
-      set({ currentCandidateId: id, loadingState: "success", error: null });
+      cache.set(applicationId, candidateData);
+      set({ currentCandidateId: applicationId, loadingState: "success", error: null });
     } catch (err) {
       set({
         loadingState: "error",

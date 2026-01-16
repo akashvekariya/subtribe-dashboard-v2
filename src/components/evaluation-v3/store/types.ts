@@ -10,6 +10,7 @@ import type {
   PersonalInfo,
   QuickStats,
   Tier,
+  InterviewQuestion,
 } from "../types";
 
 // Re-export Tier for convenience
@@ -28,8 +29,10 @@ export interface CandidateEvaluation {
   scores: {
     final_score: number;
     tier: Tier;
-    dimension_scores: Record<string, number>;
-    dimension_weights: Record<string, number>;
+    is_flagged: boolean;
+    is_dealbreaker: boolean;
+    can_proceed: boolean;
+    verification_confidence: "high" | "medium" | "low";
   };
   red_flags: {
     flags: RedFlag[];
@@ -38,29 +41,14 @@ export interface CandidateEvaluation {
       by_severity: Record<string, number>;
     };
   };
-  analysis: {
-    skill_analysis: {
-      matched_count: number;
-      total_skills: number;
-      missing_skills: MissingSkill[];
-    };
-    constraint_analysis: {
-      passed_count: number;
-      deferred_count: number;
-      total_assessed: number;
-    };
+  skills: {
+    matches: SkillMatch[];
+    missing: MissingSkill[];
   };
-  evaluation: {
-    skill_matches: SkillMatch[];
-    constraint_results: Array<{
-      evidence: string;
-      status: "pass" | "fail" | "deferred";
-      constraint_text: string;
-    }>;
-    summary: {
-      strengths: string[];
-      concerns: string[];
-    };
+  summary: {
+    strengths: string[];
+    concerns: string[];
+    interview_questions: InterviewQuestion[];
   };
 }
 
@@ -75,6 +63,9 @@ export interface CandidateData {
     constraints: Constraint[];
     stats: QuickStats;
     personalInfo: PersonalInfo;
+    interviewQuestions: InterviewQuestion[];
+    strengths: string[];
+    concerns: string[];
   };
   fetchedAt: number;
 }

@@ -203,9 +203,9 @@ export const SkillsGrid = memo<SkillsGridProps>(
         </div>
 
         <div className="eval-skills-grid">
-          {allSkills.map((skill) => (
+          {allSkills.map((skill, index) => (
             <SkillPill
-              key={skill.skill_name}
+              key={`${skill.skill_name}-${index}`}
               skill={skill}
               isSelected={selectedSkill === skill.skill_name}
               onClick={() => handleToggle(skill.skill_name)}
