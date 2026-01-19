@@ -313,6 +313,125 @@ interface PaginatedResponse<T> {
   };
 }
 
+// Resume Display Types (from /applications/{id}/resume endpoint)
+export interface ResumeOtherLink {
+  url: string;
+  label: string | null;
+}
+
+export interface ResumePersonalInfo {
+  full_name: string;
+  email: string | null;
+  phone: string | null;
+  location: string | null;
+  linkedin_url: string | null;
+  github_url: string | null;
+  portfolio_url: string | null;
+  other_links: ResumeOtherLink[];
+}
+
+export interface ResumeExperienceSummary {
+  total_months: number;
+  by_category: Record<string, number>;
+  has_overlaps: boolean;
+  has_significant_gaps: boolean;
+}
+
+export interface ResumeExperienceEntry {
+  title: string;
+  company: string;
+  location: string | null;
+  category: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  is_ongoing: boolean;
+  duration_months: number | null;
+  content: string[];
+  skills: string[];
+}
+
+export interface ResumeExperience {
+  summary: ResumeExperienceSummary;
+  entries: ResumeExperienceEntry[];
+}
+
+export interface ResumeEducationSummary {
+  highest_level: string | null;
+  months_since_graduation: number | null;
+}
+
+export interface ResumeEducationEntry {
+  degree: string;
+  institution: string;
+  field_of_study: string | null;
+  level: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  is_current: boolean;
+  score_value: string | null;
+  relevant_coursework: string[];
+}
+
+export interface ResumeEducation {
+  summary: ResumeEducationSummary;
+  entries: ResumeEducationEntry[];
+}
+
+export interface ResumeProjectEntry {
+  name: string;
+  category: string | null;
+  content: string[];
+  skills: string[];
+  start_date: string | null;
+  end_date: string | null;
+  source_url: string | null;
+  live_url: string | null;
+}
+
+export interface ResumeProjects {
+  entries: ResumeProjectEntry[];
+}
+
+export interface ResumeSkills {
+  technical: string[];
+  soft: string[];
+  languages: string[];
+}
+
+export interface ResumeCertification {
+  name: string;
+  issuer: string | null;
+  date: string | null;
+}
+
+export interface ResumeDisplayData {
+  personal_info: ResumePersonalInfo;
+  professional_summary: string | string[] | null;
+  skills: ResumeSkills;
+  experience: ResumeExperience;
+  education: ResumeEducation;
+  projects: ResumeProjects;
+  certifications: ResumeCertification[];
+}
+
+export interface ResumeDisplayMeta {
+  application_id: string;
+  candidate_name: string;
+  job_id: string;
+  job_title: string;
+  resume_filename: string | null;
+  resume_url: string | null;
+  resume_url_expires_at: string | null;
+  has_cover_letter: boolean;
+  cover_letter: string | null;
+  applied_at: string | null;
+}
+
+export interface ResumeDisplayResponse {
+  data: ResumeDisplayData | null;
+  meta: ResumeDisplayMeta;
+}
+
 export const jobsAPI = {
   async createJob(
     data: Omit<
@@ -535,6 +654,16 @@ export const applicationsAPI = {
     }>;
   }> {
     return apiFetch(`/applications/${id}/scheduled-emails`, {
+      method: "GET",
+    });
+  },
+
+  /**
+   * Get parsed resume data for display
+   * Returns null data if resume hasn't been parsed yet
+   */
+  async getApplicationResume(id: string): Promise<ResumeDisplayResponse> {
+    return apiFetch(`/api/v1/applications/${id}/resume`, {
       method: "GET",
     });
   },

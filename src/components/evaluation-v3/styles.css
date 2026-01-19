@@ -3490,3 +3490,99 @@
   color: #991b1b;
   line-height: 1.5;
 }
+
+/* ========================================
+   Resume View - Additional Styles
+   ======================================== */
+
+/* Education field of study */
+.resume-entry-field {
+  font-size: var(--eval-text-sm);
+  color: #6b7280;
+  margin: 0 0 var(--eval-spacing-sm) 0;
+  font-style: italic;
+}
+
+/* Education badge (indigo variant) */
+.resume-entry-badge-edu {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+/* Project links container */
+.resume-entry-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Project link button */
+.resume-entry-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #fafafa;
+  border: 1px solid #e4e4e7;
+  border-radius: 6px;
+  color: #52525b;
+  text-decoration: none;
+  transition: all 150ms ease;
+}
+
+.resume-entry-link:hover {
+  background: #f4f4f5;
+  color: #18181b;
+  border-color: #d4d4d8;
+}
+
+.resume-entry-link svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Cover letter text */
+.resume-cover-letter-text {
+  font-size: var(--eval-text-base);
+  color: #3f3f46;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* View Original Resume Button */
+.resume-view-original-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--eval-spacing-sm);
+  padding: var(--eval-spacing-md) var(--eval-spacing-lg);
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: var(--eval-radius-lg);
+  color: #0369a1;
+  font-size: var(--eval-text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 150ms ease;
+}
+
+.resume-view-original-btn:hover {
+  background: #e0f2fe;
+  border-color: #7dd3fc;
+  color: #0c4a6e;
+}
+
+.resume-view-original-btn svg {
+  flex-shrink: 0;
+}
+
+.resume-view-original-filename {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 400;
+  color: #64748b;
+  background: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+}

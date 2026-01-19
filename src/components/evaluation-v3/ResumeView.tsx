@@ -1,42 +1,41 @@
 import React, { memo } from "react";
 import { PersonalInfoDisplay, SectionHeader } from "./shared";
-import { BriefcaseIcon, GraduationIcon, DocumentIcon, StarIcon } from "./icons";
-import type {
-  PersonalInfo,
-  ResumeData,
-  ResumeExperience,
-  ResumeEducation,
-  ResumeProject,
-  ResumeSkills,
-} from "./types";
+import {
+  BriefcaseIcon,
+  GraduationIcon,
+  DocumentIcon,
+  StarIcon,
+  GitHubIcon,
+  GlobeFilledIcon,
+  DocumentFilledIcon,
+} from "./icons";
 import { formatDate } from "./utils";
+import type {
+  ResumeDisplayData,
+  ResumeDisplayMeta,
+  ResumeExperienceEntry,
+  ResumeEducationEntry,
+  ResumeProjectEntry,
+  ResumeCertification,
+  ResumeSkills,
+} from "@/lib/api-client";
 import "./styles.css";
 
-// Re-export types for convenience
-export type {
-  PersonalInfo as ResumePersonalInfo,
-  ResumeData,
-  ResumeExperience,
-  ResumeEducation,
-  ResumeProject,
-  ResumeSkills,
-};
-
 export interface ResumeViewProps {
-  data: ResumeData;
-  personalInfo?: PersonalInfo;
+  data: ResumeDisplayData;
+  meta: ResumeDisplayMeta;
   className?: string;
 }
 
 // Experience Section
-const ExperienceSection = memo<{ experiences: ResumeExperience[] }>(
-  ({ experiences }) => {
-    if (!experiences.length) return null;
+const ExperienceSection = memo<{ entries: ResumeExperienceEntry[] }>(
+  ({ entries }) => {
+    if (!entries.length) return null;
     return (
       <div className="resume-section">
         <SectionHeader title="Experience" icon={<BriefcaseIcon />} />
         <div className="resume-section-content">
-          {experiences.map((exp, idx) => (
+          {entries.map((exp, idx) => (
             <div key={idx} className="resume-entry">
               <div className="resume-entry-header">
                 <div className="resume-entry-title-row">
@@ -46,24 +45,25 @@ const ExperienceSection = memo<{ experiences: ResumeExperience[] }>(
                   )}
                 </div>
                 <span className="resume-entry-date">
-                  {formatDate(exp.start_date)} -{" "}
-                  {exp.is_ongoing ? "Present" : formatDate(exp.end_date)}
+                  {formatDate(exp.start_date ?? undefined)} -{" "}
+                  {exp.is_ongoing
+                    ? "Present"
+                    : formatDate(exp.end_date ?? undefined)}
                 </span>
               </div>
               <p className="resume-entry-subtitle">
                 {exp.company}
                 {exp.location && (
-                  <span className="resume-entry-location">
-                    {" "}
-                    | {exp.location}
-                  </span>
+                  <span className="resume-entry-location"> | {exp.location}</span>
                 )}
               </p>
-              <ul className="resume-entry-list">
-                {exp.content.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
-              </ul>
+              {exp.content.length > 0 && (
+                <ul className="resume-entry-list">
+                  {exp.content.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              )}
               {exp.skills && exp.skills.length > 0 && (
                 <div className="resume-entry-skills">
                   {exp.skills.map((skill, i) => (
@@ -80,24 +80,32 @@ const ExperienceSection = memo<{ experiences: ResumeExperience[] }>(
     );
   }
 );
+ExperienceSection.displayName = "ExperienceSection";
 
 // Education Section
-const EducationSection = memo<{ education: ResumeEducation[] }>(
-  ({ education }) => {
-    if (!education.length) return null;
+const EducationSection = memo<{ entries: ResumeEducationEntry[] }>(
+  ({ entries }) => {
+    if (!entries.length) return null;
     return (
       <div className="resume-section">
         <SectionHeader title="Education" icon={<GraduationIcon />} />
         <div className="resume-section-content">
-          {education.map((edu, idx) => (
+          {entries.map((edu, idx) => (
             <div key={idx} className="resume-entry">
               <div className="resume-entry-header">
                 <div className="resume-entry-title-row">
                   <h4 className="resume-entry-title">{edu.degree}</h4>
+                  {edu.level && (
+                    <span className="resume-entry-badge resume-entry-badge-edu">
+                      {edu.level}
+                    </span>
+                  )}
                 </div>
                 <span className="resume-entry-date">
-                  {formatDate(edu.start_date)} -{" "}
-                  {edu.is_current ? "Present" : formatDate(edu.end_date)}
+                  {formatDate(edu.start_date ?? undefined)} -{" "}
+                  {edu.is_current
+                    ? "Present"
+                    : formatDate(edu.end_date ?? undefined)}
                 </span>
               </div>
               <p className="resume-entry-subtitle">
@@ -109,17 +117,19 @@ const EducationSection = memo<{ education: ResumeEducation[] }>(
                   </span>
                 )}
               </p>
-              {edu.relevant_coursework &&
-                edu.relevant_coursework.length > 0 && (
-                  <div className="resume-entry-coursework">
-                    <span className="resume-entry-coursework-label">
-                      Relevant Coursework:
-                    </span>
-                    <span className="resume-entry-coursework-list">
-                      {edu.relevant_coursework.join(", ")}
-                    </span>
-                  </div>
-                )}
+              {edu.field_of_study && (
+                <p className="resume-entry-field">{edu.field_of_study}</p>
+              )}
+              {edu.relevant_coursework && edu.relevant_coursework.length > 0 && (
+                <div className="resume-entry-coursework">
+                  <span className="resume-entry-coursework-label">
+                    Relevant Coursework:
+                  </span>
+                  <span className="resume-entry-coursework-list">
+                    {edu.relevant_coursework.join(", ")}
+                  </span>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -127,44 +137,74 @@ const EducationSection = memo<{ education: ResumeEducation[] }>(
     );
   }
 );
+EducationSection.displayName = "EducationSection";
 
 // Projects Section
-const ProjectsSection = memo<{ projects: ResumeProject[] }>(({ projects }) => {
-  if (!projects.length) return null;
-  return (
-    <div className="resume-section">
-      <SectionHeader title="Projects" icon={<DocumentIcon />} />
-      <div className="resume-section-content">
-        {projects.map((project, idx) => (
-          <div key={idx} className="resume-entry">
-            <div className="resume-entry-header">
-              <h4 className="resume-entry-title">{project.name}</h4>
-              {project.category_raw && (
-                <span className="resume-entry-badge">
-                  {project.category_raw}
-                </span>
+const ProjectsSection = memo<{ entries: ResumeProjectEntry[] }>(
+  ({ entries }) => {
+    if (!entries.length) return null;
+    return (
+      <div className="resume-section">
+        <SectionHeader title="Projects" icon={<DocumentIcon />} />
+        <div className="resume-section-content">
+          {entries.map((project, idx) => (
+            <div key={idx} className="resume-entry">
+              <div className="resume-entry-header">
+                <div className="resume-entry-title-row">
+                  <h4 className="resume-entry-title">{project.name}</h4>
+                  {project.category && (
+                    <span className="resume-entry-badge">{project.category}</span>
+                  )}
+                </div>
+                <div className="resume-entry-links">
+                  {project.source_url && (
+                    <a
+                      href={project.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="resume-entry-link"
+                      title="Source Code"
+                    >
+                      <GitHubIcon className="w-4 h-4" />
+                    </a>
+                  )}
+                  {project.live_url && (
+                    <a
+                      href={project.live_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="resume-entry-link"
+                      title="Live Demo"
+                    >
+                      <GlobeFilledIcon className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
+              </div>
+              {project.content.length > 0 && (
+                <ul className="resume-entry-list">
+                  {project.content.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              )}
+              {project.skills && project.skills.length > 0 && (
+                <div className="resume-entry-skills">
+                  {project.skills.map((skill, i) => (
+                    <span key={i} className="resume-skill-tag">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
-            <ul className="resume-entry-list">
-              {project.content.map((item, i) => (
-                <li key={i}>{item}</li>
-              ))}
-            </ul>
-            {project.skills && project.skills.length > 0 && (
-              <div className="resume-entry-skills">
-                {project.skills.map((skill, i) => (
-                  <span key={i} className="resume-skill-tag">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
+ProjectsSection.displayName = "ProjectsSection";
 
 // Skills Section
 const SkillsSection = memo<{ skills: ResumeSkills }>(({ skills }) => {
@@ -184,10 +224,7 @@ const SkillsSection = memo<{ skills: ResumeSkills }>(({ skills }) => {
             <span className="resume-skills-group-label">Technical</span>
             <div className="resume-skills-tags">
               {skills.technical.map((skill, i) => (
-                <span
-                  key={i}
-                  className="resume-skill-tag resume-skill-tag-tech"
-                >
+                <span key={i} className="resume-skill-tag resume-skill-tag-tech">
                   {skill}
                 </span>
               ))}
@@ -199,10 +236,7 @@ const SkillsSection = memo<{ skills: ResumeSkills }>(({ skills }) => {
             <span className="resume-skills-group-label">Soft Skills</span>
             <div className="resume-skills-tags">
               {skills.soft.map((skill, i) => (
-                <span
-                  key={i}
-                  className="resume-skill-tag resume-skill-tag-soft"
-                >
+                <span key={i} className="resume-skill-tag resume-skill-tag-soft">
                   {skill}
                 </span>
               ))}
@@ -214,10 +248,7 @@ const SkillsSection = memo<{ skills: ResumeSkills }>(({ skills }) => {
             <span className="resume-skills-group-label">Languages</span>
             <div className="resume-skills-tags">
               {skills.languages.map((skill, i) => (
-                <span
-                  key={i}
-                  className="resume-skill-tag resume-skill-tag-lang"
-                >
+                <span key={i} className="resume-skill-tag resume-skill-tag-lang">
                   {skill}
                 </span>
               ))}
@@ -228,6 +259,7 @@ const SkillsSection = memo<{ skills: ResumeSkills }>(({ skills }) => {
     </div>
   );
 });
+SkillsSection.displayName = "SkillsSection";
 
 // Summary Section
 const SummarySection = memo<{ summary: string | string[] }>(({ summary }) => {
@@ -249,17 +281,80 @@ const SummarySection = memo<{ summary: string | string[] }>(({ summary }) => {
     </div>
   );
 });
+SummarySection.displayName = "SummarySection";
+
+// Certifications Section
+const CertificationsSection = memo<{ certifications: ResumeCertification[] }>(
+  ({ certifications }) => {
+    if (!certifications.length) return null;
+    return (
+      <div className="resume-section">
+        <SectionHeader title="Certifications" icon={<StarIcon />} />
+        <div className="resume-section-content">
+          {certifications.map((cert, idx) => (
+            <div key={idx} className="resume-cert">
+              <span className="resume-cert-name">{cert.name}</span>
+              {cert.issuer && (
+                <span className="resume-cert-issuer">{cert.issuer}</span>
+              )}
+              {cert.date && <span className="resume-cert-date">{cert.date}</span>}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+);
+CertificationsSection.displayName = "CertificationsSection";
+
+// Cover Letter Section
+const CoverLetterSection = memo<{ coverLetter: string }>(({ coverLetter }) => {
+  return (
+    <div className="resume-section">
+      <SectionHeader title="Cover Letter" icon={<DocumentIcon />} />
+      <div className="resume-section-content">
+        <div className="resume-cover-letter-text">{coverLetter}</div>
+      </div>
+    </div>
+  );
+});
+CoverLetterSection.displayName = "CoverLetterSection";
 
 // Main Component
 export const ResumeView = memo<ResumeViewProps>(
-  ({ data, personalInfo, className = "" }) => {
-    const info = personalInfo || data.personal_info;
+  ({ data, meta, className = "" }) => {
+    // Transform personal_info to match PersonalInfoDisplay expected shape
+    const personalInfo = {
+      full_name: data.personal_info.full_name,
+      email: data.personal_info.email ?? undefined,
+      phone: data.personal_info.phone ?? undefined,
+      location: data.personal_info.location ?? undefined,
+      linkedin_url: data.personal_info.linkedin_url ?? undefined,
+      github_url: data.personal_info.github_url ?? undefined,
+      portfolio_url: data.personal_info.portfolio_url ?? undefined,
+    };
 
     return (
       <div className={`resume-view ${className}`}>
         {/* Personal Info */}
-        {info && (
-          <PersonalInfoDisplay info={info} variant="card" showName={true} />
+        <PersonalInfoDisplay info={personalInfo} variant="card" showName={true} />
+
+        {/* View Original Resume Button */}
+        {meta.resume_url && (
+          <a
+            href={meta.resume_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="resume-view-original-btn"
+          >
+            <DocumentFilledIcon className="w-5 h-5" />
+            <span>View Original Resume</span>
+            {meta.resume_filename && (
+              <span className="resume-view-original-filename">
+                {meta.resume_filename}
+              </span>
+            )}
+          </a>
         )}
 
         {/* Professional Summary */}
@@ -271,36 +366,28 @@ export const ResumeView = memo<ResumeViewProps>(
         <SkillsSection skills={data.skills} />
 
         {/* Experience */}
-        <ExperienceSection experiences={data.experience} />
+        <ExperienceSection entries={data.experience.entries} />
 
         {/* Projects */}
-        <ProjectsSection projects={data.projects} />
+        <ProjectsSection entries={data.projects.entries} />
 
         {/* Education */}
-        <EducationSection education={data.education} />
+        <EducationSection entries={data.education.entries} />
 
         {/* Certifications */}
         {data.certifications && data.certifications.length > 0 && (
-          <div className="resume-section">
-            <SectionHeader title="Certifications" icon={<StarIcon />} />
-            <div className="resume-section-content">
-              {data.certifications.map((cert, idx) => (
-                <div key={idx} className="resume-cert">
-                  <span className="resume-cert-name">{cert.name}</span>
-                  {cert.issuer && (
-                    <span className="resume-cert-issuer">{cert.issuer}</span>
-                  )}
-                  {cert.date && (
-                    <span className="resume-cert-date">{cert.date}</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          <CertificationsSection certifications={data.certifications} />
+        )}
+
+        {/* Cover Letter */}
+        {meta.has_cover_letter && meta.cover_letter && (
+          <CoverLetterSection coverLetter={meta.cover_letter} />
         )}
       </div>
     );
   }
 );
+
+ResumeView.displayName = "ResumeView";
 
 export default ResumeView;

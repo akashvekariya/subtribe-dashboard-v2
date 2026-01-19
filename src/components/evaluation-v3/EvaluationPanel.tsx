@@ -12,6 +12,7 @@ import { RedFlagsAccordion } from "./RedFlagsAccordion";
 import { InterviewQuestionsAccordion } from "./InterviewQuestionsAccordion";
 import { TradeoffsCard } from "./TradeoffsCard";
 import { ManipulationAlert } from "./ManipulationAlert";
+import { ResumeView } from "./ResumeView";
 import {
   ScoreSummaryPanelSkeleton,
   InsightsCardSkeleton,
@@ -21,7 +22,7 @@ import {
 import { DimensionDetailModal } from "./DimensionDetailModal";
 import { mapBackendTierToUI } from "./utils";
 import { useCandidateStore } from "./store";
-import { api } from "@/lib/api-client";
+import { api, type ResumeDisplayData, type ResumeDisplayMeta } from "@/lib/api-client";
 import type { ApplicationStatus, Tier, CandidateSortOption } from "./types";
 import "./styles.css";
 
@@ -113,6 +114,14 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
   // Dimension detail modal state
   const [isDimensionModalOpen, setIsDimensionModalOpen] = useState(false);
   const [dimensionIndex, setDimensionIndex] = useState(0);
+
+  // Resume data state
+  const [resumeData, setResumeData] = useState<ResumeDisplayData | null>(null);
+  const [resumeMeta, setResumeMeta] = useState<ResumeDisplayMeta | null>(null);
+  const [resumeLoadingState, setResumeLoadingState] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [resumeError, setResumeError] = useState<string | null>(null);
 
   // Candidate store for evaluation data
   const {
@@ -263,12 +272,36 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
     setDimensionIndex(index);
   }, []);
 
+  // Fetch resume data for a candidate
+  const fetchResume = useCallback(async (applicationId: string) => {
+    setResumeLoadingState("loading");
+    setResumeError(null);
+
+    try {
+      const response = await api.applications.getApplicationResume(applicationId);
+      setResumeData(response.data);
+      setResumeMeta(response.meta);
+      setResumeLoadingState("success");
+    } catch (error) {
+      console.error("Failed to fetch resume:", error);
+      setResumeError(
+        error instanceof Error ? error.message : "Failed to load resume"
+      );
+      setResumeLoadingState("error");
+    }
+  }, []);
+
   // Select a candidate and fetch their evaluation data
   const selectCandidate = useCallback(
     async (id: string) => {
       setIsMobileDetailOpen(true);
       setActiveTab("ai");
       setCurrentCandidateId(id);
+      // Reset resume state for new candidate
+      setResumeData(null);
+      setResumeMeta(null);
+      setResumeLoadingState("idle");
+      setResumeError(null);
       // Fetch evaluation data (uses cache if available)
       await fetchCandidate(id);
     },
@@ -277,6 +310,17 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
 
   // selectedCandidate can be used for additional actions if needed
   // const selectedCandidate = candidates.find((c) => c.id === currentCandidateId);
+
+  // Fetch resume data when switching to resume tab
+  useEffect(() => {
+    if (
+      activeTab === "resume" &&
+      currentCandidateId &&
+      resumeLoadingState === "idle"
+    ) {
+      fetchResume(currentCandidateId);
+    }
+  }, [activeTab, currentCandidateId, resumeLoadingState, fetchResume]);
 
   // Render AI Evaluation content
   const renderAIEvaluationContent = () => {
@@ -399,14 +443,70 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
     );
   };
 
-  // Render Resume tab content (placeholder for now)
+  // Render Resume tab content
   const renderResumeContent = () => {
+    // No candidate selected
+    if (!currentCandidateId) {
+      return (
+        <div className="text-center py-20">
+          <p className="text-zinc-400 text-lg">
+            Select a candidate to view resume
+          </p>
+          <p className="text-zinc-400 text-sm mt-2">
+            Click on a candidate from the list
+          </p>
+        </div>
+      );
+    }
+
+    // Loading state
+    if (resumeLoadingState === "loading") {
+      return (
+        <div className="eval-content-scroll">
+          <ScoreSummaryPanelSkeleton />
+          <AccordionSkeleton title="Experience" />
+          <AccordionSkeleton title="Education" />
+          <AccordionSkeleton title="Skills" />
+        </div>
+      );
+    }
+
+    // Error state
+    if (resumeLoadingState === "error") {
+      return (
+        <div className="text-center py-20">
+          <p className="text-red-500 text-lg font-medium">
+            Failed to load resume
+          </p>
+          <p className="text-zinc-400 text-sm mt-2">
+            {resumeError || "Unknown error occurred"}
+          </p>
+          <button
+            onClick={() => fetchResume(currentCandidateId)}
+            className="mt-4 px-4 py-2 bg-zinc-100 hover:bg-zinc-200 rounded-lg text-sm text-zinc-700 transition-colors"
+          >
+            Try again
+          </button>
+        </div>
+      );
+    }
+
+    // No resume data available
+    if (!resumeData || !resumeMeta) {
+      return (
+        <div className="text-center py-20">
+          <p className="text-zinc-400 text-lg">Resume data not available</p>
+          <p className="text-zinc-400 text-sm mt-2">
+            This candidate&apos;s resume may not have been parsed yet
+          </p>
+        </div>
+      );
+    }
+
+    // Render resume view
     return (
-      <div className="text-center py-20">
-        <p className="text-zinc-400 text-lg">Resume view coming soon</p>
-        <p className="text-zinc-400 text-sm mt-2">
-          Resume parsing endpoint not yet implemented
-        </p>
+      <div className="eval-content-scroll">
+        <ResumeView data={resumeData} meta={resumeMeta} />
       </div>
     );
   };

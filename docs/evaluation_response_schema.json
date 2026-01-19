@@ -1,0 +1,649 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EvaluationResponse",
+  "description": "Response structure from candidate evaluation API",
+  "type": "object",
+  "properties": {
+    "scores": {
+      "type": "object",
+      "description": "Top-level scoring summary",
+      "properties": {
+        "final_score": {
+          "type": "number",
+          "description": "Final weighted score (0-10)"
+        },
+        "tier": {
+          "type": "string",
+          "enum": [
+            "strong_match",
+            "good_match",
+            "moderate_match",
+            "weak_match",
+            "mismatch"
+          ],
+          "description": "Match tier based on final_score"
+        },
+        "is_dealbreaker": {
+          "type": "boolean",
+          "description": "True if any dealbreaker skill/constraint failed"
+        },
+        "is_flagged": {
+          "type": "boolean",
+          "description": "True if manipulation attempt detected"
+        },
+        "can_proceed": {
+          "type": "boolean",
+          "description": "True if no blockers exist"
+        },
+        "verification_confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"],
+          "description": "Confidence level based on red flags"
+        }
+      },
+      "required": [
+        "final_score",
+        "tier",
+        "is_dealbreaker",
+        "is_flagged",
+        "can_proceed",
+        "verification_confidence"
+      ]
+    },
+
+    "summary": {
+      "type": "object",
+      "description": "High-level candidate summary for quick review",
+      "properties": {
+        "strengths": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "3-5 key strengths for this role"
+        },
+        "concerns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "2-4 key concerns or gaps"
+        },
+        "interview_questions": {
+          "type": "array",
+          "description": "3-5 targeted interview questions",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string",
+                "description": "The interview question"
+              },
+              "gap_addressed": {
+                "type": "string",
+                "description": "What concern/gap this addresses"
+              },
+              "resume_reference": {
+                "type": "string",
+                "description": "Specific resume content referenced"
+              }
+            },
+            "required": ["question", "gap_addressed", "resume_reference"]
+          }
+        }
+      },
+      "required": ["strengths", "concerns", "interview_questions"]
+    },
+
+    "dimensions": {
+      "type": "object",
+      "description": "Evaluation scores and assessments per dimension",
+      "properties": {
+        "technical_fit": { "$ref": "#/definitions/DimensionAssessment" },
+        "experience_fit": { "$ref": "#/definitions/DimensionAssessment" },
+        "trajectory_fit": { "$ref": "#/definitions/DimensionAssessment" },
+        "culture_fit": { "$ref": "#/definitions/DimensionAssessment" },
+        "problem_solving_fit": { "$ref": "#/definitions/DimensionAssessment" }
+      },
+      "required": [
+        "technical_fit",
+        "experience_fit",
+        "trajectory_fit",
+        "culture_fit",
+        "problem_solving_fit"
+      ]
+    },
+
+    "skills": {
+      "type": "object",
+      "description": "Skill matching results",
+      "properties": {
+        "summary": {
+          "type": "object",
+          "properties": {
+            "total": {
+              "type": "integer",
+              "description": "Total skills in framework"
+            },
+            "matched": {
+              "type": "integer",
+              "description": "Number of skills found in resume"
+            },
+            "coverage": {
+              "type": "number",
+              "description": "Ratio of required skills found (0-1)"
+            },
+            "source_breakdown": {
+              "type": "object",
+              "description": "Count of skills by source type",
+              "properties": {
+                "experience": { "type": "integer" },
+                "project": { "type": "integer" },
+                "education": { "type": "integer" },
+                "inferred": { "type": "integer" },
+                "keyword_only": { "type": "integer" }
+              }
+            },
+            "keyword_stuffing_flag": {
+              "type": "boolean",
+              "description": "True if >30% skills are keyword_only"
+            }
+          },
+          "required": [
+            "total",
+            "matched",
+            "coverage",
+            "source_breakdown",
+            "keyword_stuffing_flag"
+          ]
+        },
+        "matches": {
+          "type": "array",
+          "description": "Skills found in resume with evidence",
+          "items": {
+            "type": "object",
+            "properties": {
+              "skill_name": {
+                "type": "string",
+                "description": "Human-readable skill name"
+              },
+              "source_type": {
+                "type": "string",
+                "enum": [
+                  "experience",
+                  "project",
+                  "education",
+                  "inferred",
+                  "keyword_only"
+                ],
+                "description": "Where the skill evidence was found"
+              },
+              "source_reference": {
+                "type": "string",
+                "description": "Specific experience/project name"
+              },
+              "evidence": {
+                "type": "string",
+                "description": "Brief explanation of evidence"
+              },
+              "signal_strength": {
+                "type": "string",
+                "enum": [
+                  "strong",
+                  "demonstrated",
+                  "contextual",
+                  "academic",
+                  "listed"
+                ],
+                "description": "Strength of evidence"
+              },
+              "is_dealbreaker": {
+                "type": "boolean",
+                "description": "True if this is a dealbreaker skill"
+              }
+            },
+            "required": [
+              "skill_name",
+              "source_type",
+              "source_reference",
+              "evidence",
+              "signal_strength",
+              "is_dealbreaker"
+            ]
+          }
+        },
+        "missing": {
+          "type": "array",
+          "description": "Required skills not found in resume",
+          "items": {
+            "type": "object",
+            "properties": {
+              "skill_name": {
+                "type": "string",
+                "description": "Human-readable skill name"
+              },
+              "category": { "type": "string", "description": "Skill category" },
+              "is_dealbreaker": {
+                "type": "boolean",
+                "description": "True if this is a dealbreaker skill"
+              }
+            },
+            "required": ["skill_name", "category", "is_dealbreaker"]
+          }
+        }
+      },
+      "required": ["summary", "matches", "missing"]
+    },
+
+    "experience": {
+      "type": "object",
+      "description": "Work experience analysis",
+      "properties": {
+        "summary": {
+          "type": "object",
+          "properties": {
+            "total_months": {
+              "type": "integer",
+              "description": "Total experience in months"
+            },
+            "total_years": {
+              "type": "number",
+              "description": "Total experience in years (rounded)"
+            },
+            "entries_count": {
+              "type": "integer",
+              "description": "Number of experience entries"
+            },
+            "has_current_role": {
+              "type": "boolean",
+              "description": "True if candidate has ongoing role"
+            },
+            "by_type": {
+              "type": "object",
+              "description": "Experience breakdown by type",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "count": { "type": "integer" },
+                  "months": { "type": "integer" }
+                }
+              }
+            }
+          },
+          "required": [
+            "total_months",
+            "total_years",
+            "entries_count",
+            "has_current_role",
+            "by_type"
+          ]
+        },
+        "entries": {
+          "type": "array",
+          "description": "Individual experience entries",
+          "items": {
+            "type": "object",
+            "properties": {
+              "company": { "type": "string" },
+              "title": { "type": "string" },
+              "experience_type": {
+                "type": "string",
+                "enum": [
+                  "full_time",
+                  "internship",
+                  "freelance",
+                  "founder",
+                  "academic_project",
+                  "personal_project"
+                ]
+              },
+              "start_date": {
+                "type": "string",
+                "description": "Start date as stated in resume"
+              },
+              "end_date": {
+                "type": "string",
+                "description": "End date or 'Present'"
+              },
+              "duration_months": { "type": "integer" },
+              "is_current": { "type": "boolean" },
+              "key_contributions": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "2-4 notable contributions"
+              },
+              "skills_demonstrated_names": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Skill names evidenced in this experience"
+              }
+            },
+            "required": [
+              "company",
+              "title",
+              "experience_type",
+              "start_date",
+              "end_date",
+              "duration_months",
+              "is_current",
+              "key_contributions",
+              "skills_demonstrated_names"
+            ]
+          }
+        }
+      },
+      "required": ["summary", "entries"]
+    },
+
+    "constraints": {
+      "type": "object",
+      "description": "Hard constraint evaluation results",
+      "properties": {
+        "summary": {
+          "type": "object",
+          "properties": {
+            "passed": {
+              "type": "integer",
+              "description": "Number of constraints passed"
+            },
+            "failed": {
+              "type": "integer",
+              "description": "Number of constraints failed"
+            },
+            "deferred": {
+              "type": "integer",
+              "description": "Number deferred to interview"
+            },
+            "total": {
+              "type": "integer",
+              "description": "Total constraints assessed"
+            }
+          },
+          "required": ["passed", "failed", "deferred", "total"]
+        },
+        "results": {
+          "type": "array",
+          "description": "Individual constraint results",
+          "items": {
+            "type": "object",
+            "properties": {
+              "constraint_text": {
+                "type": "string",
+                "description": "Human-readable constraint description"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["pass", "fail", "deferred"],
+                "description": "Constraint evaluation result"
+              },
+              "evidence": {
+                "type": "string",
+                "description": "Explanation of why pass/fail/deferred"
+              }
+            },
+            "required": ["constraint_text", "status", "evidence"]
+          }
+        }
+      },
+      "required": ["summary", "results"]
+    },
+
+    "tradeoffs": {
+      "type": "object",
+      "description": "Tradeoff preference alignment",
+      "properties": {
+        "summary": {
+          "type": "object",
+          "properties": {
+            "aligned": {
+              "type": "integer",
+              "description": "Number of tradeoffs aligned with preference"
+            },
+            "misaligned": {
+              "type": "integer",
+              "description": "Number of tradeoffs misaligned"
+            },
+            "total": {
+              "type": "integer",
+              "description": "Total tradeoffs assessed"
+            }
+          },
+          "required": ["aligned", "misaligned", "total"]
+        },
+        "signals": {
+          "type": "array",
+          "description": "Individual tradeoff signals",
+          "items": {
+            "type": "object",
+            "properties": {
+              "tradeoff_title": {
+                "type": "string",
+                "description": "Human-readable tradeoff name"
+              },
+              "direction": {
+                "type": "string",
+                "enum": ["option_a", "option_b", "balanced", "unclear"],
+                "description": "Candidate's detected direction"
+              },
+              "evidence": {
+                "type": "string",
+                "description": "What signals indicate this direction"
+              }
+            },
+            "required": ["tradeoff_title", "direction", "evidence"]
+          }
+        }
+      },
+      "required": ["summary", "signals"]
+    },
+
+    "red_flags": {
+      "type": "object",
+      "description": "Resume red flags detected",
+      "properties": {
+        "summary": {
+          "type": "object",
+          "properties": {
+            "total_flags": { "type": "integer" },
+            "by_severity": {
+              "type": "object",
+              "properties": {
+                "info": { "type": "integer" },
+                "investigate": { "type": "integer" },
+                "concern": { "type": "integer" }
+              }
+            },
+            "by_type": {
+              "type": "object",
+              "additionalProperties": { "type": "integer" }
+            },
+            "summary": {
+              "type": "string",
+              "description": "Human-readable summary"
+            },
+            "verification_confidence": {
+              "type": "string",
+              "enum": ["high", "medium", "low"]
+            }
+          },
+          "required": [
+            "total_flags",
+            "by_severity",
+            "by_type",
+            "summary",
+            "verification_confidence"
+          ]
+        },
+        "flags": {
+          "type": "array",
+          "description": "Individual red flags",
+          "items": {
+            "type": "object",
+            "properties": {
+              "flag_type": {
+                "type": "string",
+                "enum": [
+                  "short_tenure",
+                  "employment_gap",
+                  "title_experience_mismatch",
+                  "vague_contributions",
+                  "unverifiable_claims"
+                ]
+              },
+              "severity": {
+                "type": "string",
+                "enum": ["info", "investigate", "concern"]
+              },
+              "details": {
+                "type": "string",
+                "description": "Specific details of the flag"
+              },
+              "context": {
+                "type": ["string", "null"],
+                "description": "Mitigating context if any"
+              },
+              "interview_probe": {
+                "type": "string",
+                "description": "Suggested interview question"
+              }
+            },
+            "required": ["flag_type", "severity", "details", "interview_probe"]
+          }
+        }
+      },
+      "required": ["summary", "flags"]
+    },
+
+    "blockers": {
+      "type": "array",
+      "description": "Issues that block candidate from proceeding",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "manipulation_attempt",
+              "dealbreaker_skill",
+              "dealbreaker_constraint"
+            ]
+          },
+          "description": { "type": "string" },
+          "skill_id": {
+            "type": "string",
+            "description": "For dealbreaker_skill type"
+          },
+          "reason": { "type": "string" },
+          "details": { "type": "string" },
+          "evidence": { "type": "string" }
+        },
+        "required": ["type"]
+      }
+    },
+
+    "manipulation_check": {
+      "type": "object",
+      "description": "Prompt injection/manipulation detection",
+      "properties": {
+        "detected": {
+          "type": "boolean",
+          "description": "True if manipulation attempt found"
+        },
+        "details": {
+          "type": ["string", "null"],
+          "description": "Details if detected, null otherwise"
+        }
+      },
+      "required": ["detected"]
+    },
+
+    "warnings": {
+      "type": "array",
+      "description": "Non-blocking warnings (optional field)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string" },
+          "severity": {
+            "type": "string",
+            "enum": ["info", "medium", "critical"]
+          },
+          "message": { "type": "string" }
+        },
+        "required": ["type", "severity", "message"]
+      }
+    },
+
+    "timing": {
+      "type": "object",
+      "description": "Evaluation timing info",
+      "properties": {
+        "evaluation_seconds": {
+          "type": "number",
+          "description": "LLM evaluation time"
+        },
+        "total_seconds": {
+          "type": "number",
+          "description": "Total processing time"
+        }
+      },
+      "required": ["evaluation_seconds", "total_seconds"]
+    }
+  },
+
+  "required": [
+    "scores",
+    "summary",
+    "dimensions",
+    "skills",
+    "experience",
+    "constraints",
+    "tradeoffs",
+    "red_flags",
+    "blockers",
+    "manipulation_check",
+    "timing"
+  ],
+
+  "definitions": {
+    "DimensionAssessment": {
+      "type": "object",
+      "description": "Assessment for a single dimension",
+      "properties": {
+        "score": { "type": "number", "description": "Dimension score (0-10)" },
+        "weight": {
+          "type": "number",
+          "description": "Weight used in final calculation (0-1)"
+        },
+        "level": {
+          "type": "string",
+          "enum": ["strong", "good", "moderate", "weak", "poor"],
+          "description": "Qualitative assessment level"
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable dimension name"
+        },
+        "reasoning": {
+          "type": "string",
+          "description": "2-3 sentence explanation"
+        },
+        "positive_signals": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "2-4 positive indicators"
+        },
+        "negative_signals": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "0-3 concerns identified"
+        }
+      },
+      "required": [
+        "score",
+        "weight",
+        "level",
+        "label",
+        "reasoning",
+        "positive_signals",
+        "negative_signals"
+      ]
+    }
+  }
+}

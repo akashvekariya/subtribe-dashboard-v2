@@ -10,7 +10,9 @@ import {
 } from "./InterviewQuestionsAccordion";
 import { SkillsGrid, type SkillMatch, type MissingSkill } from "./SkillsGrid";
 import { EvaluationTabs, type TabId } from "./EvaluationTabs";
-import { ResumeView, type ResumeData } from "./ResumeView";
+// TODO: Update ResumeView usage after API integration
+// import { ResumeView } from "./ResumeView";
+import type { ResumeData } from "./types";
 import { CandidateList, type CandidateListItem } from "./CandidateList";
 import {
   EvaluationPageSkeleton,
@@ -1082,10 +1084,14 @@ const ComponentsDebugPage = memo(() => {
 
                   {/* Resume Tab */}
                   {activeTab === "resume" && (
-                    <ResumeView
-                      data={candidate.resume}
-                      personalInfo={candidate.personalInfo}
-                    />
+                    <div className="text-center py-20">
+                      <p className="text-zinc-400 text-lg">
+                        Resume view - Use main EvaluationPanel instead
+                      </p>
+                      <p className="text-zinc-400 text-sm mt-2">
+                        Debug page needs update for new ResumeView API
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>

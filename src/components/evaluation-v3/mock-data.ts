@@ -3,7 +3,7 @@ import type { Constraint } from "./ConstraintAccordion";
 import type { RedFlag } from "./RedFlagsAccordion";
 import type { InterviewQuestion } from "./InterviewQuestionsAccordion";
 import type { SkillMatch, MissingSkill } from "./SkillsGrid";
-import type { ResumeData } from "./ResumeView";
+import type { ResumeData } from "./types";
 
 export interface MockCandidateData {
   personalInfo: PersonalInfo;
