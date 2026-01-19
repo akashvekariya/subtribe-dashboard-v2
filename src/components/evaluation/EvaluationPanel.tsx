@@ -12,11 +12,7 @@ import {
   RedFlagsAccordion,
   InterviewQuestionsAccordion,
 } from "./accordions";
-import {
-  InsightsCard,
-  TradeoffsCard,
-  ManipulationAlert,
-} from "./cards";
+import { InsightsCard, TradeoffsCard, ManipulationAlert } from "./cards";
 import {
   ScoreSummaryPanelSkeleton,
   InsightsCardSkeleton,
