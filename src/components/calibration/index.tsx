@@ -229,7 +229,6 @@ export default function JobCalibration({
       <PreparationScreen
         isProcessing={isLoading}
         onContinue={() => {
-          console.log("[JobCalibration] User clicked Start Calibration");
           setUserConfirmedStart(true);
           setCurrentStep("calibration_1");
         }}

@@ -74,10 +74,6 @@ export class LRUCache<T> {
 
     if (oldestKey) {
       this.cache.delete(oldestKey);
-      // Optional: Log for debugging during development
-      if (process.env.NODE_ENV === "development") {
-        console.log(`[LRU Cache] Evicted candidate: ${oldestKey}`);
-      }
     }
   }
 }

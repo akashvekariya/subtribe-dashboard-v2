@@ -196,13 +196,6 @@ const TradeoffCard: React.FC<{ tradeoff: TradeoffPreference }> = ({
     );
   }
 
-  console.log("[TradeoffCard] Rendering tradeoff:", {
-    id: tradeoff.tradeoff_id,
-    title: tradeoff.title,
-    preferred_direction: tradeoff.preferred_direction,
-    strength: tradeoff.strength,
-  });
-
   const directionConfig: Record<
     string,
     { label: string; color: string; bg: string }
@@ -471,10 +464,6 @@ export default function EvaluationFrameworkView({
   onBack,
   onDone,
 }: EvaluationFrameworkViewProps) {
-  // Debug logging
-  console.log("[EvaluationFrameworkView] Framework received:", framework);
-  console.log("[EvaluationFrameworkView] Keys:", Object.keys(framework || {}));
-
   // Group skills by category
   const skillsByCategory = useMemo(() => {
     const grouped: Record<string, WeightedSkill[]> = {};
@@ -500,12 +489,6 @@ export default function EvaluationFrameworkView({
       acceptable_gap: [],
     };
     const constraints = framework.hard_constraints || [];
-
-    // Debug: log constraint types
-    console.log(
-      "[EvaluationFrameworkView] Constraint types:",
-      constraints.map((c) => c.constraint_type)
-    );
 
     constraints.forEach((c) => {
       // Normalize the constraint type to handle different cases
@@ -541,12 +524,6 @@ export default function EvaluationFrameworkView({
         );
         grouped.dealbreaker.push(c);
       }
-    });
-
-    console.log("[EvaluationFrameworkView] Grouped constraints:", {
-      dealbreaker: grouped.dealbreaker.length,
-      required_day1: grouped.required_day1.length,
-      acceptable_gap: grouped.acceptable_gap.length,
     });
 
     return grouped;

@@ -81,7 +81,6 @@ export function useFeatureAccess(feature: PremiumFeature): FeatureAccessResult {
   const requestUpgrade = () => {
     // TODO: Implement upgrade flow
     // This could navigate to pricing page, show upgrade modal, etc.
-    console.log(`Upgrade requested for feature: ${feature}`);
     // window.location.href = '/pricing';
     // or: showUpgradeModal(feature);
   };
