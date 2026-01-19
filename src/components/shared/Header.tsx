@@ -6,7 +6,6 @@ import { User } from "@/types";
 import {
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
-  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 
 interface HeaderProps {

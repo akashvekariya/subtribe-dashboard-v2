@@ -169,7 +169,13 @@ export type {
 } from "./store";
 
 // Hooks
-export { useCandidateList, type UseCandidateListReturn } from "./hooks/useCandidateList";
+export {
+  useCandidateList,
+  type UseCandidateListReturn,
+} from "./hooks/useCandidateList";
 
 // Context
-export { CandidateListProvider, useCandidateListContext } from "./context/CandidateListContext";
+export {
+  CandidateListProvider,
+  useCandidateListContext,
+} from "./context/CandidateListContext";

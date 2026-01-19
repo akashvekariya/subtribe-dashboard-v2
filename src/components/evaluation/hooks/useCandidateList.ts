@@ -21,7 +21,10 @@ interface ApplicationListItem {
 // Map frontend sort option to API params
 const mapSortToAPI = (
   sortOption: CandidateSortOption
-): { sort_by: "ai_score" | "applied_at" | "name"; sort_dir: "asc" | "desc" } => {
+): {
+  sort_by: "ai_score" | "applied_at" | "name";
+  sort_dir: "asc" | "desc";
+} => {
   switch (sortOption) {
     case "score_desc":
       return { sort_by: "ai_score", sort_dir: "desc" };
@@ -82,7 +85,10 @@ export interface UseCandidateListReturn {
 
   // Status update
   updatingStatusId: string | null;
-  updateStatus: (candidateId: string, status: ApplicationStatus) => Promise<void>;
+  updateStatus: (
+    candidateId: string,
+    status: ApplicationStatus
+  ) => Promise<void>;
 
   // Actions
   refresh: () => void;
@@ -95,11 +101,14 @@ export function useCandidateList(jobId: string): UseCandidateListReturn {
   const [error, setError] = useState<string | null>(null);
 
   // Filter state
-  const [selectedStatuses, setSelectedStatuses] = useState<ApplicationStatus[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<ApplicationStatus[]>(
+    []
+  );
   const [selectedTiers, setSelectedTiers] = useState<Tier[]>([]);
 
   // Sort state
-  const [sortOption, setSortOption] = useState<CandidateSortOption>("score_desc");
+  const [sortOption, setSortOption] =
+    useState<CandidateSortOption>("score_desc");
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -117,10 +126,12 @@ export function useCandidateList(jobId: string): UseCandidateListReturn {
       const { sort_by, sort_dir } = mapSortToAPI(sortOption);
 
       // API supports comma-separated statuses and tiers
-      const statusFilter = selectedStatuses.length > 0 ? selectedStatuses.join(",") : undefined;
-      const tierFilter = selectedTiers.length > 0
-        ? selectedTiers.map(mapUITierToBackend).join(",")
-        : undefined;
+      const statusFilter =
+        selectedStatuses.length > 0 ? selectedStatuses.join(",") : undefined;
+      const tierFilter =
+        selectedTiers.length > 0
+          ? selectedTiers.map(mapUITierToBackend).join(",")
+          : undefined;
 
       const response = await api.applications.getJobApplications(jobId, {
         status: statusFilter,
@@ -132,7 +143,9 @@ export function useCandidateList(jobId: string): UseCandidateListReturn {
       });
 
       // Transform API response to CandidateListItem format
-      const items: CandidateListItem[] = (response.data as ApplicationListItem[]).map((app) => ({
+      const items: CandidateListItem[] = (
+        response.data as ApplicationListItem[]
+      ).map((app) => ({
         id: app.id,
         personalInfo: {
           full_name: `${app.first_name} ${app.last_name}`.trim(),
@@ -166,20 +179,25 @@ export function useCandidateList(jobId: string): UseCandidateListReturn {
   }, [fetchCandidates]);
 
   // Handle status change - call API to update
-  const updateStatus = useCallback(async (candidateId: string, status: ApplicationStatus) => {
-    setUpdatingStatusId(candidateId);
-    try {
-      await api.applications.updateApplicationStatus(candidateId, status);
-      // Update local state after success
-      setCandidates((prev) =>
-        prev.map((c) => (c.id === candidateId ? { ...c, applicationStatus: status } : c))
-      );
-    } catch (err) {
-      console.error("Failed to update status:", err);
-    } finally {
-      setUpdatingStatusId(null);
-    }
-  }, []);
+  const updateStatus = useCallback(
+    async (candidateId: string, status: ApplicationStatus) => {
+      setUpdatingStatusId(candidateId);
+      try {
+        await api.applications.updateApplicationStatus(candidateId, status);
+        // Update local state after success
+        setCandidates((prev) =>
+          prev.map((c) =>
+            c.id === candidateId ? { ...c, applicationStatus: status } : c
+          )
+        );
+      } catch (err) {
+        console.error("Failed to update status:", err);
+      } finally {
+        setUpdatingStatusId(null);
+      }
+    },
+    []
+  );
 
   return {
     // Data

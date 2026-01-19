@@ -4,8 +4,7 @@
  */
 
 // Import centralized types to avoid duplication
-import type { ApplicationStatus } from "@/types";
-import type { DimensionLevel, ManipulationCheck } from "@/types/evaluation";
+import type { DimensionLevel } from "@/types/evaluation";
 
 // Status Types
 export type EligibilityStatus = true | false | "review";

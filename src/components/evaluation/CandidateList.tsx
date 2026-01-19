@@ -23,7 +23,7 @@ import type {
   ApplicationStatus,
   CandidateSortOption,
 } from "./types";
-import { tierStyles, statusStyles, sortOptions } from "./config";
+import { statusStyles, sortOptions } from "./config";
 import { getInitials, formatRelativeDate } from "./utils";
 import { useCandidateListContext } from "./context/CandidateListContext";
 import "./styles.css";

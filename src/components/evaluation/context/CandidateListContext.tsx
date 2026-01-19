@@ -6,14 +6,19 @@ import type { UseCandidateListReturn } from "../hooks/useCandidateList";
 // The context value is the return type of useCandidateList
 type CandidateListContextValue = UseCandidateListReturn;
 
-const CandidateListContext = createContext<CandidateListContextValue | null>(null);
+const CandidateListContext = createContext<CandidateListContextValue | null>(
+  null
+);
 
 interface CandidateListProviderProps {
   children: ReactNode;
   value: CandidateListContextValue;
 }
 
-export function CandidateListProvider({ children, value }: CandidateListProviderProps) {
+export function CandidateListProvider({
+  children,
+  value,
+}: CandidateListProviderProps) {
   return (
     <CandidateListContext.Provider value={value}>
       {children}
@@ -24,7 +29,9 @@ export function CandidateListProvider({ children, value }: CandidateListProvider
 export function useCandidateListContext(): CandidateListContextValue {
   const context = useContext(CandidateListContext);
   if (!context) {
-    throw new Error("useCandidateListContext must be used within a CandidateListProvider");
+    throw new Error(
+      "useCandidateListContext must be used within a CandidateListProvider"
+    );
   }
   return context;
 }

@@ -49,7 +49,10 @@ export function isHighSignalTransition(
   }
 
   // Hiring/offering low-scoring candidates is high-signal
-  if ((newStatus === "offer" || newStatus === "hired") && aiScore < AI_SCORE.LOW_THRESHOLD) {
+  if (
+    (newStatus === "offer" || newStatus === "hired") &&
+    aiScore < AI_SCORE.LOW_THRESHOLD
+  ) {
     return {
       isHighSignal: true,
       scenario: "ai_mismatch_hire",

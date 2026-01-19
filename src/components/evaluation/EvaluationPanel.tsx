@@ -43,7 +43,7 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
 
   // Use the candidate list hook
   const candidateList = useCandidateList(jobId);
-  const { isLoading: isListLoading, error: listError, refresh: refreshCandidates } = candidateList;
+  const { error: listError, refresh: refreshCandidates } = candidateList;
 
   // Dimension detail modal state
   const [isDimensionModalOpen, setIsDimensionModalOpen] = useState(false);

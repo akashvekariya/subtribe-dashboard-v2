@@ -5,7 +5,6 @@
 
 import type {
   PillVariant,
-  EligibilityStatus,
   FlagSeverity,
   SignalStrength,
   SourceType,

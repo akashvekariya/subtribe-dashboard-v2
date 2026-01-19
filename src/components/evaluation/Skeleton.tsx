@@ -165,7 +165,7 @@ export const CandidateListSkeleton = memo<{ itemCount?: number }>(
 
 // Accordion Skeleton (for Constraints and Red Flags)
 export const AccordionSkeleton = memo<{ itemCount?: number; title?: string }>(
-  ({ itemCount = 4, title = "Loading..." }) => (
+  ({ itemCount = 4 }) => (
     <div className="eval-accordion">
       <div className="eval-accordion-header">
         <SkeletonBlock className="skeleton-title" style={{ width: 100 }} />
