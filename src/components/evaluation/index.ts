@@ -1,5 +1,5 @@
 /**
- * Evaluation V3 Components
+ * Evaluation Components
  * Clean exports for all evaluation UI components
  */
 
@@ -167,6 +167,3 @@ export type {
   CandidateEvaluation,
   LoadingState,
 } from "./store";
-
-// Debug Page
-export { default as ComponentsDebugPage } from "./ComponentsDebugPage";
