@@ -10,7 +10,7 @@ import {
   EvaluateCandidateResponse,
 } from "@/types";
 import { FrameworkAPIResponse } from "@/types/evaluationFramework";
-import { CalibrationSummaryJSON } from "@/lib/calibrationSummary";
+import { CalibrationSummaryJSON } from "@/lib/calibration-summary";
 import { apiFetch } from "./client";
 
 export const aiAPI = {
