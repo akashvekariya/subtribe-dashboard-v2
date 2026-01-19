@@ -117,10 +117,7 @@ export interface Job {
 }
 
 // Import evaluation types
-import type {
-  EvaluationJSON,
-  EvaluationTier,
-} from "@/components/applications/evaluation/types";
+import type { EvaluationJSON, EvaluationTier } from "./evaluation";
 
 // Enhanced Application/Candidate interface matching backend
 export interface Application {
@@ -683,3 +680,6 @@ export function createInitialCalibrationData(): CalibrationData {
     sectionFeedback: [],
   };
 }
+
+// Re-export evaluation types for convenience
+export type { EvaluationJSON, EvaluationTier } from "./evaluation";

@@ -11,7 +11,7 @@ import {
 } from "../../types";
 import { aiAPI, jobsAPI } from "../../lib/api-client";
 import { EvaluationFramework } from "../../types/evaluationFramework";
-import { generateCalibrationSummaryJSON } from "../../lib/calibrationSummary";
+import { generateCalibrationSummaryJSON } from "../../lib/calibration-summary";
 import CalibrationStep1 from "./CalibrationStep1";
 import CalibrationStep2 from "./CalibrationStep2";
 import CalibrationStep3 from "./CalibrationStep3";
@@ -229,7 +229,6 @@ export default function JobCalibration({
       <PreparationScreen
         isProcessing={isLoading}
         onContinue={() => {
-          console.log("[JobCalibration] User clicked Start Calibration");
           setUserConfirmedStart(true);
           setCurrentStep("calibration_1");
         }}

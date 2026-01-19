@@ -6,7 +6,7 @@ import {
   CalibrationQuestionsPayload,
   RoleAnalysis,
 } from "../../types";
-import { generateCalibrationSummaryJSON } from "../../lib/calibrationSummary";
+import { generateCalibrationSummaryJSON } from "../../lib/calibration-summary";
 
 interface CalibrationCompleteProps {
   jobId: string;

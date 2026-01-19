@@ -20,11 +20,11 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
-  // Disable display-name rule for evaluation-v3 components (migrated from POC)
+  // Disable display-name rule for evaluation components
   {
     files: [
-      "src/components/evaluation-v3/**/*.tsx",
-      "src/components/evaluation-v3/**/*.ts",
+      "src/components/evaluation/**/*.tsx",
+      "src/components/evaluation/**/*.ts",
     ],
     rules: {
       "react/display-name": "off",

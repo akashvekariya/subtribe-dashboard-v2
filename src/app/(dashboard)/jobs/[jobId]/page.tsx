@@ -6,13 +6,13 @@ import Link from "next/link";
 import { Job, JobStats } from "@/types";
 import { getJobById } from "@/lib/jobs";
 import { Button } from "@/components/ui/Button";
-import EvaluationPanel from "@/components/evaluation-v3/EvaluationPanel";
+import EvaluationPanel from "@/components/evaluation/EvaluationPanel";
 import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import showToast from "@/lib/toast";
 import { api } from "@/lib/api-client";
 import { getPublicJobUrl } from "@/lib/env";
-import { RefreshIcon } from "@/components/evaluation-v3/icons";
-import { formatTimeAgo } from "@/components/evaluation-v3/utils";
+import { RefreshIcon } from "@/components/evaluation/Icons";
+import { formatTimeAgo } from "@/components/evaluation/utils";
 import {
   ArrowLeftIcon,
   PencilIcon,

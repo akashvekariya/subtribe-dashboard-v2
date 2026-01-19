@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { EmailTemplate, EmailWildcard } from "@/types";
+import { EmailTemplate } from "@/types";
 import { emailAPI } from "@/lib/api-client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";

@@ -340,20 +340,3 @@ export async function getAnalysisFeatureFlags(
     subscription_tier: isPremium ? "pro" : "free",
   };
 }
-
-/**
- * Placeholder for future batch analysis
- */
-export async function getBatchAnalysis(
-  applicationIds: string[],
-  hasPremiumAccess: boolean = false
-): Promise<Record<string, ResumeAnalysis>> {
-  const analyses: Record<string, ResumeAnalysis> = {};
-
-  for (const id of applicationIds) {
-    const response = await getResumeAnalysis(id, hasPremiumAccess);
-    analyses[id] = response.data;
-  }
-
-  return analyses;
-}
