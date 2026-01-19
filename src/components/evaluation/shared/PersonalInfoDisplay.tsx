@@ -7,7 +7,7 @@ import {
   GitHubIcon,
   GlobeFilledIcon,
   DocumentFilledIcon,
-} from "../icons";
+} from "../Icons";
 import type { PersonalInfo } from "../types";
 
 /**

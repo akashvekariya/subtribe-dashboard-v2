@@ -11,7 +11,7 @@ import { MarkdownRenderer } from "@/components/shared/MarkdownRenderer";
 import showToast from "@/lib/toast";
 import { api } from "@/lib/api-client";
 import { getPublicJobUrl } from "@/lib/env";
-import { RefreshIcon } from "@/components/evaluation/icons";
+import { RefreshIcon } from "@/components/evaluation/Icons";
 import { formatTimeAgo } from "@/components/evaluation/utils";
 import {
   ArrowLeftIcon,
