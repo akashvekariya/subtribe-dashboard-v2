@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import type { ApplicationStatus, Tier, CandidateSortOption } from "../types";
 import type { CandidateListItem } from "../CandidateList";
 import { mapBackendTierToUI } from "../utils";
+import { PAGINATION } from "@/lib/constants";
 
 // API response type for applications list
 interface ApplicationListItem {
@@ -56,8 +57,6 @@ const mapUITierToBackend = (uiTier: Tier): string => {
       return "";
   }
 };
-
-const PAGE_SIZE = 20;
 
 export interface UseCandidateListReturn {
   // Data
@@ -129,7 +128,7 @@ export function useCandidateList(jobId: string): UseCandidateListReturn {
         sort_by,
         sort_dir,
         page: currentPage,
-        limit: PAGE_SIZE,
+        limit: PAGINATION.DEFAULT_PAGE_SIZE,
       });
 
       // Transform API response to CandidateListItem format
@@ -202,7 +201,7 @@ export function useCandidateList(jobId: string): UseCandidateListReturn {
     currentPage,
     setCurrentPage,
     totalItems,
-    pageSize: PAGE_SIZE,
+    pageSize: PAGINATION.DEFAULT_PAGE_SIZE,
 
     // Status update
     updatingStatusId,

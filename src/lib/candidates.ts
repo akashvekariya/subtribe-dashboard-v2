@@ -4,6 +4,7 @@
 
 import { Application, ApplicationStatus } from "@/types";
 import { api } from "./api-client";
+import { SCORING } from "./constants";
 
 export async function getCandidates(): Promise<Application[]> {
   try {
@@ -76,32 +77,32 @@ export function generateMockAIEvaluation(data: {
   current_ctc?: number;
   expected_ctc?: number;
 }): { score: number; evaluation: string } {
-  let score = 40;
+  let score = SCORING.BASE_SCORE;
   let evaluation = "AI-Powered Candidate Assessment:\n\n";
 
   if (data.linkedin_url) {
-    score += 12;
+    score += SCORING.LINKEDIN_BONUS;
     evaluation += "✓ LinkedIn profile: Professional online presence\n";
   }
 
   if (data.github_url) {
-    score += 18;
+    score += SCORING.GITHUB_BONUS;
     evaluation += "✓ GitHub profile: Technical portfolio available\n";
   }
 
   if (data.portfolio_url) {
-    score += 15;
+    score += SCORING.PORTFOLIO_BONUS;
     evaluation += "✓ Personal portfolio: Demonstrates work quality\n";
   }
 
   if (data.current_ctc && data.expected_ctc) {
     const growthExpectation =
       ((data.expected_ctc - data.current_ctc) / data.current_ctc) * 100;
-    if (growthExpectation <= 30) {
-      score += 10;
+    if (growthExpectation <= SCORING.REALISTIC_SALARY_THRESHOLD) {
+      score += SCORING.REALISTIC_SALARY_BONUS;
       evaluation += `✓ Realistic salary expectations: ${growthExpectation.toFixed(0)}% growth\n`;
-    } else if (growthExpectation <= 50) {
-      score += 5;
+    } else if (growthExpectation <= SCORING.MODERATE_SALARY_THRESHOLD) {
+      score += SCORING.MODERATE_SALARY_BONUS;
       evaluation += `◐ Moderate salary expectations: ${growthExpectation.toFixed(0)}% growth\n`;
     }
   }
@@ -111,11 +112,11 @@ export function generateMockAIEvaluation(data: {
   score = Math.max(0, Math.min(100, score));
 
   evaluation += "\n";
-  if (score >= 85) {
+  if (score >= SCORING.THRESHOLDS.EXCEPTIONAL) {
     evaluation += "🌟 Exceptional candidate - Priority review recommended";
-  } else if (score >= 70) {
+  } else if (score >= SCORING.THRESHOLDS.STRONG) {
     evaluation += "🎯 Strong candidate - High potential for success";
-  } else if (score >= 55) {
+  } else if (score >= SCORING.THRESHOLDS.GOOD) {
     evaluation += "👍 Good candidate - Worth considering for interview";
   } else {
     evaluation += "📋 Standard candidate - Review based on role requirements";

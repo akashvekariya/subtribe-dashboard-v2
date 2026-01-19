@@ -4,6 +4,7 @@
  */
 
 import { ApplicationStatus } from "@/types";
+import { AI_SCORE } from "./constants";
 
 export type StatusUpdateScenario =
   | "rejection"
@@ -35,7 +36,7 @@ export function isHighSignalTransition(
   // Any transition to rejected is high-signal
   if (newStatus === "rejected") {
     // Check if AI thought candidate was good
-    if (aiScore >= 70) {
+    if (aiScore >= AI_SCORE.HIGH_THRESHOLD) {
       return {
         isHighSignal: true,
         scenario: "ai_mismatch_reject",
@@ -48,7 +49,7 @@ export function isHighSignalTransition(
   }
 
   // Hiring/offering low-scoring candidates is high-signal
-  if ((newStatus === "offer" || newStatus === "hired") && aiScore < 50) {
+  if ((newStatus === "offer" || newStatus === "hired") && aiScore < AI_SCORE.LOW_THRESHOLD) {
     return {
       isHighSignal: true,
       scenario: "ai_mismatch_hire",

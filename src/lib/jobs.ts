@@ -4,9 +4,10 @@
 
 import { Job } from "@/types";
 import { api } from "./api-client";
+import { PAGINATION } from "./constants";
 
 export async function getJobs(): Promise<Job[]> {
-  const response = await api.jobs.getJobs({ limit: 100 });
+  const response = await api.jobs.getJobs({ limit: PAGINATION.JOBS_LIMIT });
 
   if (!response?.data || !Array.isArray(response.data)) {
     return [];
