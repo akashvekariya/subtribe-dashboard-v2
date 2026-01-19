@@ -167,3 +167,9 @@ export type {
   CandidateEvaluation,
   LoadingState,
 } from "./store";
+
+// Hooks
+export { useCandidateList, type UseCandidateListReturn } from "./hooks/useCandidateList";
+
+// Context
+export { CandidateListProvider, useCandidateListContext } from "./context/CandidateListContext";

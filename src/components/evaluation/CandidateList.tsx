@@ -16,7 +16,6 @@ import {
   ChevronRightIcon,
   CheckIcon,
   SearchIcon,
-  RefreshIcon,
 } from "./icons";
 import type {
   Tier,
@@ -25,7 +24,8 @@ import type {
   CandidateSortOption,
 } from "./types";
 import { tierStyles, statusStyles, sortOptions } from "./config";
-import { getInitials, formatRelativeDate, formatTimeAgo } from "./utils";
+import { getInitials, formatRelativeDate } from "./utils";
+import { useCandidateListContext } from "./context/CandidateListContext";
 import "./styles.css";
 
 // Candidate item type for the list
@@ -39,34 +39,18 @@ export interface CandidateListItem {
 }
 
 export interface CandidateListProps {
-  candidates: CandidateListItem[];
+  // Selection (parent controls which candidate is selected)
   selectedId: string | null;
   onSelect: (id: string) => void;
+
+  // Action handlers (parent handles these)
   onEmailClick?: (candidate: CandidateListItem) => void;
   onPhoneClick?: (candidate: CandidateListItem) => void;
   onResumeClick?: (candidate: CandidateListItem) => void;
-  onStatusChange?: (candidateId: string, status: ApplicationStatus) => void;
-  isLoading?: boolean;
+
+  // UI customization
   title?: string;
   className?: string;
-  pageSize?: number;
-  showFilters?: boolean;
-  showPagination?: boolean;
-  onRefresh?: () => void;
-  lastRefreshedAt?: Date | null;
-  isRefreshing?: boolean;
-  updatingStatusId?: string | null;
-  // Controlled filter/sort props (when provided, component uses these instead of internal state)
-  selectedTiers?: Tier[];
-  onTiersChange?: (tiers: Tier[]) => void;
-  selectedStatuses?: ApplicationStatus[];
-  onStatusesChange?: (statuses: ApplicationStatus[]) => void;
-  sortOption?: CandidateSortOption;
-  onSortChange?: (sort: CandidateSortOption) => void;
-  // Controlled pagination props (for server-side pagination)
-  currentPage?: number;
-  onPageChange?: (page: number) => void;
-  totalItems?: number;
 }
 
 // ============================================
@@ -528,118 +512,31 @@ const CandidateCardSkeleton = memo(() => (
 
 export const CandidateList = memo<CandidateListProps>(
   ({
-    candidates,
     selectedId,
     onSelect,
     onEmailClick,
     onPhoneClick,
     onResumeClick,
-    onStatusChange,
-    isLoading = false,
     title = "Candidates",
     className = "",
-    pageSize = 20,
-    showFilters = true,
-    showPagination = true,
-    onRefresh,
-    lastRefreshedAt,
-    isRefreshing = false,
-    updatingStatusId,
-    // Controlled props
-    selectedTiers: controlledTiers,
-    onTiersChange,
-    selectedStatuses: controlledStatuses,
-    onStatusesChange,
-    sortOption: controlledSort,
-    onSortChange,
-    // Controlled pagination props
-    currentPage: controlledPage,
-    onPageChange,
-    totalItems: controlledTotalItems,
   }) => {
-    // Internal state (used when not controlled)
-    const [internalTiers, setInternalTiers] = useState<Tier[]>([]);
-    const [internalStatuses, setInternalStatuses] = useState<
-      ApplicationStatus[]
-    >([]);
-    const [internalSort, setInternalSort] =
-      useState<CandidateSortOption>("score_desc");
-    const [internalPage, setInternalPage] = useState(1);
-
-    // Determine if controlled mode
-    const isControlled =
-      onTiersChange !== undefined ||
-      onStatusesChange !== undefined ||
-      onSortChange !== undefined;
-    const isPaginationControlled = onPageChange !== undefined;
-
-    // Use controlled or internal values
-    const selectedTiers = controlledTiers ?? internalTiers;
-    const selectedStatuses = controlledStatuses ?? internalStatuses;
-    const sortOption = controlledSort ?? internalSort;
-    const currentPage = controlledPage ?? internalPage;
-
-    // Handlers that work for both controlled and uncontrolled modes
-    const handleTiersChange = useCallback(
-      (tiers: Tier[]) => {
-        if (onTiersChange) {
-          onTiersChange(tiers);
-        } else {
-          setInternalTiers(tiers);
-        }
-      },
-      [onTiersChange]
-    );
-
-    const handleStatusesChange = useCallback(
-      (statuses: ApplicationStatus[]) => {
-        if (onStatusesChange) {
-          onStatusesChange(statuses);
-        } else {
-          setInternalStatuses(statuses);
-        }
-      },
-      [onStatusesChange]
-    );
-
-    const handleSortChange = useCallback(
-      (sort: CandidateSortOption) => {
-        if (onSortChange) {
-          onSortChange(sort);
-        } else {
-          setInternalSort(sort);
-        }
-      },
-      [onSortChange]
-    );
-
-    const handlePageChange = useCallback(
-      (page: number) => {
-        if (onPageChange) {
-          onPageChange(page);
-        } else {
-          setInternalPage(page);
-        }
-      },
-      [onPageChange]
-    );
-
-    // Time tracking for refresh indicator (triggers re-render every 10 seconds)
-    const [, setTimeTick] = useState(0);
-    useEffect(() => {
-      if (!lastRefreshedAt) return;
-      const interval = setInterval(() => {
-        setTimeTick((t) => t + 1);
-      }, 10000);
-      return () => clearInterval(interval);
-    }, [lastRefreshedAt]);
-
-    // Reset to page 1 when filters change (only for uncontrolled pagination)
-    useEffect(() => {
-      if (!isPaginationControlled) {
-        setInternalPage(1);
-      }
-    }, [selectedTiers, selectedStatuses, sortOption, isPaginationControlled]);
+    // Get everything from context
+    const {
+      candidates,
+      isLoading,
+      selectedTiers,
+      setSelectedTiers,
+      selectedStatuses,
+      setSelectedStatuses,
+      sortOption,
+      setSortOption,
+      currentPage,
+      setCurrentPage,
+      totalItems,
+      pageSize,
+      updatingStatusId,
+      updateStatus,
+    } = useCandidateListContext();
 
     // Filter options
     const tierOptions: FilterOption<Tier>[] = useMemo(
@@ -665,76 +562,8 @@ export const CandidateList = memo<CandidateListProps>(
       []
     );
 
-    // In controlled mode, data is already filtered/sorted by parent (via API)
-    // In uncontrolled mode, do client-side filtering/sorting
-    const processedCandidates = useMemo(() => {
-      if (isControlled) {
-        // Data already filtered/sorted by API
-        return candidates;
-      }
-
-      // Client-side filtering
-      let result = candidates.filter((candidate) => {
-        if (
-          selectedTiers.length > 0 &&
-          !selectedTiers.includes(candidate.tier)
-        ) {
-          return false;
-        }
-        if (
-          selectedStatuses.length > 0 &&
-          !selectedStatuses.includes(candidate.applicationStatus)
-        ) {
-          return false;
-        }
-        return true;
-      });
-
-      // Client-side sorting
-      result = [...result].sort((a, b) => {
-        switch (sortOption) {
-          case "score_desc":
-            return b.score - a.score;
-          case "score_asc":
-            return a.score - b.score;
-          case "date_desc":
-            return (
-              new Date(b.appliedDate || 0).getTime() -
-              new Date(a.appliedDate || 0).getTime()
-            );
-          case "date_asc":
-            return (
-              new Date(a.appliedDate || 0).getTime() -
-              new Date(b.appliedDate || 0).getTime()
-            );
-          case "name_asc":
-            return (a.personalInfo.full_name || "").localeCompare(
-              b.personalInfo.full_name || ""
-            );
-          case "name_desc":
-            return (b.personalInfo.full_name || "").localeCompare(
-              a.personalInfo.full_name || ""
-            );
-          default:
-            return 0;
-        }
-      });
-
-      return result;
-    }, [candidates, selectedTiers, selectedStatuses, sortOption, isControlled]);
-
-    // Paginate - use server total when controlled, otherwise calculate from local data
-    const totalItems = controlledTotalItems ?? processedCandidates.length;
+    // Data is already filtered, sorted, and paginated by API (via context/hook)
     const totalPages = Math.ceil(totalItems / pageSize);
-    const paginatedCandidates = useMemo(() => {
-      if (isPaginationControlled) {
-        // Server-side pagination - candidates are already paginated
-        return processedCandidates;
-      }
-      // Client-side pagination
-      const start = (currentPage - 1) * pageSize;
-      return processedCandidates.slice(start, start + pageSize);
-    }, [processedCandidates, currentPage, pageSize, isPaginationControlled]);
 
     // Check if any filters are active
     const hasActiveFilters =
@@ -742,10 +571,10 @@ export const CandidateList = memo<CandidateListProps>(
 
     // Clear all filters
     const handleClearFilters = useCallback(() => {
-      handleTiersChange([]);
-      handleStatusesChange([]);
-      handleSortChange("score_desc");
-    }, [handleTiersChange, handleStatusesChange, handleSortChange]);
+      setSelectedTiers([]);
+      setSelectedStatuses([]);
+      setSortOption("score_desc");
+    }, [setSelectedTiers, setSelectedStatuses, setSortOption]);
 
     return (
       <div className={`candidate-list ${className}`}>
@@ -755,41 +584,21 @@ export const CandidateList = memo<CandidateListProps>(
             {title} <span className="candidate-list-count">{totalItems}</span>
           </h2>
 
-          {/* Refresh section */}
-          {onRefresh && (
-            <div className="candidate-refresh-section">
-              <span className="candidate-refresh-text">
-                {formatTimeAgo(lastRefreshedAt ?? null)}
-              </span>
-              <button
-                type="button"
-                className={`candidate-refresh-btn ${isRefreshing ? "refreshing" : ""}`}
-                onClick={onRefresh}
-                disabled={isRefreshing}
-                aria-label="Refresh candidates"
-              >
-                <RefreshIcon strokeWidth={2} />
-              </button>
-            </div>
-          )}
-
-          {showFilters && (
-            <div className="candidate-list-filters">
-              <FilterDropdown
-                label="Tier"
-                options={tierOptions}
-                selected={selectedTiers}
-                onChange={handleTiersChange}
-              />
-              <FilterDropdown
-                label="Status"
-                options={statusOptions}
-                selected={selectedStatuses}
-                onChange={handleStatusesChange}
-              />
-              <SortDropdown value={sortOption} onChange={handleSortChange} />
-            </div>
-          )}
+          <div className="candidate-list-filters">
+            <FilterDropdown
+              label="Tier"
+              options={tierOptions}
+              selected={selectedTiers}
+              onChange={setSelectedTiers}
+            />
+            <FilterDropdown
+              label="Status"
+              options={statusOptions}
+              selected={selectedStatuses}
+              onChange={setSelectedStatuses}
+            />
+            <SortDropdown value={sortOption} onChange={setSortOption} />
+          </div>
         </div>
 
         {/* List items */}
@@ -798,13 +607,13 @@ export const CandidateList = memo<CandidateListProps>(
             Array.from({ length: 5 }).map((_, i) => (
               <CandidateCardSkeleton key={i} />
             ))
-          ) : paginatedCandidates.length === 0 ? (
+          ) : candidates.length === 0 ? (
             <EmptyState
               hasFilters={hasActiveFilters}
               onClearFilters={handleClearFilters}
             />
           ) : (
-            paginatedCandidates.map((candidate) => (
+            candidates.map((candidate) => (
               <CandidateCard
                 key={candidate.id}
                 candidate={candidate}
@@ -819,11 +628,7 @@ export const CandidateList = memo<CandidateListProps>(
                 onResumeClick={
                   onResumeClick ? () => onResumeClick(candidate) : undefined
                 }
-                onStatusChange={
-                  onStatusChange
-                    ? (status) => onStatusChange(candidate.id, status)
-                    : undefined
-                }
+                onStatusChange={(status) => updateStatus(candidate.id, status)}
                 isStatusUpdating={updatingStatusId === candidate.id}
               />
             ))
@@ -831,13 +636,13 @@ export const CandidateList = memo<CandidateListProps>(
         </div>
 
         {/* Pagination */}
-        {showPagination && !isLoading && totalItems > 0 && (
+        {!isLoading && totalItems > 0 && (
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
             totalItems={totalItems}
             pageSize={pageSize}
-            onPageChange={handlePageChange}
+            onPageChange={setCurrentPage}
           />
         )}
       </div>
