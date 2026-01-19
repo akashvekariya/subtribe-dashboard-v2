@@ -11,15 +11,15 @@ import type {
 } from "./types";
 import type {
   CategoryScore,
+  Constraint,
   DimensionDetail,
   InterviewQuestion,
+  QuickStats,
   SignalStrength,
   SkillMatch,
   RedFlag,
   Tradeoff,
 } from "../types";
-import type { Constraint } from "../ConstraintAccordion";
-import type { QuickStats } from "../ScoreSummaryPanel";
 import {
   api,
   type ApplicationEvaluationData,

@@ -1,6 +1,6 @@
 import React, { memo } from "react";
-import type { ManipulationCheck } from "./types";
-import "./styles.css";
+import type { ManipulationCheck } from "../types";
+import "../styles.css";
 
 interface ManipulationAlertProps {
   manipulationCheck: ManipulationCheck;

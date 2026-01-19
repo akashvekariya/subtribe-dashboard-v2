@@ -1,7 +1,7 @@
 import React, { memo, useState, useCallback } from "react";
-import { ChevronDownIcon } from "./Icons";
-import type { Tradeoff, TradeoffsSummary } from "./types";
-import "./styles.css";
+import { ChevronDownIcon } from "../Icons";
+import type { Tradeoff, TradeoffsSummary } from "../types";
+import "../styles.css";
 
 interface TradeoffsCardProps {
   tradeoffs: Tradeoff[];
@@ -44,6 +44,8 @@ const DirectionIndicator = memo<{
   );
 });
 
+DirectionIndicator.displayName = "DirectionIndicator";
+
 // Single tradeoff item
 const TradeoffItem = memo<{ tradeoff: Tradeoff }>(({ tradeoff }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -78,6 +80,8 @@ const TradeoffItem = memo<{ tradeoff: Tradeoff }>(({ tradeoff }) => {
   );
 });
 
+TradeoffItem.displayName = "TradeoffItem";
+
 export const TradeoffsCard = memo<TradeoffsCardProps>(
   ({ tradeoffs, summary }) => {
     if (tradeoffs.length === 0) {
@@ -109,5 +113,7 @@ export const TradeoffsCard = memo<TradeoffsCardProps>(
     );
   }
 );
+
+TradeoffsCard.displayName = "TradeoffsCard";
 
 export default TradeoffsCard;

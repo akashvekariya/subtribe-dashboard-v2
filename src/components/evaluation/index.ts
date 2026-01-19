@@ -103,14 +103,12 @@ export { StatusPill, EligibilityPill, EligibilityIcon } from "./StatusPill";
 // Score Ring
 export { ScoreRing, ScoreRingLegend, ScoreRingWithLegend } from "./ScoreRing";
 
-// Constraint Accordion
-export { ConstraintAccordion } from "./ConstraintAccordion";
-
-// Red Flags Accordion
-export { RedFlagsAccordion } from "./RedFlagsAccordion";
-
-// Interview Questions Accordion
-export { InterviewQuestionsAccordion } from "./InterviewQuestionsAccordion";
+// Accordions
+export {
+  ConstraintAccordion,
+  RedFlagsAccordion,
+  InterviewQuestionsAccordion,
+} from "./accordions";
 
 // Skills Grid
 export { SkillsGrid } from "./SkillsGrid";
@@ -121,8 +119,14 @@ export {
   type ScoreSummaryPanelProps,
 } from "./ScoreSummaryPanel";
 
-// Insights Card (Strengths & Weaknesses)
-export { InsightsCard, type InsightsCardProps } from "./InsightsCard";
+// Cards (Insights, Tradeoffs, Manipulation)
+export {
+  InsightsCard,
+  type InsightsCardProps,
+  TradeoffsCard,
+  ManipulationCard,
+  ManipulationAlert,
+} from "./cards";
 
 // Evaluation Tabs
 export {

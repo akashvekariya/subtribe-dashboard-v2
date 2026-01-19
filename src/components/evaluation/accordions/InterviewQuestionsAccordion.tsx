@@ -1,10 +1,7 @@
 import React, { memo, useState, useCallback } from "react";
-import { MessageIcon, ChevronDownIcon, DocumentIcon } from "./Icons";
-import type { InterviewQuestion } from "./types";
-import "./styles.css";
-
-// Re-export types
-export type { InterviewQuestion };
+import { MessageIcon, ChevronDownIcon, DocumentIcon } from "../Icons";
+import type { InterviewQuestion } from "../types";
+import "../styles.css";
 
 // Single question item
 const QuestionItem = memo<{
@@ -49,6 +46,8 @@ const QuestionItem = memo<{
     </div>
   );
 });
+
+QuestionItem.displayName = "QuestionItem";
 
 // Main accordion component
 export interface InterviewQuestionsAccordionProps {
@@ -117,5 +116,7 @@ export const InterviewQuestionsAccordion =
       );
     }
   );
+
+InterviewQuestionsAccordion.displayName = "InterviewQuestionsAccordion";
 
 export default InterviewQuestionsAccordion;

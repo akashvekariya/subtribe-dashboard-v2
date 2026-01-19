@@ -5,14 +5,18 @@ import { ChevronLeftIcon } from "./Icons";
 import { EvaluationTabs, type TabId } from "./EvaluationTabs";
 import { CandidateList } from "./CandidateList";
 import { ScoreSummaryPanel } from "./ScoreSummaryPanel";
-import { InsightsCard } from "./InsightsCard";
 import { SkillsGrid } from "./SkillsGrid";
-import { ConstraintAccordion } from "./ConstraintAccordion";
-import { RedFlagsAccordion } from "./RedFlagsAccordion";
-import { InterviewQuestionsAccordion } from "./InterviewQuestionsAccordion";
-import { TradeoffsCard } from "./TradeoffsCard";
-import { ManipulationAlert } from "./ManipulationAlert";
 import { ResumeView } from "./ResumeView";
+import {
+  ConstraintAccordion,
+  RedFlagsAccordion,
+  InterviewQuestionsAccordion,
+} from "./accordions";
+import {
+  InsightsCard,
+  TradeoffsCard,
+  ManipulationAlert,
+} from "./cards";
 import {
   ScoreSummaryPanelSkeleton,
   InsightsCardSkeleton,

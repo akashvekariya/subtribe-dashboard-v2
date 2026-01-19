@@ -1,12 +1,9 @@
 import React, { memo, useState, useCallback, useMemo } from "react";
-import { EligibilityPill, EligibilityIcon } from "./StatusPill";
-import { AnimatedPill } from "./shared";
-import { ChevronDownIcon } from "./Icons";
-import type { Constraint } from "./types";
-import "./styles.css";
-
-// Re-export types
-export type { Constraint };
+import { EligibilityPill, EligibilityIcon } from "../StatusPill";
+import { AnimatedPill } from "../shared";
+import { ChevronDownIcon } from "../Icons";
+import type { Constraint } from "../types";
+import "../styles.css";
 
 // Single constraint item
 const ConstraintItem = memo<{
@@ -35,6 +32,8 @@ const ConstraintItem = memo<{
     </div>
   </div>
 ));
+
+ConstraintItem.displayName = "ConstraintItem";
 
 // Main accordion component
 export interface ConstraintAccordionProps {
@@ -129,5 +128,7 @@ export const ConstraintAccordion = memo<ConstraintAccordionProps>(
     );
   }
 );
+
+ConstraintAccordion.displayName = "ConstraintAccordion";
 
 export default ConstraintAccordion;

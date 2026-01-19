@@ -1,7 +1,7 @@
 import React, { memo } from "react";
-import { AlertTriangleFilledIcon } from "./Icons";
-import type { ManipulationCheck } from "./types";
-import "./styles.css";
+import { AlertTriangleFilledIcon } from "../Icons";
+import type { ManipulationCheck } from "../types";
+import "../styles.css";
 
 interface ManipulationCardProps {
   manipulationCheck: ManipulationCheck;

@@ -1,6 +1,6 @@
 import React, { memo } from "react";
-import { CheckCircleFilledIcon, AlertTriangleFilledIcon } from "./Icons";
-import "./styles.css";
+import { CheckCircleFilledIcon, AlertTriangleFilledIcon } from "../Icons";
+import "../styles.css";
 
 export interface InsightsCardProps {
   strengths: string[];
@@ -17,6 +17,8 @@ const InsightItem = memo<{ text: string; type: "strength" | "concern" }>(
     </li>
   )
 );
+
+InsightItem.displayName = "InsightItem";
 
 // Column component
 const InsightsColumn = memo<{
@@ -40,6 +42,8 @@ const InsightsColumn = memo<{
     </ul>
   </div>
 ));
+
+InsightsColumn.displayName = "InsightsColumn";
 
 export const InsightsCard = memo<InsightsCardProps>(
   ({ strengths, concerns, className = "" }) => (
@@ -66,5 +70,7 @@ export const InsightsCard = memo<InsightsCardProps>(
     </div>
   )
 );
+
+InsightsCard.displayName = "InsightsCard";
 
 export default InsightsCard;

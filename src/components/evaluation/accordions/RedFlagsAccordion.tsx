@@ -5,14 +5,11 @@ import {
   ChevronDownIcon,
   InfoCircleIcon,
   MessageIcon,
-} from "./Icons";
-import { AnimatedPill } from "./shared";
-import { severityConfig, getFlagTypeLabel } from "./config";
-import type { FlagSeverity, RedFlag } from "./types";
-import "./styles.css";
-
-// Re-export types
-export type { FlagSeverity, RedFlag };
+} from "../Icons";
+import { AnimatedPill } from "../shared";
+import { severityConfig, getFlagTypeLabel } from "../config";
+import type { FlagSeverity, RedFlag } from "../types";
+import "../styles.css";
 
 // Severity pill
 const SeverityPill = memo<{ severity: FlagSeverity; showLabel?: boolean }>(
@@ -33,6 +30,8 @@ const SeverityPill = memo<{ severity: FlagSeverity; showLabel?: boolean }>(
   }
 );
 
+SeverityPill.displayName = "SeverityPill";
+
 // Severity icon (compact)
 const SeverityIcon = memo<{ severity: FlagSeverity }>(({ severity }) => {
   const config = severityConfig[severity];
@@ -50,6 +49,8 @@ const SeverityIcon = memo<{ severity: FlagSeverity }>(({ severity }) => {
     </span>
   );
 });
+
+SeverityIcon.displayName = "SeverityIcon";
 
 // Single flag item
 const RedFlagItem = memo<{
@@ -106,6 +107,8 @@ const RedFlagItem = memo<{
     </div>
   );
 });
+
+RedFlagItem.displayName = "RedFlagItem";
 
 // Main accordion component
 export interface RedFlagsAccordionProps {
@@ -196,5 +199,7 @@ export const RedFlagsAccordion = memo<RedFlagsAccordionProps>(
     );
   }
 );
+
+RedFlagsAccordion.displayName = "RedFlagsAccordion";
 
 export default RedFlagsAccordion;
