@@ -1,7 +1,11 @@
 /**
- * Evaluation V3 - Centralized Type Definitions
+ * Evaluation - Centralized Type Definitions
  * All shared types for the evaluation component system
  */
+
+// Import centralized types to avoid duplication
+import type { ApplicationStatus } from "@/types";
+import type { DimensionLevel, ManipulationCheck } from "@/types/evaluation";
 
 // Status Types
 export type EligibilityStatus = true | false | "review";
@@ -32,13 +36,6 @@ export type PillVariant =
   | "info"
   | "purple"
   | "neutral";
-export type ApplicationStatus =
-  | "applied"
-  | "screening"
-  | "interviewing"
-  | "offer"
-  | "hired"
-  | "rejected";
 export type CandidateSortOption =
   | "score_desc"
   | "score_asc"
@@ -70,8 +67,6 @@ export interface CategoryScore {
 }
 
 // Dimension Detail (full data from API for modal)
-export type DimensionLevel = "strong" | "good" | "moderate" | "weak" | "poor";
-
 export interface DimensionDetail {
   id: string;
   label: string;
@@ -144,12 +139,6 @@ export interface TradeoffsSummary {
   misaligned: number;
 }
 
-// Manipulation Check Types
-export interface ManipulationCheck {
-  detected: boolean;
-  details: string | null;
-}
-
 // Stats Types
 export interface QuickStats {
   skillsMatched: number;
@@ -218,3 +207,7 @@ export interface ResumeData {
   skills: ResumeSkills;
   certifications?: ResumeCertification[];
 }
+
+// Re-export centralized types for backward compatibility
+export type { ApplicationStatus } from "@/types";
+export type { DimensionLevel, ManipulationCheck } from "@/types/evaluation";
