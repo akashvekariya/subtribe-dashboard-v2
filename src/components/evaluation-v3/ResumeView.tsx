@@ -54,7 +54,10 @@ const ExperienceSection = memo<{ entries: ResumeExperienceEntry[] }>(
               <p className="resume-entry-subtitle">
                 {exp.company}
                 {exp.location && (
-                  <span className="resume-entry-location"> | {exp.location}</span>
+                  <span className="resume-entry-location">
+                    {" "}
+                    | {exp.location}
+                  </span>
                 )}
               </p>
               {exp.content.length > 0 && (
@@ -120,16 +123,17 @@ const EducationSection = memo<{ entries: ResumeEducationEntry[] }>(
               {edu.field_of_study && (
                 <p className="resume-entry-field">{edu.field_of_study}</p>
               )}
-              {edu.relevant_coursework && edu.relevant_coursework.length > 0 && (
-                <div className="resume-entry-coursework">
-                  <span className="resume-entry-coursework-label">
-                    Relevant Coursework:
-                  </span>
-                  <span className="resume-entry-coursework-list">
-                    {edu.relevant_coursework.join(", ")}
-                  </span>
-                </div>
-              )}
+              {edu.relevant_coursework &&
+                edu.relevant_coursework.length > 0 && (
+                  <div className="resume-entry-coursework">
+                    <span className="resume-entry-coursework-label">
+                      Relevant Coursework:
+                    </span>
+                    <span className="resume-entry-coursework-list">
+                      {edu.relevant_coursework.join(", ")}
+                    </span>
+                  </div>
+                )}
             </div>
           ))}
         </div>
@@ -153,7 +157,9 @@ const ProjectsSection = memo<{ entries: ResumeProjectEntry[] }>(
                 <div className="resume-entry-title-row">
                   <h4 className="resume-entry-title">{project.name}</h4>
                   {project.category && (
-                    <span className="resume-entry-badge">{project.category}</span>
+                    <span className="resume-entry-badge">
+                      {project.category}
+                    </span>
                   )}
                 </div>
                 <div className="resume-entry-links">
@@ -224,7 +230,10 @@ const SkillsSection = memo<{ skills: ResumeSkills }>(({ skills }) => {
             <span className="resume-skills-group-label">Technical</span>
             <div className="resume-skills-tags">
               {skills.technical.map((skill, i) => (
-                <span key={i} className="resume-skill-tag resume-skill-tag-tech">
+                <span
+                  key={i}
+                  className="resume-skill-tag resume-skill-tag-tech"
+                >
                   {skill}
                 </span>
               ))}
@@ -236,7 +245,10 @@ const SkillsSection = memo<{ skills: ResumeSkills }>(({ skills }) => {
             <span className="resume-skills-group-label">Soft Skills</span>
             <div className="resume-skills-tags">
               {skills.soft.map((skill, i) => (
-                <span key={i} className="resume-skill-tag resume-skill-tag-soft">
+                <span
+                  key={i}
+                  className="resume-skill-tag resume-skill-tag-soft"
+                >
                   {skill}
                 </span>
               ))}
@@ -248,7 +260,10 @@ const SkillsSection = memo<{ skills: ResumeSkills }>(({ skills }) => {
             <span className="resume-skills-group-label">Languages</span>
             <div className="resume-skills-tags">
               {skills.languages.map((skill, i) => (
-                <span key={i} className="resume-skill-tag resume-skill-tag-lang">
+                <span
+                  key={i}
+                  className="resume-skill-tag resume-skill-tag-lang"
+                >
                   {skill}
                 </span>
               ))}
@@ -297,7 +312,9 @@ const CertificationsSection = memo<{ certifications: ResumeCertification[] }>(
               {cert.issuer && (
                 <span className="resume-cert-issuer">{cert.issuer}</span>
               )}
-              {cert.date && <span className="resume-cert-date">{cert.date}</span>}
+              {cert.date && (
+                <span className="resume-cert-date">{cert.date}</span>
+              )}
             </div>
           ))}
         </div>
@@ -337,7 +354,11 @@ export const ResumeView = memo<ResumeViewProps>(
     return (
       <div className={`resume-view ${className}`}>
         {/* Personal Info */}
-        <PersonalInfoDisplay info={personalInfo} variant="card" showName={true} />
+        <PersonalInfoDisplay
+          info={personalInfo}
+          variant="card"
+          showName={true}
+        />
 
         {/* View Original Resume Button */}
         {meta.resume_url && (

@@ -22,7 +22,11 @@ import {
 import { DimensionDetailModal } from "./DimensionDetailModal";
 import { mapBackendTierToUI } from "./utils";
 import { useCandidateStore } from "./store";
-import { api, type ResumeDisplayData, type ResumeDisplayMeta } from "@/lib/api-client";
+import {
+  api,
+  type ResumeDisplayData,
+  type ResumeDisplayMeta,
+} from "@/lib/api-client";
 import type { ApplicationStatus, Tier, CandidateSortOption } from "./types";
 import "./styles.css";
 
@@ -278,7 +282,8 @@ const EvaluationPanel = memo(({ jobId }: EvaluationPanelProps) => {
     setResumeError(null);
 
     try {
-      const response = await api.applications.getApplicationResume(applicationId);
+      const response =
+        await api.applications.getApplicationResume(applicationId);
       setResumeData(response.data);
       setResumeMeta(response.meta);
       setResumeLoadingState("success");
