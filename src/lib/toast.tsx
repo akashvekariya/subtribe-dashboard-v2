@@ -1,7 +1,6 @@
 // Toast notification utilities
 // Wrapper around react-hot-toast for consistent notifications
 
-import React from "react";
 import toast from "react-hot-toast";
 
 export const showToast = {

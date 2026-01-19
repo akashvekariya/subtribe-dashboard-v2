@@ -1,7 +1,7 @@
 "use client";
 
 import React, { memo, useState, useCallback, useEffect } from "react";
-import { ChevronLeftIcon } from "./icons";
+import { ChevronLeftIcon } from "./Icons";
 import { EvaluationTabs, type TabId } from "./EvaluationTabs";
 import { CandidateList } from "./CandidateList";
 import { ScoreSummaryPanel } from "./ScoreSummaryPanel";

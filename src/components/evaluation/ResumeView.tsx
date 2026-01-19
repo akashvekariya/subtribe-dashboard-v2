@@ -8,7 +8,7 @@ import {
   GitHubIcon,
   GlobeFilledIcon,
   DocumentFilledIcon,
-} from "./icons";
+} from "./Icons";
 import { formatDate } from "./utils";
 import type {
   ResumeDisplayData,

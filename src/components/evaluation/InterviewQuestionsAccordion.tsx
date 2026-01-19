@@ -1,5 +1,5 @@
 import React, { memo, useState, useCallback } from "react";
-import { MessageIcon, ChevronDownIcon, DocumentIcon } from "./icons";
+import { MessageIcon, ChevronDownIcon, DocumentIcon } from "./Icons";
 import type { InterviewQuestion } from "./types";
 import "./styles.css";
 

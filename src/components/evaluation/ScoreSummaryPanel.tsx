@@ -2,7 +2,7 @@ import React, { memo, useMemo } from "react";
 import { ScoreRing } from "./ScoreRing";
 import { PersonalInfoDisplay } from "./shared";
 import { tierConfig } from "./config";
-import { ChartFilledIcon, ShieldFilledIcon, FlagFilledIcon } from "./icons";
+import { ChartFilledIcon, ShieldFilledIcon, FlagFilledIcon } from "./Icons";
 import type { PersonalInfo, QuickStats, CategoryScore, Tier } from "./types";
 import "./styles.css";
 

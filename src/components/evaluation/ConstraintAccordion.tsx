@@ -1,7 +1,7 @@
 import React, { memo, useState, useCallback, useMemo } from "react";
 import { EligibilityPill, EligibilityIcon } from "./StatusPill";
 import { AnimatedPill } from "./shared";
-import { ChevronDownIcon } from "./icons";
+import { ChevronDownIcon } from "./Icons";
 import type { Constraint, EligibilityStatus } from "./types";
 import "./styles.css";
 

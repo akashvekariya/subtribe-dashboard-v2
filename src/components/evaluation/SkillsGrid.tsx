@@ -1,6 +1,6 @@
 import React, { memo, useState, useCallback, useMemo } from "react";
 import { StatusPill, PillIcons } from "./StatusPill";
-import { InfoCircleIcon, CloseIcon, BriefcaseIcon, QuoteIcon } from "./icons";
+import { InfoCircleIcon, CloseIcon, BriefcaseIcon, QuoteIcon } from "./Icons";
 import { signalConfig, sourceLabels } from "./config";
 import type {
   SignalStrength,

@@ -5,7 +5,7 @@ import {
   ChevronDownIcon,
   InfoCircleIcon,
   MessageIcon,
-} from "./icons";
+} from "./Icons";
 import { AnimatedPill } from "./shared";
 import { severityConfig, getFlagTypeLabel } from "./config";
 import type { FlagSeverity, RedFlag } from "./types";

@@ -16,7 +16,7 @@ import {
   ChevronRightIcon,
   CheckIcon,
   SearchIcon,
-} from "./icons";
+} from "./Icons";
 import type {
   Tier,
   PersonalInfo,

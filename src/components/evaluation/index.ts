@@ -74,7 +74,7 @@ export {
   QuoteIcon,
   PillIcons,
   PillIconsBold,
-} from "./icons";
+} from "./Icons";
 
 // Icons - Filled
 export {
@@ -90,7 +90,7 @@ export {
   AlertTriangleFilledIcon,
   LinkedInIcon,
   GitHubIcon,
-} from "./icons";
+} from "./Icons";
 
 // Shared Components
 export { AnimatedPill, type AnimatedPillProps } from "./shared";

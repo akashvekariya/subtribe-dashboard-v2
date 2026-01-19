@@ -51,31 +51,3 @@ export async function updateJob(
     return null;
   }
 }
-
-export async function closeJob(id: string): Promise<boolean> {
-  try {
-    await api.jobs.closeJob(id);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export async function getPublicJob(slug: string): Promise<Job | null> {
-  try {
-    return await api.jobs.getPublicJob(slug);
-  } catch {
-    return null;
-  }
-}
-
-export async function getJobApplicationCount(jobId: string): Promise<number> {
-  try {
-    const response = await api.applications.getJobApplications(jobId, {
-      limit: 1,
-    });
-    return response.pagination.total;
-  } catch {
-    return 0;
-  }
-}

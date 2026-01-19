@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { AlertTriangleFilledIcon } from "./icons";
+import { AlertTriangleFilledIcon } from "./Icons";
 import type { ManipulationCheck } from "./types";
 import "./styles.css";
 

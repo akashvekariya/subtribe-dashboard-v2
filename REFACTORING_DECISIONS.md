@@ -23,6 +23,15 @@ These types have same names but different structures (API vs UI format):
 **File:** `src/app/(dashboard)/jobs/[jobId]/page.tsx` (850 lines)
 **Question:** Should this be decomposed into smaller components?
 
+### 5. UI Component File Naming Convention
+**Location:** `src/components/ui/`
+**Issue:** Mixed naming conventions:
+- PascalCase: `Button.tsx`, `Card.tsx`, `Input.tsx`, `Label.tsx`, etc.
+- kebab-case: `alert-dialog.tsx`, `calendar.tsx`, `dialog.tsx`, `popover.tsx`, etc.
+
+**Context:** The kebab-case files are shadcn/ui components (shadcn convention). PascalCase files may be custom or were renamed earlier.
+**Question:** Standardize all to PascalCase (React convention) OR keep shadcn/ui kebab-case for compatibility with CLI updates?
+
 ---
 
 ## Completed Refactoring
@@ -74,15 +83,28 @@ These types have same names but different structures (API vs UI format):
 - Native Intl APIs used for date formatting
 - Commit: `396b0ea`
 
+### Phase 9: Dead Code Cleanup & Final Polish
+- Removed unused `React` import from `toast.tsx`
+- Removed `generateMockAIEvaluation`, `processResumeFile` from `candidates.ts` (~60 lines)
+- Removed `SCORING` import from `candidates.ts` (no longer needed)
+- Removed `closeJob`, `getPublicJob`, `getJobApplicationCount` from `jobs.ts` (~30 lines)
+- Removed `getStatusBadgeClasses` from `styles.ts` (~8 lines)
+- Removed `usePremiumAccess`, `useBatchFeatureAccess` from `useFeatureAccess.ts` (~100 lines)
+- Removed `getBatchAnalysis` from `analysis-stub.ts` (~15 lines)
+- Deleted orphan `StatusUpdateModal.tsx` component (~155 lines)
+- Renamed `icons.tsx` to `Icons.tsx` (PascalCase convention)
+- Updated 14 import statements for Icons rename
+
 ---
 
 ## Summary
 
-**Total commits:** 10
-**Estimated lines removed:** ~6,000+
+**Total commits:** 11
+**Estimated lines removed:** ~6,400+
 **Key improvements:**
-- Removed dead code (evaluation v1, debug files)
+- Removed dead code (evaluation v1, debug files, unused functions)
 - Better code organization (api split, hooks, context)
 - Reduced prop drilling (26 → 7 props)
 - Centralized constants
 - Consistent naming conventions
+- Clean import hygiene

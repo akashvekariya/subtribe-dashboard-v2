@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect } from "react";
-import { CloseIcon, ChevronLeftIcon, ChevronRightIcon } from "./icons";
+import { CloseIcon, ChevronLeftIcon, ChevronRightIcon } from "./Icons";
 import { getColor } from "./colors";
 import type { DimensionDetail, DimensionLevel } from "./types";
 import "./styles.css";

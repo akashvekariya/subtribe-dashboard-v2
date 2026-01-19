@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { CheckCircleFilledIcon, AlertTriangleFilledIcon } from "./icons";
+import { CheckCircleFilledIcon, AlertTriangleFilledIcon } from "./Icons";
 import "./styles.css";
 
 export interface InsightsCardProps {

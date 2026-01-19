@@ -1,11 +1,11 @@
 import React, { memo } from "react";
-import { CircleCheckIcon, HourglassIcon, CircleXIcon } from "./icons";
+import { CircleCheckIcon, HourglassIcon, CircleXIcon } from "./Icons";
 import { pillVariantStyles, eligibilityConfig } from "./config";
 import type { PillVariant, EligibilityStatus } from "./types";
 import "./styles.css";
 
 // Re-export icons for convenience
-export { PillIcons, PillIconsBold } from "./icons";
+export { PillIcons, PillIconsBold } from "./Icons";
 
 // Re-export types
 export type { PillVariant, EligibilityStatus };

@@ -1,5 +1,5 @@
 import React, { memo, useState, useCallback } from "react";
-import { ChevronDownIcon } from "./icons";
+import { ChevronDownIcon } from "./Icons";
 import type { Tradeoff, TradeoffsSummary } from "./types";
 import "./styles.css";
 
