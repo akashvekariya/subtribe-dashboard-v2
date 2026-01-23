@@ -18,7 +18,7 @@ export const aiResumeEvalAPI = {
    */
   async getJobEvaluationStatus(jobId: string): Promise<JobEvaluationStatus> {
     return apiFetch<JobEvaluationStatus>(
-      `/api/ai-resume-eval/jobs/${jobId}/status`,
+      `/api/v1/ai-resume-eval/jobs/${jobId}/status`,
       {
         method: "GET",
       }
@@ -34,7 +34,7 @@ export const aiResumeEvalAPI = {
   ): Promise<StartEvaluationResponse> {
     const body = applicationIds ? { application_ids: applicationIds } : {};
     return apiFetch<StartEvaluationResponse>(
-      `/api/ai-resume-eval/jobs/${jobId}/start`,
+      `/api/v1/ai-resume-eval/jobs/${jobId}/start`,
       {
         method: "POST",
         body: JSON.stringify(body),
@@ -47,7 +47,7 @@ export const aiResumeEvalAPI = {
    */
   async getBatchStatus(batchId: string): Promise<EvaluationBatchStatus> {
     return apiFetch<EvaluationBatchStatus>(
-      `/api/ai-resume-eval/batches/${batchId}`,
+      `/api/v1/ai-resume-eval/batches/${batchId}`,
       {
         method: "GET",
       }
@@ -60,7 +60,7 @@ export const aiResumeEvalAPI = {
   async cancelBatch(
     batchId: string
   ): Promise<{ success: boolean; message: string }> {
-    return apiFetch(`/api/ai-resume-eval/batches/${batchId}/cancel`, {
+    return apiFetch(`/api/v1/ai-resume-eval/batches/${batchId}/cancel`, {
       method: "POST",
     });
   },
@@ -73,7 +73,7 @@ export const aiResumeEvalAPI = {
     retried_count: number;
     message: string;
   }> {
-    return apiFetch(`/api/ai-resume-eval/batches/${batchId}/retry-failed`, {
+    return apiFetch(`/api/v1/ai-resume-eval/batches/${batchId}/retry-failed`, {
       method: "POST",
     });
   },
@@ -86,7 +86,7 @@ export const aiResumeEvalAPI = {
     data: ApplicationEvaluationData | null;
     meta: ApplicationEvaluationMeta;
   }> {
-    return apiFetch(`/api/ai-resume-eval/applications/${applicationId}`, {
+    return apiFetch(`/api/v1/ai-resume-eval/applications/${applicationId}`, {
       method: "GET",
     });
   },

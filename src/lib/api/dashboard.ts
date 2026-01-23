@@ -17,8 +17,8 @@ export const dashboardAPI = {
 
     const queryString = searchParams.toString();
     const endpoint = queryString
-      ? `/dashboard/stats?${queryString}`
-      : "/dashboard/stats";
+      ? `/api/v1/dashboard/stats?${queryString}`
+      : "/api/v1/dashboard/stats";
 
     return apiFetch<DashboardStats>(endpoint, {
       method: "GET",

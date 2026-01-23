@@ -18,7 +18,7 @@ export const aiAPI = {
    * Parse a job description and generate calibration questions
    */
   async parseJob(data: JobCalibrationInput): Promise<ParseJobResponse> {
-    return apiFetch<ParseJobResponse>("/api/ai/jobs/parse", {
+    return apiFetch<ParseJobResponse>("/api/v1/ai/jobs/parse", {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -30,7 +30,7 @@ export const aiAPI = {
   async createFramework(
     calibrationData: CalibrationSummaryJSON
   ): Promise<FrameworkAPIResponse> {
-    return apiFetch<FrameworkAPIResponse>("/api/ai/jobs/create-framework", {
+    return apiFetch<FrameworkAPIResponse>("/api/v1/ai/jobs/create-framework", {
       method: "POST",
       body: JSON.stringify(calibrationData),
     });
@@ -49,7 +49,7 @@ export const aiAPI = {
     skill_keywords: string[];
     timing?: Record<string, number>;
   }> {
-    return apiFetch("/api/ai/facts/extract", {
+    return apiFetch("/api/v1/ai/facts/extract", {
       method: "POST",
       body: JSON.stringify({
         resume_text: resumeText,
@@ -74,7 +74,7 @@ export const aiAPI = {
     computed: Record<string, unknown>;
     timing?: Record<string, number>;
   }> {
-    return apiFetch("/api/ai/resume/parse", {
+    return apiFetch("/api/v1/ai/resume/parse", {
       method: "POST",
       body: JSON.stringify({
         resume_markdown: resumeMarkdown,
@@ -89,7 +89,7 @@ export const aiAPI = {
   async evaluateCandidate(
     request: EvaluateCandidateRequest
   ): Promise<EvaluateCandidateResponse> {
-    return apiFetch<EvaluateCandidateResponse>("/api/ai/candidates/evaluate", {
+    return apiFetch<EvaluateCandidateResponse>("/api/v1/ai/candidates/evaluate", {
       method: "POST",
       body: JSON.stringify(request),
     });

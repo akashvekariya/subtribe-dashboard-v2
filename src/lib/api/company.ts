@@ -9,7 +9,7 @@ import { OnboardingRequest, OnboardingResponse } from "./types";
 
 export const companyAPI = {
   async getCompany(): Promise<Company> {
-    return apiFetch<Company>("/companies/me", {
+    return apiFetch<Company>("/api/v1/companies/me", {
       method: "GET",
     });
   },
@@ -17,7 +17,7 @@ export const companyAPI = {
   async updateCompany(
     data: Partial<Omit<Company, "id" | "created_at" | "updated_at">>
   ): Promise<Company> {
-    return apiFetch<Company>("/companies/me", {
+    return apiFetch<Company>("/api/v1/companies/me", {
       method: "PATCH",
       body: JSON.stringify(data),
     });
@@ -26,7 +26,7 @@ export const companyAPI = {
   async completeOnboarding(
     data: OnboardingRequest
   ): Promise<OnboardingResponse> {
-    return apiFetch<OnboardingResponse>("/companies/onboarding", {
+    return apiFetch<OnboardingResponse>("/api/v1/companies/onboarding", {
       method: "POST",
       body: JSON.stringify(data),
     });

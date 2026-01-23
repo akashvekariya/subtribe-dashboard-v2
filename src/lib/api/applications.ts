@@ -12,7 +12,7 @@ export const applicationsAPI = {
     slug: string,
     formData: FormData
   ): Promise<{ id: string; message: string }> {
-    const url = `${API_BASE_URL}/public/jobs/${slug}/apply`;
+    const url = `${API_BASE_URL}/api/public/jobs/${slug}/apply`;
 
     const response = await fetch(url, {
       method: "POST",
@@ -46,8 +46,8 @@ export const applicationsAPI = {
 
     const queryString = searchParams.toString();
     const endpoint = queryString
-      ? `/jobs/${jobId}/applications?${queryString}`
-      : `/jobs/${jobId}/applications`;
+      ? `/api/v1/jobs/${jobId}/applications?${queryString}`
+      : `/api/v1/jobs/${jobId}/applications`;
 
     return apiFetch<PaginatedResponse<Application>>(endpoint, {
       method: "GET",
@@ -55,7 +55,7 @@ export const applicationsAPI = {
   },
 
   async getApplicationById(id: string): Promise<Application> {
-    return apiFetch<Application>(`/applications/${id}`, {
+    return apiFetch<Application>(`/api/v1/applications/${id}`, {
       method: "GET",
     });
   },
@@ -72,7 +72,7 @@ export const applicationsAPI = {
       body.notes = notes.trim();
     }
 
-    return apiFetch<Application>(`/applications/${id}`, {
+    return apiFetch<Application>(`/api/v1/applications/${id}`, {
       method: "PATCH",
       body: JSON.stringify(body),
     });
@@ -81,7 +81,7 @@ export const applicationsAPI = {
   async getResumeViewUrl(
     id: string
   ): Promise<{ url: string; filename: string; expires_at: string }> {
-    return apiFetch(`/applications/${id}/resume/view`, {
+    return apiFetch(`/api/v1/applications/${id}/resume/view`, {
       method: "GET",
     });
   },
@@ -89,7 +89,7 @@ export const applicationsAPI = {
   async getResumeDownloadUrl(
     id: string
   ): Promise<{ url: string; filename: string; expires_at: string }> {
-    return apiFetch(`/applications/${id}/resume/download`, {
+    return apiFetch(`/api/v1/applications/${id}/resume/download`, {
       method: "GET",
     });
   },
@@ -104,7 +104,7 @@ export const applicationsAPI = {
       created_at: string;
     }>;
   }> {
-    return apiFetch(`/applications/${id}/history`, {
+    return apiFetch(`/api/v1/applications/${id}/history`, {
       method: "GET",
     });
   },
@@ -124,7 +124,7 @@ export const applicationsAPI = {
       created_at: string;
     }>;
   }> {
-    return apiFetch(`/applications/${id}/scheduled-emails`, {
+    return apiFetch(`/api/v1/applications/${id}/scheduled-emails`, {
       method: "GET",
     });
   },
@@ -144,7 +144,7 @@ export const applicationsAPI = {
     by_status: Record<string, number>;
     by_tier: Record<string, number>;
   }> {
-    return apiFetch(`/jobs/${jobId}/applications/stats`, {
+    return apiFetch(`/api/v1/jobs/${jobId}/applications/stats`, {
       method: "GET",
     });
   },

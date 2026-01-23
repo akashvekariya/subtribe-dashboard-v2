@@ -13,7 +13,7 @@ export const authAPI = {
    * Sets HTTP-only cookie on success
    */
   async login(email: string, password: string): Promise<AuthResponse> {
-    return apiFetch<AuthResponse>("/auth/login", {
+    return apiFetch<AuthResponse>("/api/v1/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
@@ -29,7 +29,7 @@ export const authAPI = {
     first_name: string;
     last_name: string;
   }): Promise<AuthResponse> {
-    return apiFetch<AuthResponse>("/auth/register", {
+    return apiFetch<AuthResponse>("/api/v1/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -42,7 +42,7 @@ export const authAPI = {
     token: string
   ): Promise<{ success: boolean; message: string }> {
     return apiFetch<{ success: boolean; message: string }>(
-      "/auth/verify-email",
+      "/api/v1/auth/verify-email",
       {
         method: "POST",
         body: JSON.stringify({ token }),
@@ -57,7 +57,7 @@ export const authAPI = {
     email: string
   ): Promise<{ success: boolean; message: string }> {
     return apiFetch<{ success: boolean; message: string }>(
-      "/auth/resend-verification",
+      "/api/v1/auth/resend-verification",
       {
         method: "POST",
         body: JSON.stringify({ email }),
@@ -70,7 +70,7 @@ export const authAPI = {
    * Validates token from HTTP-only cookie
    */
   async me(): Promise<User> {
-    return apiFetch<User>("/auth/me", {
+    return apiFetch<User>("/api/v1/auth/me", {
       method: "GET",
     });
   },
@@ -80,7 +80,7 @@ export const authAPI = {
    * Calls backend to properly clear HTTP-only cookie with correct attributes
    */
   async logout(): Promise<void> {
-    await apiFetch<{ message: string }>("/auth/logout", {
+    await apiFetch<{ message: string }>("/api/v1/auth/logout", {
       method: "POST",
     });
   },
@@ -90,7 +90,7 @@ export const authAPI = {
    * Called after email verification
    */
   async claimInvite(code: string): Promise<ClaimInviteResponse> {
-    return apiFetch<ClaimInviteResponse>("/auth/claim-invite", {
+    return apiFetch<ClaimInviteResponse>("/api/v1/auth/claim-invite", {
       method: "POST",
       body: JSON.stringify({ code }),
     });
@@ -103,7 +103,7 @@ export const authAPI = {
   async forgotPassword(
     email: string
   ): Promise<{ success: boolean; message: string }> {
-    return apiFetch("/auth/forgot-password", {
+    return apiFetch("/api/v1/auth/forgot-password", {
       method: "POST",
       body: JSON.stringify({ email }),
     });
@@ -117,7 +117,7 @@ export const authAPI = {
     password: string,
     confirmPassword: string
   ): Promise<{ success: boolean; message: string }> {
-    return apiFetch("/auth/reset-password", {
+    return apiFetch("/api/v1/auth/reset-password", {
       method: "POST",
       body: JSON.stringify({
         token,
@@ -134,7 +134,7 @@ export const authAPI = {
   async validateResetToken(
     token: string
   ): Promise<{ valid: boolean; email?: string; message?: string }> {
-    return apiFetch("/auth/validate-reset-token", {
+    return apiFetch("/api/v1/auth/validate-reset-token", {
       method: "POST",
       body: JSON.stringify({ token }),
     });

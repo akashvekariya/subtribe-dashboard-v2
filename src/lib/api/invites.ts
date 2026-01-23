@@ -26,7 +26,7 @@ export const invitesAPI = {
    * List all invites for the company
    */
   async list(): Promise<InviteListResponse> {
-    return apiFetch<InviteListResponse>("/invites", {
+    return apiFetch<InviteListResponse>("/api/v1/invites", {
       method: "GET",
     });
   },
@@ -35,7 +35,7 @@ export const invitesAPI = {
    * Create and send a new invite
    */
   async create(data: InviteCreateRequest): Promise<InviteSendResponse> {
-    return apiFetch<InviteSendResponse>("/invites", {
+    return apiFetch<InviteSendResponse>("/api/v1/invites", {
       method: "POST",
       body: JSON.stringify(data),
     });

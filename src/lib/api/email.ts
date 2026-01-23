@@ -18,7 +18,7 @@ import { WildcardsAPIResponse, TemplatesAPIResponse } from "./types";
 export const emailAPI = {
   // Get available wildcards for templates
   async getWildcards(): Promise<{ data: EmailWildcard[] }> {
-    const response = await apiFetch<WildcardsAPIResponse>("/emails/wildcards", {
+    const response = await apiFetch<WildcardsAPIResponse>("/api/v1/emails/wildcards", {
       method: "GET",
     });
     return { data: response.wildcards };
@@ -26,7 +26,7 @@ export const emailAPI = {
 
   // Get all email templates for the company
   async getTemplates(): Promise<{ data: EmailTemplate[] }> {
-    const response = await apiFetch<TemplatesAPIResponse>("/emails/templates", {
+    const response = await apiFetch<TemplatesAPIResponse>("/api/v1/emails/templates", {
       method: "GET",
     });
     return { data: response.templates };
@@ -46,7 +46,7 @@ export const emailAPI = {
     subject: string;
     body: string;
   }): Promise<EmailTemplate> {
-    return apiFetch("/emails/templates", {
+    return apiFetch("/api/v1/emails/templates", {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -88,7 +88,7 @@ export const emailAPI = {
 
   // Send bulk emails to multiple applications
   async sendBulkEmail(data: BulkEmailRequest): Promise<BulkEmailResponse> {
-    return apiFetch("/emails/bulk-send", {
+    return apiFetch("/api/v1/emails/bulk-send", {
       method: "POST",
       body: JSON.stringify(data),
     });

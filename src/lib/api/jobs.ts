@@ -22,7 +22,7 @@ export const jobsAPI = {
       | "created_by"
     >
   ): Promise<Job> {
-    return apiFetch<Job>("/jobs", {
+    return apiFetch<Job>("/api/v1/jobs", {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -39,7 +39,7 @@ export const jobsAPI = {
     if (params?.limit) searchParams.append("limit", params.limit.toString());
 
     const queryString = searchParams.toString();
-    const endpoint = queryString ? `/jobs?${queryString}` : "/jobs";
+    const endpoint = queryString ? `/api/v1/jobs?${queryString}` : "/api/v1/jobs";
 
     return apiFetch<PaginatedResponse<Job>>(endpoint, {
       method: "GET",
@@ -47,13 +47,13 @@ export const jobsAPI = {
   },
 
   async getJobById(id: string): Promise<Job> {
-    return apiFetch<Job>(`/jobs/${id}`, {
+    return apiFetch<Job>(`/api/v1/jobs/${id}`, {
       method: "GET",
     });
   },
 
   async updateJob(id: string, data: Partial<Job>): Promise<Job> {
-    return apiFetch<Job>(`/jobs/${id}`, {
+    return apiFetch<Job>(`/api/v1/jobs/${id}`, {
       method: "PATCH",
       body: JSON.stringify(data),
     });
@@ -62,19 +62,19 @@ export const jobsAPI = {
   async closeJob(
     id: string
   ): Promise<{ id: string; status: string; closed_at: string }> {
-    return apiFetch(`/jobs/${id}/close`, {
+    return apiFetch(`/api/v1/jobs/${id}/close`, {
       method: "PATCH",
     });
   },
 
   async getPublicJob(slug: string): Promise<Job> {
-    return apiFetch<Job>(`/public/jobs/${slug}`, {
+    return apiFetch<Job>(`/api/public/jobs/${slug}`, {
       method: "GET",
     });
   },
 
   async getJobStats(jobId: string): Promise<JobStats> {
-    return apiFetch<JobStats>(`/jobs/${jobId}/stats`, {
+    return apiFetch<JobStats>(`/api/v1/jobs/${jobId}/stats`, {
       method: "GET",
     });
   },
@@ -92,7 +92,7 @@ export const jobsAPI = {
     calibrated_at: string | null;
     message: string;
   }> {
-    return apiFetch(`/jobs/${jobId}/calibration`, {
+    return apiFetch(`/api/v1/jobs/${jobId}/calibration`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
@@ -105,7 +105,7 @@ export const jobsAPI = {
     calibrated_at: string | null;
     message: string;
   }> {
-    return apiFetch(`/jobs/${jobId}/calibration`, {
+    return apiFetch(`/api/v1/jobs/${jobId}/calibration`, {
       method: "GET",
     });
   },
