@@ -105,10 +105,13 @@ export const emailAPI = {
     applicationId: string,
     data: { subject: string; body: string }
   ): Promise<EmailPreviewResponse> {
-    return apiFetch(`/api/v1/emails/applications/${applicationId}/preview-email`, {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    return apiFetch(
+      `/api/v1/emails/applications/${applicationId}/preview-email`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      }
+    );
   },
 
   // Cancel a scheduled email

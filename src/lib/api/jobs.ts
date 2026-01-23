@@ -39,7 +39,9 @@ export const jobsAPI = {
     if (params?.limit) searchParams.append("limit", params.limit.toString());
 
     const queryString = searchParams.toString();
-    const endpoint = queryString ? `/api/v1/jobs?${queryString}` : "/api/v1/jobs";
+    const endpoint = queryString
+      ? `/api/v1/jobs?${queryString}`
+      : "/api/v1/jobs";
 
     return apiFetch<PaginatedResponse<Job>>(endpoint, {
       method: "GET",

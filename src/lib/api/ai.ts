@@ -89,9 +89,12 @@ export const aiAPI = {
   async evaluateCandidate(
     request: EvaluateCandidateRequest
   ): Promise<EvaluateCandidateResponse> {
-    return apiFetch<EvaluateCandidateResponse>("/api/v1/ai/candidates/evaluate", {
-      method: "POST",
-      body: JSON.stringify(request),
-    });
+    return apiFetch<EvaluateCandidateResponse>(
+      "/api/v1/ai/candidates/evaluate",
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      }
+    );
   },
 };
