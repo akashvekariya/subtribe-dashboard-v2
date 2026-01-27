@@ -4,11 +4,13 @@
  */
 
 import { ApplicationStatus } from "@/types";
+import { AI_SCORE } from "./constants";
 
 export type StatusUpdateScenario =
   | "rejection"
   | "ai_mismatch_reject"
   | "ai_mismatch_hire"
+  | "offer_declined"
   | null;
 
 export interface HighSignalResult {
@@ -25,30 +27,69 @@ export interface StatusUpdateMessaging {
 }
 
 /**
+ * Stages that indicate meaningful engagement (past initial application)
+ */
+const ENGAGED_STAGES: ApplicationStatus[] = [
+  "screening",
+  "interviewing",
+  "offer",
+];
+
+/**
  * Detect if a status transition is high-signal (requires feedback)
+ *
+ * High-signal transitions:
+ * 1. Rejecting a high-scoring candidate (AI mismatch) - always ask
+ * 2. Rejecting after screening+ with decent score (>=50) - invested time, worth knowing
+ * 3. Offer declined (offer -> rejected) - candidate said no, why?
+ * 4. Hiring/offering a low-scoring candidate - AI missed something
  */
 export function isHighSignalTransition(
   currentStatus: ApplicationStatus,
   newStatus: ApplicationStatus,
   aiScore: number
 ): HighSignalResult {
-  // Any transition to rejected is high-signal
+  // Rejection scenarios
   if (newStatus === "rejected") {
-    // Check if AI thought candidate was good
-    if (aiScore >= 70) {
+    // Offer declined - candidate was given offer but rejected
+    if (currentStatus === "offer") {
+      return {
+        isHighSignal: true,
+        scenario: "offer_declined",
+      };
+    }
+
+    // AI mismatch - rejecting someone AI thought was good
+    if (aiScore >= AI_SCORE.HIGH_THRESHOLD) {
       return {
         isHighSignal: true,
         scenario: "ai_mismatch_reject",
       };
     }
+
+    // Rejection after engagement - only if score is decent (AI wasn't already flagging them)
+    if (
+      ENGAGED_STAGES.includes(currentStatus) &&
+      aiScore >= AI_SCORE.LOW_THRESHOLD
+    ) {
+      return {
+        isHighSignal: true,
+        scenario: "rejection",
+      };
+    }
+
+    // Low-scoring candidate rejected from any stage - AI already flagged, no need to ask
     return {
-      isHighSignal: true,
-      scenario: "rejection",
+      isHighSignal: false,
+      scenario: null,
     };
   }
 
   // Hiring/offering low-scoring candidates is high-signal
-  if ((newStatus === "offer" || newStatus === "hired") && aiScore < 50) {
+  if (
+    (newStatus === "offer" || newStatus === "hired") &&
+    aiScore < AI_SCORE.LOW_THRESHOLD
+  ) {
     return {
       isHighSignal: true,
       scenario: "ai_mismatch_hire",
@@ -108,7 +149,19 @@ export function getStatusUpdateMessaging(
         "Growth mindset",
         "Unique experience",
       ],
-      hint: "Helps us find more candidates like this",
+      hint: "Helps us find more candidates like this for you",
+    },
+    offer_declined: {
+      title: "Why did they decline?",
+      subtitle: "Understanding candidate decisions helps improve your offers",
+      quickPicksLabel: "Quick picks:",
+      tags: [
+        "Accepted another offer",
+        "Salary/compensation",
+        "Role expectations",
+        "Location/remote policy",
+      ],
+      hint: "Helps identify patterns in offer acceptance",
     },
   };
 

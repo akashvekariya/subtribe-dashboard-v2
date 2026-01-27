@@ -23,7 +23,6 @@ import {
   getStatusUpdateMessaging,
   combineTagsAndNotes,
 } from "@/lib/status-update-config";
-import { CommunicationTab } from "@/components/applications/CommunicationTab";
 
 const APPLICATION_STATUSES = [
   { value: "applied", label: "Applied", color: "bg-blue-100 text-blue-800" },
@@ -155,13 +154,6 @@ export default function ApplicationDetailPage() {
       setCustomNotes("");
 
       showToast.success("Status updated successfully!");
-
-      // Show prompt to send email
-      showToast.withAction(
-        "Would you like to send an email to the candidate?",
-        "Send Email",
-        () => setActiveTab("communication")
-      );
 
       // Reload history after status change
       const response = await api.applications.getApplicationHistory(
@@ -304,12 +296,6 @@ export default function ApplicationDetailPage() {
             className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-[var(--color-primary)]"
           >
             Analysis
-          </TabsTrigger>
-          <TabsTrigger
-            value="communication"
-            className="data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-[var(--color-primary)]"
-          >
-            Communication
           </TabsTrigger>
         </TabsList>
 
@@ -837,10 +823,6 @@ export default function ApplicationDetailPage() {
               </div>
             </div>
           </div>
-        </TabsContent>
-
-        <TabsContent value="communication" className="mt-6">
-          <CommunicationTab application={application} />
         </TabsContent>
       </Tabs>
     </div>

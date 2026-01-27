@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { getCurrentUser, removeUserData } from "@/lib/auth";
-import { Sidebar } from "@/components/shared/Sidebar";
-import { Header } from "@/components/shared/Header";
+import { Sidebar, JobContext } from "@/components/shared/Sidebar";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { TawkTo } from "@/components/shared/TawkTo";
-import { User } from "@/types";
+import { User, Job } from "@/types";
+import { api } from "@/lib/api-client";
 
 export default function DashboardLayoutClient({
   children,
@@ -18,6 +18,20 @@ export default function DashboardLayoutClient({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Job context state
+  const [currentJob, setCurrentJob] = useState<Job | null>(null);
+  const [jobStats, setJobStats] = useState<{
+    total_candidates: number;
+    by_status: Record<string, number>;
+    by_tier: Record<string, number>;
+  } | null>(null);
+
+  // Extract jobId from pathname
+  const jobId = useMemo(() => {
+    const match = pathname?.match(/^\/jobs\/([^/]+)/);
+    return match ? match[1] : null;
+  }, [pathname]);
 
   useEffect(() => {
     const validateAuth = async () => {
@@ -86,6 +100,42 @@ export default function DashboardLayoutClient({
     validateAuth();
   }, [pathname]);
 
+  // Fetch job data when jobId changes
+  useEffect(() => {
+    if (!jobId) {
+      setCurrentJob(null);
+      setJobStats(null);
+      return;
+    }
+
+    const fetchJobContext = async () => {
+      try {
+        const [job, stats] = await Promise.all([
+          api.jobs.getJobById(jobId),
+          api.applications.getJobApplicationsStats(jobId),
+        ]);
+        setCurrentJob(job);
+        setJobStats(stats);
+      } catch (error) {
+        console.error("Failed to fetch job context:", error);
+        setCurrentJob(null);
+        setJobStats(null);
+      }
+    };
+
+    fetchJobContext();
+  }, [jobId]);
+
+  // Build job context for sidebar
+  const jobContext: JobContext | undefined = useMemo(() => {
+    if (!currentJob || !jobStats) return undefined;
+    return {
+      id: currentJob.id,
+      title: currentJob.title,
+      stats: jobStats,
+    };
+  }, [currentJob, jobStats]);
+
   // Show loading state while validating auth
   if (loading) {
     return (
@@ -128,16 +178,15 @@ export default function DashboardLayoutClient({
           <Sidebar
             collapsed={sidebarCollapsed}
             onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+            user={user}
+            jobContext={jobContext}
           />
 
           {/* Main content area */}
           <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Header */}
-            <Header user={user} />
-
             {/* Main content */}
             <main id="main-content" className="flex-1 overflow-y-auto">
-              <div className="py-4">
+              <div className="pt-6 pb-4">
                 <div className="mx-auto px-4 sm:px-6 max-w-[1800px]">
                   {children}
                 </div>

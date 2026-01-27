@@ -7,6 +7,7 @@ import {
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import "devicon/devicon.min.css";
+import "@/components/evaluation/styles.css";
 
 const instrumentSans = Instrument_Sans({
   variable: "--font-instrument-sans",
