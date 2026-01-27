@@ -14,7 +14,7 @@ permissions:
 env:
   # GCP Configuration
   PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-  REGION: asia-south1 # Mumbai region
+  REGION: asia-east1 # Taiwan region (supports custom domain mappings)
   SERVICE_NAME: subtribe-dashboard-staging
   ARTIFACT_REGISTRY_REPO: subtribe # Shared repo for all services
 
@@ -41,7 +41,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 9
+          version: 10.23.0
           run_install: false
 
       # Step 3: Install dependencies

@@ -6,7 +6,7 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.23.0 --activate
 
 # Install dependencies based on package manager
 COPY package.json pnpm-lock.yaml ./
@@ -17,7 +17,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.23.0 --activate
 
 # Copy dependencies
 COPY --from=deps /app/node_modules ./node_modules
@@ -26,10 +26,12 @@ COPY . .
 # Build arguments for environment variables
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_BASE_URL
+ARG NEXT_PUBLIC_APP_URL
 
 # Set environment variables for build
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build Next.js application (standalone output)

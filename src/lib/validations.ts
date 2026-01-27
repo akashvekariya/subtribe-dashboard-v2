@@ -35,19 +35,52 @@ export const signInSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-export const signUpSchema = z
+// Password validation matching backend requirements
+const passwordSchema = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .regex(/[A-Z]/, "Password must contain at least one uppercase letter (A-Z)")
+  .regex(/\d/, "Password must contain at least one number (0-9)")
+  .regex(
+    /[!@#$%^&*(),.?":{}|<>]/,
+    "Password must contain at least one special character (!@#$%^&*...)"
+  );
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
+
+export const resetPasswordSchema = z
   .object({
-    email: z.string().email("Invalid email address"),
-    first_name: z.string().min(2, "First name must be at least 2 characters"),
-    last_name: z.string().min(2, "Last name must be at least 2 characters"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    password: passwordSchema,
     confirmPassword: z.string(),
-    company_code: z.string().min(1, "Company code is required"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
+
+// Note: invite_token removed - users enter invite code on /claim-invite after email verification
+export const signUpSchema = z
+  .object({
+    email: z.string().email("Invalid email address"),
+    first_name: z.string().min(2, "First name must be at least 2 characters"),
+    last_name: z.string().min(2, "Last name must be at least 2 characters"),
+    password: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1, "Verification token is required"),
+});
+
+export const resendVerificationSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
 
 // Screening question schema
 const screeningQuestionSchema = z.object({
@@ -345,14 +378,44 @@ export const validateCurrency = (amount: number, currency: string) => {
   return { valid: true };
 };
 
+// Onboarding schema for organization setup
+export const onboardingSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Organization name must be at least 2 characters")
+    .max(255, "Organization name must be less than 255 characters"),
+  slug: z
+    .string()
+    .min(2, "URL slug must be at least 2 characters")
+    .max(100, "URL slug must be less than 100 characters")
+    .regex(
+      /^[a-z0-9-]+$/,
+      "URL slug can only contain lowercase letters, numbers, and hyphens"
+    ),
+  logo_url: z.string().url("Invalid logo URL").optional().or(z.literal("")),
+  tagline: z
+    .string()
+    .max(500, "Tagline must be less than 500 characters")
+    .optional()
+    .or(z.literal("")),
+  about: z
+    .string()
+    .max(20000, "About section must be less than 20,000 characters")
+    .optional()
+    .or(z.literal("")),
+});
+
 // Type exports
 export type SignInInput = z.infer<typeof signInSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type JobInput = z.infer<typeof jobSchema>;
 export type ApplicationInput = z.infer<typeof applicationSchema>;
 export type StatusUpdateInput = z.infer<typeof statusUpdateSchema>;
 export type CompanyProfileInput = z.infer<typeof companyProfileSchema>;
 export type ScreeningQuestionInput = z.infer<typeof screeningQuestionSchema>;
+export type OnboardingInput = z.infer<typeof onboardingSchema>;
 
 // Backward compatibility types
 export type JobFormData = JobInput;

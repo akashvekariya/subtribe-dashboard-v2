@@ -1,4 +1,4 @@
-# Subtribe ATS Frontend - Production Deployment Guide
+# Subtribe Frontend - Production Deployment Guide
 
 ## Table of Contents
 
@@ -1548,7 +1548,7 @@ git commit -m "test: Verify pre-commit hook"
    gcloud artifacts repositories create subtribe \
      --repository-format=docker \
      --location=asia-south1 \
-     --description="Subtribe ATS containers"
+     --description="Subtribe containers"
    ```
 
 6. [ ] **Create GCP Service Account**:

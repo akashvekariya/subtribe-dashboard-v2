@@ -31,6 +31,8 @@ export interface Company {
   website_url?: string;
   tagline?: string;
   about?: string;
+  plan?: string;
+  onboarding_completed?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -42,7 +44,9 @@ export interface User {
   first_name: string;
   last_name: string;
   role: "recruiter" | "admin";
-  company: Company;
+  email_verified: boolean;
+  pending_onboarding: boolean; // True when user claimed org_creator invite, waiting to create org
+  company?: Company | null; // Optional - null until invite is claimed
   created_at?: string;
   updated_at?: string;
 }
@@ -100,6 +104,11 @@ export interface Job {
   created_at: string;
   updated_at: string;
 
+  // AI Calibration
+  calibration_summary?: Record<string, unknown>;
+  evaluation_framework?: Record<string, unknown>;
+  calibrated_at?: string;
+
   // Nested objects from backend
   creator?: {
     id: string;
@@ -107,6 +116,9 @@ export interface Job {
   };
   company?: Company;
 }
+
+// Import evaluation types
+import type { EvaluationJSON, EvaluationTier } from "./evaluation";
 
 // Enhanced Application/Candidate interface matching backend
 export interface Application {
@@ -133,6 +145,20 @@ export interface Application {
   // AI evaluation fields (frontend-specific for now)
   ai_score?: number;
   ai_evaluation?: string;
+
+  // AI Resume Evaluation fields (from backend)
+  ai_resume_eval_status?:
+    | "pending"
+    | "queued"
+    | "processing"
+    | "completed"
+    | "failed"
+    | "skipped";
+  ai_resume_eval_batch_id?: string;
+  evaluation_json?: EvaluationJSON | null;
+  evaluation_score?: number | null;
+  evaluation_tier?: EvaluationTier | null;
+  evaluated_at?: string | null;
 
   // Job reference for nested data
   job?: Partial<Job>;
@@ -303,4 +329,322 @@ export interface JobStats {
     avg_time_to_hire_days: number | null;
   };
   generated_at: string;
+}
+
+// ============================================================================
+// AI Calibration Types
+// ============================================================================
+
+export type RoleComplexity = "Junior" | "Mid" | "Senior" | "Lead" | "Executive";
+export type SkillCategory =
+  | "Technical"
+  | "Soft"
+  | "Domain"
+  | "Education"
+  | "Certification"
+  | "Custom";
+export type CalibrationStep =
+  | "basic"
+  | "parsing"
+  | "calibration_1"
+  | "calibration_2"
+  | "calibration_3"
+  | "summary"
+  | "generating_framework"
+  | "framework_view"
+  | "saving"
+  | "complete";
+export type TradeoffRelevance = "High" | "Medium" | "Low" | "NotRelevant";
+export type Trajectory =
+  | "stable"
+  | "grow_senior"
+  | "future_leader"
+  | "specialist";
+export type RoleFamily =
+  | "SoftwareEngineering"
+  | "DataAndML"
+  | "DevOpsAndInfra"
+  | "ProductAndBusiness"
+  | "DesignAndCreative"
+  | "HardwareAndPhysical"
+  | "QualityAndTesting"
+  | "SecurityAndCompliance"
+  | "SalesAndMarketing"
+  | "PeopleAndOps"
+  | "Other";
+
+// Section Feedback for collecting user feedback on each section
+export interface SectionFeedback {
+  sectionId: string;
+  rating: "positive" | "negative" | null;
+  comment?: string;
+  timestamp: string;
+}
+
+// Extracted Skill from LLM parsing
+export interface ExtractedSkill {
+  id: string;
+  name: string;
+  category: SkillCategory;
+}
+
+// Trade-off Types
+export interface TradeoffOption {
+  id: string;
+  label: string;
+  description: string;
+  implication: string;
+}
+
+export interface TradeoffScenario {
+  id: string;
+  title: string;
+  description: string;
+  options: TradeoffOption[];
+  relevance: TradeoffRelevance;
+  isRoleSpecific: boolean;
+}
+
+// Pipeline Calibration Types
+export interface PriorityOption {
+  id: string;
+  label: string;
+  hint: string;
+}
+
+export interface PipelineCalibration {
+  assessmentPriorities: PriorityOption[];
+  problemTypes: PriorityOption[];
+  trajectoryOptions: PriorityOption[];
+  communicationOptions: PriorityOption[];
+}
+
+// Psychological Extraction Types
+export interface PsychOption {
+  id: string;
+  label: string;
+}
+
+export interface PsychQuestion {
+  id: string;
+  question: string;
+  options: PsychOption[];
+}
+
+export interface PsychologicalInsights {
+  questions: PsychQuestion[];
+}
+
+// Role-Specific Trade-offs
+export interface RoleSpecificTradeoffs {
+  scenarios: TradeoffScenario[];
+  instruction: string;
+}
+
+// Red Flags Section (LLM-generated, role-specific)
+export interface RedFlagsSection {
+  rejectionBehaviors: string[];
+  trainableGaps: string[];
+  nonTrainableGaps: string[];
+}
+
+// Role Analysis (includes chain-of-thought reasoning)
+export interface RoleAnalysis {
+  roleFamily: RoleFamily;
+  reasoning: string;
+  assessmentApproach: string;
+  keyConflicts: string[];
+  complexity: RoleComplexity;
+  domainKeywords: string[];
+  roleType: string;
+  senioritySignals: string[];
+}
+
+// Calibration Questions Payload from API
+export interface CalibrationQuestionsPayload {
+  skillRealityCheck: {
+    mustHaveSkills: ExtractedSkill[];
+    goodToHaveSkills: ExtractedSkill[];
+    instruction: string;
+  };
+  experienceTradeoffs: {
+    scenarios: TradeoffScenario[];
+  };
+  roleSpecificTradeoffs: RoleSpecificTradeoffs;
+  redFlags: RedFlagsSection;
+  pipelineCalibration: PipelineCalibration;
+  psychologicalInsights: PsychologicalInsights;
+  honestAssessment: {
+    challengeOptions: string[];
+    growthOptions: string[];
+    quitRiskOptions: string[];
+  };
+  day60Expectations: {
+    milestones: string[];
+    instruction: string;
+  };
+}
+
+// API Response for parsing
+export interface ParseJobResponse {
+  jobId: string;
+  roleAnalysis: RoleAnalysis;
+  calibrationQuestions: CalibrationQuestionsPayload;
+}
+
+// Calibration Data (user's answers)
+export interface CalibrationData {
+  mustHaveSkills: string[];
+  goodToHaveSkills: string[];
+  experienceTradeoffs: Record<string, number>;
+  pipelineCalibration: {
+    assessmentPriorities: string[];
+    trajectory: Trajectory | "";
+    problemTypes: string[];
+  };
+  psychologicalAnswers: Record<string, string>;
+  honestAssessment: {
+    challenges: string[];
+    growthOpportunities: string[];
+    quitReasons: string[];
+  };
+  redFlags: {
+    rejectionBehaviors: string[];
+    trainableGaps: string[];
+    nonTrainableGaps: string[];
+  };
+  roleContext: {
+    roleOpenReason?: string;
+    autonomyLevel?: string;
+  };
+  day60Expectations: string[];
+  sectionFeedback: SectionFeedback[];
+}
+
+// Job Calibration input for API
+export interface JobCalibrationInput {
+  title: string;
+  description: string;
+  positionType: string;
+  department?: string;
+  locationType: string;
+  experienceMin?: number;
+  experienceMax?: number;
+}
+
+// Framework creation response
+export interface FrameworkResponse {
+  framework: Record<string, unknown>;
+  post_processing: {
+    errors: Array<{ stage: string; message: string }>;
+    warnings: Array<{ stage: string; message: string }>;
+    requires_human_review: boolean;
+    metadata: Record<string, unknown>;
+  };
+}
+
+// Candidate evaluation request
+export interface EvaluateCandidateRequest {
+  framework: Record<string, unknown>;
+  candidate_resume: string;
+}
+
+// Candidate evaluation response
+export interface EvaluateCandidateResponse {
+  scores: {
+    final_score: number;
+    tier: string;
+    dimension_scores: Record<string, number>;
+  };
+  skill_matches: Array<Record<string, unknown>>;
+  constraint_results: Record<string, unknown>;
+  tradeoff_alignment: Record<string, unknown>;
+  summary: Record<string, unknown>;
+  computed_facts: Record<string, unknown>;
+  timing?: Record<string, number>;
+}
+
+// Basic job data for calibration
+export interface BasicJobData {
+  title: string;
+  description: string;
+  positionType: string;
+  department?: string;
+  locationType: string;
+  experienceRange: {
+    min?: number;
+    max?: number;
+  };
+}
+
+// Helper function to create initial calibration data
+export function createInitialCalibrationData(): CalibrationData {
+  return {
+    mustHaveSkills: [],
+    goodToHaveSkills: [],
+    experienceTradeoffs: {},
+    pipelineCalibration: {
+      assessmentPriorities: [],
+      trajectory: "",
+      problemTypes: [],
+    },
+    psychologicalAnswers: {},
+    honestAssessment: {
+      challenges: [],
+      growthOpportunities: [],
+      quitReasons: [],
+    },
+    redFlags: {
+      rejectionBehaviors: [],
+      trainableGaps: [],
+      nonTrainableGaps: [],
+    },
+    roleContext: {},
+    day60Expectations: [],
+    sectionFeedback: [],
+  };
+}
+
+// Re-export evaluation types for convenience
+export type { EvaluationJSON, EvaluationTier } from "./evaluation";
+
+// ============================================================================
+// Bulk Upload Types
+// ============================================================================
+
+export type BulkUploadBatchStatus =
+  | "pending"
+  | "extracting"
+  | "processing"
+  | "completed"
+  | "failed";
+
+export interface BulkUploadBatch {
+  id: string;
+  job_id: string;
+  status: BulkUploadBatchStatus;
+  original_filename: string;
+  total_files: number;
+  valid_pdfs: number;
+  skipped_count: number;
+  duplicate_count: number;
+  processed_count: number;
+  failed_count: number;
+  progress_percent: number;
+  last_error: string | null;
+  created_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export interface BulkUploadHistoryItem {
+  id: string;
+  original_filename: string;
+  status: BulkUploadBatchStatus;
+  valid_pdfs: number;
+  processed_count: number;
+  failed_count: number;
+  duplicate_count: number;
+  created_at: string;
+  completed_at: string | null;
 }

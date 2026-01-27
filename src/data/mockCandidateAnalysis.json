@@ -1,0 +1,420 @@
+{
+  "candidates": [
+    {
+      "id": "1",
+      "name": "Sarah Johnson",
+      "rank": 1,
+      "analysisData": [
+        { "focus": "Culture Fit", "score": 9 },
+        { "focus": "Skills Match", "score": 9 },
+        { "focus": "Experience", "score": 8 },
+        { "focus": "Communication", "score": 9 },
+        { "focus": "Problem Solving", "score": 9 }
+      ],
+      "techStack": [
+        {
+          "name": "React",
+          "icon": "devicon-react-original",
+          "status": "present"
+        },
+        {
+          "name": "TypeScript",
+          "icon": "devicon-typescript-plain",
+          "status": "present"
+        },
+        {
+          "name": "Node.js",
+          "icon": "devicon-nodejs-plain",
+          "status": "present"
+        },
+        {
+          "name": "PostgreSQL",
+          "icon": "devicon-postgresql-plain",
+          "status": "present"
+        },
+        {
+          "name": "AWS",
+          "icon": "devicon-amazonwebservices-plain-wordmark",
+          "status": "present"
+        },
+        {
+          "name": "Docker",
+          "icon": "devicon-docker-plain",
+          "status": "present"
+        },
+        {
+          "name": "GraphQL",
+          "icon": "devicon-graphql-plain",
+          "status": "present"
+        },
+        {
+          "name": "Redis",
+          "icon": "devicon-redis-plain",
+          "status": "uncertain"
+        }
+      ],
+      "experience": {
+        "candidate": 6.5,
+        "requiredMin": 3,
+        "requiredMax": 5
+      },
+      "strengths": [
+        "Exceptional proficiency in React and TypeScript with 6+ years of production experience",
+        "Strong full-stack capabilities across frontend and backend technologies",
+        "Proven expertise in AWS cloud infrastructure and deployment",
+        "Extensive experience with modern development tools including Docker and GraphQL"
+      ],
+      "weaknesses": [
+        "Redis caching experience is mentioned but not well documented in work history",
+        "Slightly over-qualified which may lead to retention concerns",
+        "Limited management or mentorship experience mentioned",
+        "May expect higher compensation due to experience level"
+      ],
+      "overallMatch": "Exceptional candidate with strong technical skills and cultural alignment, ideal for senior engineering roles."
+    },
+    {
+      "id": "2",
+      "name": "Michael Chen",
+      "rank": 2,
+      "analysisData": [
+        { "focus": "Culture Fit", "score": 8 },
+        { "focus": "Skills Match", "score": 8 },
+        { "focus": "Experience", "score": 9 },
+        { "focus": "Communication", "score": 8 },
+        { "focus": "Problem Solving", "score": 8 }
+      ],
+      "techStack": [
+        {
+          "name": "React",
+          "icon": "devicon-react-original",
+          "status": "present"
+        },
+        {
+          "name": "TypeScript",
+          "icon": "devicon-typescript-plain",
+          "status": "present"
+        },
+        {
+          "name": "Node.js",
+          "icon": "devicon-nodejs-plain",
+          "status": "present"
+        },
+        {
+          "name": "PostgreSQL",
+          "icon": "devicon-postgresql-plain",
+          "status": "present"
+        },
+        {
+          "name": "AWS",
+          "icon": "devicon-amazonwebservices-plain-wordmark",
+          "status": "uncertain"
+        },
+        {
+          "name": "Docker",
+          "icon": "devicon-docker-plain",
+          "status": "missing"
+        },
+        {
+          "name": "GraphQL",
+          "icon": "devicon-graphql-plain",
+          "status": "missing"
+        },
+        {
+          "name": "Redis",
+          "icon": "devicon-redis-plain",
+          "status": "uncertain"
+        }
+      ],
+      "experience": {
+        "candidate": 4.5,
+        "requiredMin": 3,
+        "requiredMax": 5
+      },
+      "strengths": [
+        "Strong proficiency in React, TypeScript, and Node.js with proven track record",
+        "Experience perfectly aligns with job requirements at 4.5 years",
+        "Advanced Python skills provide additional value for full-stack projects",
+        "Demonstrated ability to work with PostgreSQL and modern database systems"
+      ],
+      "weaknesses": [
+        "AWS cloud infrastructure experience appears limited and may require training",
+        "SQL proficiency is below requirements and could benefit from development",
+        "No demonstrated experience with Docker or GraphQL containerization",
+        "Redis experience is unclear from resume and needs verification"
+      ],
+      "overallMatch": "Solid mid-level candidate with strong technical foundation and excellent culture fit potential."
+    },
+    {
+      "id": "3",
+      "name": "Emily Rodriguez",
+      "rank": 3,
+      "analysisData": [
+        { "focus": "Culture Fit", "score": 8 },
+        { "focus": "Skills Match", "score": 8 },
+        { "focus": "Experience", "score": 9 },
+        { "focus": "Communication", "score": 9 },
+        { "focus": "Problem Solving", "score": 7 }
+      ],
+      "techStack": [
+        {
+          "name": "React",
+          "icon": "devicon-react-original",
+          "status": "present"
+        },
+        {
+          "name": "TypeScript",
+          "icon": "devicon-typescript-plain",
+          "status": "present"
+        },
+        {
+          "name": "Node.js",
+          "icon": "devicon-nodejs-plain",
+          "status": "uncertain"
+        },
+        {
+          "name": "PostgreSQL",
+          "icon": "devicon-postgresql-plain",
+          "status": "present"
+        },
+        {
+          "name": "AWS",
+          "icon": "devicon-amazonwebservices-plain-wordmark",
+          "status": "present"
+        },
+        {
+          "name": "Docker",
+          "icon": "devicon-docker-plain",
+          "status": "present"
+        },
+        {
+          "name": "GraphQL",
+          "icon": "devicon-graphql-plain",
+          "status": "uncertain"
+        },
+        { "name": "Redis", "icon": "devicon-redis-plain", "status": "present" }
+      ],
+      "experience": {
+        "candidate": 5.0,
+        "requiredMin": 3,
+        "requiredMax": 5
+      },
+      "strengths": [
+        "Excellent frontend skills with React and TypeScript expertise",
+        "Strong database and SQL optimization knowledge exceeding requirements",
+        "Solid AWS and cloud infrastructure experience with certifications",
+        "Experience with Docker and Redis for modern deployment architectures"
+      ],
+      "weaknesses": [
+        "Node.js backend experience is somewhat limited compared to requirements",
+        "Python proficiency is below average and may need improvement",
+        "GraphQL experience is mentioned but lacks concrete project examples",
+        "Less well-rounded full-stack profile compared to other candidates"
+      ],
+      "overallMatch": "Promising candidate with solid frontend expertise, though backend experience requires further development."
+    },
+    {
+      "id": "4",
+      "name": "David Kim",
+      "rank": 4,
+      "analysisData": [
+        { "focus": "Culture Fit", "score": 7 },
+        { "focus": "Skills Match", "score": 8 },
+        { "focus": "Experience", "score": 8 },
+        { "focus": "Communication", "score": 7 },
+        { "focus": "Problem Solving", "score": 9 }
+      ],
+      "techStack": [
+        {
+          "name": "React",
+          "icon": "devicon-react-original",
+          "status": "present"
+        },
+        {
+          "name": "TypeScript",
+          "icon": "devicon-typescript-plain",
+          "status": "uncertain"
+        },
+        {
+          "name": "Node.js",
+          "icon": "devicon-nodejs-plain",
+          "status": "present"
+        },
+        {
+          "name": "PostgreSQL",
+          "icon": "devicon-postgresql-plain",
+          "status": "present"
+        },
+        {
+          "name": "AWS",
+          "icon": "devicon-amazonwebservices-plain-wordmark",
+          "status": "present"
+        },
+        {
+          "name": "Docker",
+          "icon": "devicon-docker-plain",
+          "status": "present"
+        },
+        {
+          "name": "GraphQL",
+          "icon": "devicon-graphql-plain",
+          "status": "present"
+        },
+        { "name": "Redis", "icon": "devicon-redis-plain", "status": "present" }
+      ],
+      "experience": {
+        "candidate": 3.5,
+        "requiredMin": 3,
+        "requiredMax": 5
+      },
+      "strengths": [
+        "Exceptional backend skills with Node.js, Python, and AWS expertise",
+        "Strong DevOps knowledge with Docker, GraphQL, and Redis experience",
+        "Excellent problem-solving and system architecture capabilities",
+        "Experience level perfectly fits within the required range"
+      ],
+      "weaknesses": [
+        "React and frontend skills are adequate but not as strong as other candidates",
+        "TypeScript usage appears inconsistent across projects",
+        "Less experience with modern frontend frameworks and tooling",
+        "May require additional support for complex UI/UX implementations"
+      ],
+      "overallMatch": "Junior-level candidate with potential but lacks the experience depth required for this mid-senior position."
+    },
+    {
+      "id": "5",
+      "name": "Jessica Martinez",
+      "rank": 5,
+      "analysisData": [
+        { "focus": "Culture Fit", "score": 8 },
+        { "focus": "Skills Match", "score": 7 },
+        { "focus": "Experience", "score": 6 },
+        { "focus": "Communication", "score": 8 },
+        { "focus": "Problem Solving", "score": 7 }
+      ],
+      "techStack": [
+        {
+          "name": "React",
+          "icon": "devicon-react-original",
+          "status": "present"
+        },
+        {
+          "name": "TypeScript",
+          "icon": "devicon-typescript-plain",
+          "status": "uncertain"
+        },
+        {
+          "name": "Node.js",
+          "icon": "devicon-nodejs-plain",
+          "status": "present"
+        },
+        {
+          "name": "PostgreSQL",
+          "icon": "devicon-postgresql-plain",
+          "status": "uncertain"
+        },
+        {
+          "name": "AWS",
+          "icon": "devicon-amazonwebservices-plain-wordmark",
+          "status": "uncertain"
+        },
+        {
+          "name": "Docker",
+          "icon": "devicon-docker-plain",
+          "status": "missing"
+        },
+        {
+          "name": "GraphQL",
+          "icon": "devicon-graphql-plain",
+          "status": "missing"
+        },
+        { "name": "Redis", "icon": "devicon-redis-plain", "status": "missing" }
+      ],
+      "experience": {
+        "candidate": 2.5,
+        "requiredMin": 3,
+        "requiredMax": 5
+      },
+      "strengths": [
+        "Solid foundation in React and modern frontend development",
+        "Good understanding of Node.js and full-stack fundamentals",
+        "Strong learning attitude and eagerness to grow",
+        "Recent bootcamp graduate with fresh perspective on modern practices"
+      ],
+      "weaknesses": [
+        "Below minimum experience requirement at 2.5 years",
+        "TypeScript knowledge is basic and needs significant development",
+        "Limited exposure to cloud infrastructure and AWS services",
+        "Missing experience with Docker, GraphQL, and Redis technologies"
+      ],
+      "overallMatch": "Strong backend-focused engineer with adequate frontend skills, better suited for infrastructure-heavy roles."
+    },
+    {
+      "id": "6",
+      "name": "Alex Thompson",
+      "rank": 6,
+      "analysisData": [
+        { "focus": "Culture Fit", "score": 7 },
+        { "focus": "Skills Match", "score": 5 },
+        { "focus": "Experience", "score": 4 },
+        { "focus": "Communication", "score": 7 },
+        { "focus": "Problem Solving", "score": 6 }
+      ],
+      "techStack": [
+        {
+          "name": "React",
+          "icon": "devicon-react-original",
+          "status": "present"
+        },
+        {
+          "name": "TypeScript",
+          "icon": "devicon-typescript-plain",
+          "status": "missing"
+        },
+        {
+          "name": "Node.js",
+          "icon": "devicon-nodejs-plain",
+          "status": "uncertain"
+        },
+        {
+          "name": "PostgreSQL",
+          "icon": "devicon-postgresql-plain",
+          "status": "missing"
+        },
+        {
+          "name": "AWS",
+          "icon": "devicon-amazonwebservices-plain-wordmark",
+          "status": "missing"
+        },
+        {
+          "name": "Docker",
+          "icon": "devicon-docker-plain",
+          "status": "missing"
+        },
+        {
+          "name": "GraphQL",
+          "icon": "devicon-graphql-plain",
+          "status": "missing"
+        },
+        { "name": "Redis", "icon": "devicon-redis-plain", "status": "missing" }
+      ],
+      "experience": {
+        "candidate": 1.5,
+        "requiredMin": 3,
+        "requiredMax": 5
+      },
+      "strengths": [
+        "Basic React knowledge with some small project experience",
+        "Enthusiasm and willingness to learn new technologies",
+        "Good communication skills and team collaboration",
+        "Affordable compensation expectations for entry-level role"
+      ],
+      "weaknesses": [
+        "Significantly below minimum experience requirement at 1.5 years",
+        "Missing most required technologies including TypeScript and SQL",
+        "No production experience with backend or cloud infrastructure",
+        "Would require extensive training and mentorship to be productive"
+      ],
+      "overallMatch": "Entry-level candidate with enthusiasm but significantly underqualified for this position's requirements."
+    }
+  ]
+}

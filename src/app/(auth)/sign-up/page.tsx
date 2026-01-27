@@ -4,21 +4,37 @@ import React, { Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { signUpSchema, type SignUpInput } from "@/lib/validations";
 import { registerUser } from "@/lib/auth";
 import { APIError } from "@/lib/api-client";
 import showToast from "@/lib/toast";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/shared/FormField";
+import { PasswordField } from "@/components/shared/PasswordField";
 
-function SignUpForm() {
+// New flow: Users sign up freely, then enter invite code after email verification
+// The invite code is entered on /claim-invite page, not during sign-up
+
+function RegistrationForm() {
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
   });
+
+  const password = watch("password", "");
+  const confirmPassword = watch("confirmPassword", "");
+
+  // Password match validation
+  const passwordsMatch =
+    password && confirmPassword && password === confirmPassword;
+  const passwordsMismatch = confirmPassword && password !== confirmPassword;
 
   async function onSubmit(data: SignUpInput) {
     const toastId = showToast.loading("Creating your account...");
@@ -29,7 +45,6 @@ function SignUpForm() {
         password: data.password,
         first_name: data.first_name,
         last_name: data.last_name,
-        company_code: data.company_code,
       });
 
       if (!user) {
@@ -40,10 +55,11 @@ function SignUpForm() {
 
       showToast.dismiss(toastId);
       showToast.success(
-        `Welcome, ${user.first_name}! Your account has been created.`
+        "Account created! Please check your email to verify your account."
       );
 
-      window.location.href = "/";
+      // Redirect to verify-email page with email in query params
+      router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
     } catch (error) {
       showToast.dismiss(toastId);
 
@@ -63,18 +79,8 @@ function SignUpForm() {
             Create your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Join your team on Subtribe ATS
+            Start your recruiting journey with Subtribe
           </p>
-
-          {/* Development company code info - only in development */}
-          {process.env.NODE_ENV === "development" && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-xs text-blue-800 font-medium">
-                Test Company Code:
-              </p>
-              <p className="text-xs text-blue-700">DJIS938DJA9</p>
-            </div>
-          )}
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
@@ -110,22 +116,11 @@ function SignUpForm() {
               {...register("email")}
             />
 
-            <FormField
-              id="company_code"
-              label="Company Code"
-              type="text"
-              placeholder="Enter your company invitation code"
-              required
-              error={errors.company_code?.message}
-              {...register("company_code")}
-            />
-
-            <FormField
+            <PasswordField
               id="password"
               label="Password"
-              type="password"
+              password={password}
               autoComplete="new-password"
-              required
               error={errors.password?.message}
               {...register("password")}
             />
@@ -136,7 +131,13 @@ function SignUpForm() {
               type="password"
               autoComplete="new-password"
               required
-              error={errors.confirmPassword?.message}
+              error={
+                passwordsMismatch
+                  ? "Password doesn't match"
+                  : errors.confirmPassword?.message
+              }
+              isValid={!!passwordsMatch}
+              showSuccessIcon
               {...register("confirmPassword")}
             />
           </div>
@@ -173,7 +174,7 @@ export default function SignUpPage() {
         </div>
       }
     >
-      <SignUpForm />
+      <RegistrationForm />
     </Suspense>
   );
 }
