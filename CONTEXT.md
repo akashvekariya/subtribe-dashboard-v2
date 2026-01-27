@@ -1,4 +1,4 @@
-# Subtribe ATS - Project Context
+# Subtribe - Project Context
 
 ## What We Built
 

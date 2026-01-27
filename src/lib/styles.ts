@@ -51,12 +51,3 @@ export const spinner = cva(
     },
   }
 );
-
-/**
- * Utility function to generate status badge classes
- * @param colorClasses - Tailwind color classes (e.g., "bg-blue-100 text-blue-800")
- * @returns Complete badge class string
- */
-export function getStatusBadgeClasses(colorClasses: string): string {
-  return `inline-flex px-2 py-1 text-xs font-medium rounded-full ${colorClasses}`;
-}

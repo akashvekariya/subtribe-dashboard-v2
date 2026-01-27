@@ -1,0 +1,487 @@
+{
+  "scores": {
+    "tier": "strong_match",
+    "is_flagged": false,
+    "can_proceed": true,
+    "final_score": 8.9,
+    "is_dealbreaker": false,
+    "verification_confidence": "high"
+  },
+  "skills": {
+    "matches": [
+      {
+        "evidence": "Spearheaded the development of a SaaS marketplace and engineered an API response transformation library. Also developed an event listing platform with a payment system at Backyard Media.",
+        "skill_name": "Back-End Web Development",
+        "source_type": "experience",
+        "is_dealbreaker": true,
+        "signal_strength": "strong",
+        "source_reference": "CM.com"
+      },
+      {
+        "evidence": "The candidate holds a Bachelor of Engineering in Computer Engineering, which typically includes comprehensive coursework in Object-Oriented Programming principles. While not explicitly stated in projects, the degree strongly implies foundational OOP knowledge.",
+        "skill_name": "Object-Oriented Programming (OOP)",
+        "source_type": "inferred",
+        "is_dealbreaker": true,
+        "signal_strength": "contextual",
+        "source_reference": "Education"
+      },
+      {
+        "evidence": "Holds a Bachelor of Engineering in Computer Engineering from Gujarat Technological University, indicating a strong foundation in computer science concepts.",
+        "skill_name": "Computer Science Concepts",
+        "source_type": "education",
+        "is_dealbreaker": false,
+        "signal_strength": "academic",
+        "source_reference": "Gujarat Technological University"
+      },
+      {
+        "evidence": "Spearheaded the development of a SaaS marketplace from inception, indicating experience across the software development lifecycle.",
+        "skill_name": "Software Development Life Cycle",
+        "source_type": "experience",
+        "is_dealbreaker": false,
+        "signal_strength": "strong",
+        "source_reference": "CM.com"
+      },
+      {
+        "evidence": "Automated internal workflows, built dashboards to catch issues faster, and cut average session time by 25%, demonstrating problem-solving in a product analytics context.",
+        "skill_name": "Problem-Solving Mindset",
+        "source_type": "experience",
+        "is_dealbreaker": false,
+        "signal_strength": "strong",
+        "source_reference": "Posha (formerly Nymble)"
+      },
+      {
+        "evidence": "Spearheaded the development of a SaaS marketplace, integrating internal products with external platforms like Salesforce, Magento, and Shopify, implying cross-functional collaboration.",
+        "skill_name": "Collaborative Teamwork",
+        "source_type": "experience",
+        "is_dealbreaker": false,
+        "signal_strength": "strong",
+        "source_reference": "CM.com"
+      },
+      {
+        "evidence": "Managed day-to-day technical development and marketing activities, and spearheaded the creation of a comprehensive dashboard, suggesting communication of technical and business information.",
+        "skill_name": "Effective Communication",
+        "source_type": "experience",
+        "is_dealbreaker": false,
+        "signal_strength": "strong",
+        "source_reference": "Backyard Media"
+      },
+      {
+        "evidence": "Set up in-app analytics from scratch to understand user behaviour, indicating a proactive approach to learning and implementing new tracking mechanisms.",
+        "skill_name": "Proactive Learning Approach",
+        "source_type": "experience",
+        "is_dealbreaker": false,
+        "signal_strength": "strong",
+        "source_reference": "Posha (formerly Nymble)"
+      },
+      {
+        "evidence": "Holds a Bachelor of Engineering in Computer Engineering from Gujarat Technological University.",
+        "skill_name": "Bachelor's in Computer Science/Engineering",
+        "source_type": "education",
+        "is_dealbreaker": false,
+        "signal_strength": "academic",
+        "source_reference": "Gujarat Technological University"
+      },
+      {
+        "evidence": "Engineered a dynamic API response transformation library, improving efficiency by 30%, which suggests a focus on writing efficient and well-structured code.",
+        "skill_name": "Clean and Efficient Coding",
+        "source_type": "experience",
+        "is_dealbreaker": false,
+        "signal_strength": "strong",
+        "source_reference": "CM.com"
+      },
+      {
+        "evidence": "Spearheaded the development of a SaaS marketplace from inception and designed and implemented RAG models using LLMs, indicating system design capabilities.",
+        "skill_name": "Designing Back-End Systems",
+        "source_type": "experience",
+        "is_dealbreaker": false,
+        "signal_strength": "strong",
+        "source_reference": "CM.com"
+      },
+      {
+        "evidence": "Developed a SaaS marketplace and engineered an API response transformation library, which commonly involve JavaScript/TypeScript for web applications and APIs.",
+        "skill_name": "javascript",
+        "source_type": "experience",
+        "is_dealbreaker": false,
+        "signal_strength": "strong",
+        "source_reference": "CM.com"
+      },
+      {
+        "evidence": "The candidate's experience as a Software Engineer at CM.com, developing a SaaS marketplace and working with APIs, strongly suggests the use of TypeScript, a modern superset of JavaScript often used in such environments.",
+        "skill_name": "typescript",
+        "source_type": "inferred",
+        "is_dealbreaker": false,
+        "signal_strength": "contextual",
+        "source_reference": "CM.com"
+      },
+      {
+        "evidence": "Developed a web app for customizing furniture, which inherently requires HTML and CSS for the user interface and styling.",
+        "skill_name": "html5/css3",
+        "source_type": "inferred",
+        "is_dealbreaker": false,
+        "signal_strength": "contextual",
+        "source_reference": "Furniture Simulator"
+      },
+      {
+        "evidence": "The 'Furniture Simulator' project has a linked GitHub repository, indicating the use of Git and GitHub for version control and project management.",
+        "skill_name": "github",
+        "source_type": "project",
+        "is_dealbreaker": false,
+        "signal_strength": "demonstrated",
+        "source_reference": "Furniture Simulator"
+      },
+      {
+        "evidence": "The 'Furniture Simulator' project has a linked GitHub repository, indicating the use of Git for version control.",
+        "skill_name": "Version Control (Git)",
+        "source_type": "project",
+        "is_dealbreaker": false,
+        "signal_strength": "demonstrated",
+        "source_reference": "Furniture Simulator"
+      },
+      {
+        "evidence": "The candidate's role as a Software Engineer at CM.com, a modern tech company, implies work within Agile methodologies, though not explicitly stated.",
+        "skill_name": "Agile Methodologies",
+        "source_type": "experience",
+        "is_dealbreaker": false,
+        "signal_strength": "strong",
+        "source_reference": "CM.com"
+      },
+      {
+        "evidence": "Worked on AI-based recipe generation and has listed 'AI', 'LLM', 'RAG', 'Agents', 'Fine-Tuning', 'Context Engineering', 'Chatbot', 'Automations' in their technical skills.",
+        "skill_name": "AI/ML Collaboration Awareness",
+        "source_type": "experience",
+        "is_dealbreaker": false,
+        "signal_strength": "strong",
+        "source_reference": "Posha (formerly Nymble)"
+      }
+    ],
+    "summary": {
+      "total": 19,
+      "matched": 18,
+      "coverage": 1,
+      "source_breakdown": {
+        "project": 2,
+        "inferred": 3,
+        "education": 2,
+        "experience": 11,
+        "keyword_only": 0
+      },
+      "keyword_stuffing_flag": false
+    }
+  },
+  "timing": {
+    "total_seconds": 15.69,
+    "evaluation_seconds": 15.69
+  },
+  "summary": {
+    "concerns": [
+      "The candidate has a gap between their founder role and current position that needs clarification.",
+      "Explicit details on OOP principles and clean code practices are inferred rather than directly detailed in project descriptions.",
+      "Lack of specific HR-Tech domain knowledge, though this is an acceptable gap."
+    ],
+    "strengths": [
+      "Strong technical foundation with a Computer Engineering degree and practical experience in backend development, system design, and AI/ML.",
+      "Demonstrated problem-solving skills through automation, efficiency improvements, and building complex features.",
+      "Clear 'Rising Star' trajectory with proactive learning and initiative shown in roles and projects.",
+      "Versatile skill set covering backend, AI, and product analysis, aligning with a generalist preference."
+    ],
+    "interview_questions": [
+      {
+        "question": "Could you elaborate on the period between your co-founder role at Backyard Media and your current position at Posha? What were your primary focuses during that time?",
+        "gap_addressed": "Employment Gap between Backyard Media and Posha",
+        "resume_reference": "Backyard Media"
+      },
+      {
+        "question": "You mentioned engineering a dynamic API response transformation library at CM.com. Can you walk me through the specific OOP principles or design patterns you applied to ensure its efficiency and maintainability?",
+        "gap_addressed": "Technical depth in OOP and Clean Code",
+        "resume_reference": "CM.com"
+      },
+      {
+        "question": "At Posha, you set up in-app analytics from scratch. What was your process for deciding which metrics to track and what tools or technologies did you consider before implementing your solution?",
+        "gap_addressed": "Problem-solving and technical decision-making",
+        "resume_reference": "Posha (formerly Nymble)"
+      },
+      {
+        "question": "For the Furniture Simulator web app, what were the key technical decisions you made regarding its architecture or specific features, and what was the rationale behind those choices?",
+        "gap_addressed": "Technical decision-making and rationale",
+        "resume_reference": "Furniture Simulator"
+      },
+      {
+        "question": "Your experience at CM.com involved both SaaS marketplace development and RAG models. How did you balance your focus between these different technical areas, and what was your specific contribution to the RAG model implementation?",
+        "gap_addressed": "Experience fit and technical versatility",
+        "resume_reference": "CM.com"
+      }
+    ]
+  },
+  "red_flags": {
+    "flags": [
+      {
+        "context": "This was a founder role, which can have different tenure expectations than traditional employment.",
+        "details": "The candidate's tenure at 'Backyard Media' as Co-founder lasted 7 months.",
+        "severity": "info",
+        "flag_type": "short_tenure",
+        "interview_probe": "Could you tell me more about the founding of Backyard Media and the reasons for its operational duration?"
+      },
+      {
+        "context": "The resume does not explicitly explain this gap. The candidate has a Diploma and a Bachelor's degree, and certifications, which might indicate continuous learning or personal projects during this time.",
+        "details": "There is a gap between 'Backyard Media' (ended Nov 2022) and 'Posha' (started Sept 2024).",
+        "severity": "info",
+        "flag_type": "employment_gap",
+        "interview_probe": "I noticed a gap between your role at Backyard Media and your current position at Posha. Could you walk me through what you were focused on during that period?"
+      }
+    ],
+    "summary": {
+      "by_type": {
+        "short_tenure": 1,
+        "employment_gap": 1
+      },
+      "summary": "2 info note(s)",
+      "by_severity": {
+        "info": 2,
+        "concern": 0,
+        "investigate": 0
+      },
+      "total_flags": 2,
+      "verification_confidence": "high"
+    }
+  },
+  "tradeoffs": {
+    "signals": [
+      {
+        "evidence": "The candidate graduated in 2023 and has shown rapid progression from a Diploma to a Bachelor's degree, followed by roles as a Software Engineer and Product Analyst. Their experience at CM.com (1.5 years) and current role at Posha (10 months) show recent, relevant experience. The founder role at Backyard Media also indicates initiative. This aligns with the 'Rising Star' profile.",
+        "direction": "option_b",
+        "tradeoff_title": "Veteran vs. Rising Star"
+      },
+      {
+        "evidence": "The candidate has experience in backend development (SaaS marketplace, API transformation, event listing platform) and also in AI/ML (RAG models, recipe generation) and product analysis (dashboards, analytics). Their skills list includes both backend languages and AI-related technologies. The 'Furniture Simulator' project also involved web app development. This indicates a broader skill set rather than a deep specialization in only one area.",
+        "direction": "option_b",
+        "tradeoff_title": "Deep Specialist vs. Broad Generalist"
+      },
+      {
+        "evidence": "The candidate's experience includes developing a SaaS marketplace from inception and implementing RAG models, which suggests a balance between rapid execution and thoughtful design. The founder role also implies a need for speed. While explicit mentions of 'Clean Architecture' are absent, the focus on efficiency and problem-solving suggests an ability to balance these aspects.",
+        "direction": "balanced",
+        "tradeoff_title": "Clean Architecture vs. Rapid Prototyping"
+      },
+      {
+        "evidence": "The candidate 'spearheaded' the development of a SaaS marketplace, 'engineered' an API response transformation library, and 'designed and implemented' RAG models. They also 'managed' technical development and 'spearheaded' dashboard creation as a co-founder. These actions suggest a strong ability to execute and take initiative, leaning towards decision-making.",
+        "direction": "option_a",
+        "tradeoff_title": "Technical Leader vs. Pure Executor"
+      }
+    ],
+    "summary": {
+      "total": 4,
+      "aligned": 4,
+      "misaligned": 0
+    }
+  },
+  "dimensions": {
+    "culture_fit": {
+      "label": "Culture Fit",
+      "level": "good",
+      "score": 8.2,
+      "weight": 0.1,
+      "reasoning": "The candidate demonstrates collaborative teamwork through integrating internal products with external platforms and working on a SaaS marketplace. Their communication skills are evidenced by managing technical development and marketing activities and creating dashboards. The proactive learning approach also suggests adaptability. While there are no explicit mentions of remote work preferences or specific cultural values, the demonstrated teamwork and communication are positive indicators.",
+      "negative_signals": [
+        "No explicit mention of hybrid work flexibility or specific cultural alignment beyond general teamwork."
+      ],
+      "positive_signals": [
+        "Collaborative teamwork evident in SaaS marketplace integration.",
+        "Effective communication skills shown in managing diverse activities.",
+        "Proactive learning indicates adaptability.",
+        "Experience in startup environment (Backyard Media) suggests comfort with dynamic teams."
+      ]
+    },
+    "technical_fit": {
+      "label": "Technical Fit",
+      "level": "strong",
+      "score": 9.1,
+      "weight": 0.35,
+      "reasoning": "The candidate demonstrates strong technical capabilities relevant to backend development, system design, and modern programming languages like TypeScript and Python. Their experience with APIs, SaaS marketplaces, and AI/ML technologies like RAG models aligns well with the role's requirements. While explicit OOP and CS fundamentals are inferred from their degree, their practical application in projects and work experience is evident. The inclusion of custom skills like JavaScript and TypeScript further strengthens their technical profile.",
+      "negative_signals": [
+        "Explicit mention of OOP principles is inferred rather than directly stated in project descriptions."
+      ],
+      "positive_signals": [
+        "Experience in backend development (SaaS marketplace, API transformation).",
+        "Proficiency in modern languages like Python and inferred TypeScript.",
+        "Experience with AI/ML technologies (RAG models, recipe generation).",
+        "Demonstrated system design capabilities through marketplace development."
+      ]
+    },
+    "experience_fit": {
+      "label": "Experience Fit",
+      "level": "good",
+      "score": 7.5,
+      "weight": 0.15,
+      "reasoning": "The candidate has approximately 30 months of relevant full-time experience in software engineering and product analysis roles, with an additional 7 months as a founder. This falls within the 2-6 year experience range. Their Bachelor's degree in Computer Engineering provides the foundational education. The experience covers backend development, system design, and AI integration, aligning with the mid-level complexity and backend focus.",
+      "negative_signals": [
+        "No specific HR-Tech industry knowledge, which is noted as an acceptable gap."
+      ],
+      "positive_signals": [
+        "Approximately 37 months of full-time experience, fitting the mid-level requirement.",
+        "Bachelor's degree in Computer Engineering.",
+        "Experience spans backend development, SaaS, and AI/ML.",
+        "Founder experience indicates initiative and broad exposure."
+      ]
+    },
+    "trajectory_fit": {
+      "label": "Trajectory Fit",
+      "level": "strong",
+      "score": 9.5,
+      "weight": 0.15,
+      "reasoning": "The candidate shows clear signals of a 'Rising Star' trajectory, with rapid progression from a Diploma to a Bachelor's degree and then into roles like Software Engineer and Product Analyst. Their proactive learning approach, demonstrated by setting up analytics from scratch and working with AI technologies, aligns with the desire for continuous growth. Their willingness to take on diverse responsibilities as a co-founder and their initiative in developing new features suggest a potential for technical leadership.",
+      "positive_signals": [
+        "Rapid progression from Diploma to Bachelor's and then to Software Engineer/Product Analyst roles.",
+        "Proactive learning demonstrated through implementing new analytics and working with AI.",
+        "Founder experience indicates initiative and potential for leadership.",
+        "Experience with modern technologies like RAG models and SaaS marketplaces."
+      ]
+    },
+    "problem_solving_fit": {
+      "label": "Problem Solving Fit",
+      "level": "strong",
+      "score": 9.5,
+      "weight": 0.25,
+      "reasoning": "The candidate consistently showcases strong problem-solving skills through their work experience and projects. They automated workflows, improved efficiency with API transformations, designed RAG models for query interpretation, and built dashboards to identify issues. The founder role also involved managing technical development and creating solutions like an event listing platform with a payment system. This demonstrates an ability to tackle complex and often undefined problems.",
+      "positive_signals": [
+        "Automated workflows and reduced manual work by 90%.",
+        "Engineered API response transformation library, improving efficiency.",
+        "Designed RAG models to interpret user queries and enhance accuracy.",
+        "Developed a full-stack event listing platform with payment integration."
+      ]
+    }
+  },
+  "experience": {
+    "entries": [
+      {
+        "title": "Product Analyst",
+        "company": "Posha (formerly Nymble)",
+        "end_date": "Present",
+        "is_current": true,
+        "start_date": "2024-09",
+        "duration_months": 10,
+        "experience_type": "full_time",
+        "key_contributions": [
+          "Worked on AI-based recipe generation, handling hardware limits and building out the full recipe logic.",
+          "Automated internal workflows using n8n, Airtable, and Supabase, reducing manual work by 90%.",
+          "Built dashboards with Retool, Python, and MongoDB to track sessions and catch issues faster, improving resolution time by 60%."
+        ],
+        "skills_demonstrated_names": [
+          "AI/ML Collaboration Awareness",
+          "Back-End Web Development",
+          "javascript",
+          "typescript",
+          "Problem-Solving Mindset",
+          "Clean and Efficient Coding",
+          "Collaborative Teamwork",
+          "Effective Communication",
+          "Proactive Learning Approach"
+        ]
+      },
+      {
+        "title": "Software Engineer",
+        "company": "CM.com",
+        "end_date": "2024-09",
+        "is_current": false,
+        "start_date": "2023-02",
+        "duration_months": 20,
+        "experience_type": "full_time",
+        "key_contributions": [
+          "Spearheaded the development of a SaaS marketplace from inception, integrating internal products with platforms like Salesforce, Magento, and Shopify, driving a 25% increase in cross-platform functionality.",
+          "Engineered a dynamic API response transformation library, improving efficiency by 30%, and played a key role in optimizing API call processes.",
+          "Designed and implemented RAG models using LLMs to interpret user queries and select appropriate APIs, enhancing task execution accuracy by 20%."
+        ],
+        "skills_demonstrated_names": [
+          "Back-End Web Development",
+          "Designing Back-End Systems",
+          "AI/ML Collaboration Awareness",
+          "javascript",
+          "typescript",
+          "Problem-Solving Mindset",
+          "Clean and Efficient Coding",
+          "Collaborative Teamwork",
+          "Effective Communication",
+          "Proactive Learning Approach"
+        ]
+      },
+      {
+        "title": "Co-founder",
+        "company": "Backyard Media",
+        "end_date": "2022-11",
+        "is_current": false,
+        "start_date": "2022-05",
+        "duration_months": 7,
+        "experience_type": "founder",
+        "key_contributions": [
+          "Managed day-to-day technical development and marketing activities, leading to a 30% increase in ticket sales.",
+          "Spearheaded the creation of a comprehensive dashboard with KPIs such as daily revenue tracking and projected customer signups for clients.",
+          "Developed BBQ, an event listing platform with its own payment system using Razor Pay, featuring listing management for organizers to manage tickets, RSVPs, customers, and entry verification with analytics."
+        ],
+        "skills_demonstrated_names": [
+          "Back-End Web Development",
+          "Problem-Solving Mindset",
+          "Effective Communication",
+          "Proactive Learning Approach",
+          "javascript"
+        ]
+      }
+    ],
+    "summary": {
+      "by_type": {
+        "founder": {
+          "count": 1,
+          "months": 7
+        },
+        "full_time": {
+          "count": 2,
+          "months": 30
+        }
+      },
+      "total_years": 3.1,
+      "total_months": 37,
+      "entries_count": 3,
+      "has_current_role": true
+    }
+  },
+  "constraints": {
+    "results": [
+      {
+        "status": "pass",
+        "evidence": "The candidate's resume describes the 'why' behind their technical choices, such as implementing RAG models to interpret user queries and selecting tools like n8n and Airtable for workflow automation. They also explain the impact of their work (e.g., 'improving efficiency by 30%').",
+        "constraint_text": "Inability to provide technical rationale for architectural decisions."
+      },
+      {
+        "status": "pass",
+        "evidence": "The candidate holds a Bachelor of Engineering in Computer Engineering from Gujarat Technological University, which strongly implies a solid foundation in CS fundamentals and OOP principles. Their projects and work experience also suggest practical application of these concepts.",
+        "constraint_text": "Insufficient understanding of core computer science and object-oriented programming."
+      },
+      {
+        "status": "pass",
+        "evidence": "The candidate has experience with Express, Python, and has worked on SaaS marketplaces and APIs, which are modern backend technologies. While a specific framework like Express isn't explicitly detailed as the sole focus, the breadth of backend experience is sufficient.",
+        "constraint_text": "Lack of experience in the specific framework used by the team."
+      },
+      {
+        "status": "pass",
+        "evidence": "The candidate's resume does not contain any specific knowledge or experience related to the HR-Tech industry. This is acceptable as per the constraint.",
+        "constraint_text": "Lack of prior experience in the hiring or HR technology domain."
+      },
+      {
+        "status": "pass",
+        "evidence": "The candidate's experience as a Software Engineer and Co-founder, coupled with a Computer Engineering degree and projects like the 'Furniture Simulator' and SaaS marketplace development, demonstrates core problem-solving abilities.",
+        "constraint_text": "Fundamental ability to solve complex logical problems."
+      },
+      {
+        "status": "pass",
+        "evidence": "The candidate's work experience at CM.com as a Software Engineer and their role as Co-founder at Backyard Media, involving technical development and building platforms, indicates proficiency in writing functional code. Their Computer Engineering degree also supports foundational coding knowledge.",
+        "constraint_text": "Must be able to write clean, functional code using OOP principles immediately."
+      }
+    ],
+    "summary": {
+      "total": 6,
+      "failed": 0,
+      "passed": 6,
+      "deferred": 0
+    }
+  },
+  "manipulation_check": {
+    "detected": false
+  }
+}

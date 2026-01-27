@@ -306,7 +306,7 @@ const csp = [
 ```typescript
 // Line ~10: Update metadata
 export const metadata: Metadata = {
-  title: "Subtribe ATS - Dashboard",
+  title: "Subtribe - Dashboard",
   description: "Manage your hiring pipeline with AI-powered applicant tracking",
 };
 ```

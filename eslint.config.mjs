@@ -20,6 +20,17 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  // Disable display-name rule for evaluation components
+  {
+    files: [
+      "src/components/evaluation/**/*.tsx",
+      "src/components/evaluation/**/*.ts",
+    ],
+    rules: {
+      "react/display-name": "off",
+      "@typescript-eslint/no-unused-vars": "warn",
+    },
+  },
 ];
 
 export default eslintConfig;

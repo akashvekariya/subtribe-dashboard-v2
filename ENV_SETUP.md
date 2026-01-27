@@ -6,7 +6,7 @@ This document explains the environment variables required for the **Dashboard** 
 
 ### 1. `NEXT_PUBLIC_API_URL` (Required)
 
-**Purpose:** Backend API endpoint for the Subtribe ATS API.
+**Purpose:** Backend API endpoint for the Subtribe API.
 
 **Local Development:**
 
