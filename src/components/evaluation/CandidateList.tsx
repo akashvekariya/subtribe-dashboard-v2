@@ -26,6 +26,8 @@ import type {
 import { statusStyles, sortOptions } from "./config";
 import { getInitials, formatRelativeDate } from "./utils";
 import { useCandidateListContext } from "./context/CandidateListContext";
+import { isHighSignalTransition } from "@/lib/status-update-config";
+import { StatusFeedbackModal } from "./StatusFeedbackModal";
 import "./styles.css";
 
 // Candidate item type for the list
@@ -510,6 +512,15 @@ const CandidateCardSkeleton = memo(() => (
 // Main Component
 // ============================================
 
+// Pending status change state for modal
+interface PendingStatusChange {
+  candidateId: string;
+  candidateName: string;
+  currentStatus: ApplicationStatus;
+  newStatus: ApplicationStatus;
+  aiScore: number;
+}
+
 export const CandidateList = memo<CandidateListProps>(
   ({
     selectedId,
@@ -537,6 +548,10 @@ export const CandidateList = memo<CandidateListProps>(
       updatingStatusId,
       updateStatus,
     } = useCandidateListContext();
+
+    // State for feedback modal
+    const [pendingStatusChange, setPendingStatusChange] =
+      useState<PendingStatusChange | null>(null);
 
     // Filter options
     const tierOptions: FilterOption<Tier>[] = useMemo(
@@ -575,6 +590,52 @@ export const CandidateList = memo<CandidateListProps>(
       setSelectedStatuses([]);
       setSortOption("score_desc");
     }, [setSelectedTiers, setSelectedStatuses, setSortOption]);
+
+    // Handle status change - check if high-signal and show modal or update directly
+    const handleStatusChange = useCallback(
+      (candidate: CandidateListItem, newStatus: ApplicationStatus) => {
+        const highSignalResult = isHighSignalTransition(
+          candidate.applicationStatus,
+          newStatus,
+          candidate.score
+        );
+
+        if (highSignalResult.isHighSignal) {
+          // Show feedback modal
+          setPendingStatusChange({
+            candidateId: candidate.id,
+            candidateName: candidate.personalInfo.full_name,
+            currentStatus: candidate.applicationStatus,
+            newStatus,
+            aiScore: candidate.score,
+          });
+        } else {
+          // Direct update without feedback
+          updateStatus(candidate.id, newStatus);
+        }
+      },
+      [updateStatus]
+    );
+
+    // Handle modal submit
+    const handleModalSubmit = useCallback(
+      (notes?: string) => {
+        if (pendingStatusChange) {
+          updateStatus(
+            pendingStatusChange.candidateId,
+            pendingStatusChange.newStatus,
+            notes
+          );
+          setPendingStatusChange(null);
+        }
+      },
+      [pendingStatusChange, updateStatus]
+    );
+
+    // Handle modal cancel
+    const handleModalCancel = useCallback(() => {
+      setPendingStatusChange(null);
+    }, []);
 
     return (
       <div className={`candidate-list ${className}`}>
@@ -628,7 +689,9 @@ export const CandidateList = memo<CandidateListProps>(
                 onResumeClick={
                   onResumeClick ? () => onResumeClick(candidate) : undefined
                 }
-                onStatusChange={(status) => updateStatus(candidate.id, status)}
+                onStatusChange={(status) =>
+                  handleStatusChange(candidate, status)
+                }
                 isStatusUpdating={updatingStatusId === candidate.id}
               />
             ))
@@ -643,6 +706,18 @@ export const CandidateList = memo<CandidateListProps>(
             totalItems={totalItems}
             pageSize={pageSize}
             onPageChange={setCurrentPage}
+          />
+        )}
+
+        {/* Status Feedback Modal */}
+        {pendingStatusChange && (
+          <StatusFeedbackModal
+            candidateName={pendingStatusChange.candidateName}
+            currentStatus={pendingStatusChange.currentStatus}
+            newStatus={pendingStatusChange.newStatus}
+            aiScore={pendingStatusChange.aiScore}
+            onSubmit={handleModalSubmit}
+            onCancel={handleModalCancel}
           />
         )}
       </div>

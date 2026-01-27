@@ -3,7 +3,7 @@
  * Types used by various API endpoints
  */
 
-import { Company, EmailWildcard, EmailTemplate } from "@/types";
+import { Company } from "@/types";
 
 // ============================================================================
 // Auth Types
@@ -172,22 +172,6 @@ export interface ResumeDisplayMeta {
 export interface ResumeDisplayResponse {
   data: ResumeDisplayData | null;
   meta: ResumeDisplayMeta;
-}
-
-// ============================================================================
-// Email Types (internal API response types)
-// ============================================================================
-
-export interface WildcardsAPIResponse {
-  success: boolean;
-  message: string;
-  wildcards: EmailWildcard[];
-}
-
-export interface TemplatesAPIResponse {
-  success: boolean;
-  message: string;
-  templates: EmailTemplate[];
 }
 
 // ============================================================================

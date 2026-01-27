@@ -87,7 +87,8 @@ export interface UseCandidateListReturn {
   updatingStatusId: string | null;
   updateStatus: (
     candidateId: string,
-    status: ApplicationStatus
+    status: ApplicationStatus,
+    notes?: string
   ) => Promise<void>;
 
   // Actions
@@ -180,10 +181,14 @@ export function useCandidateList(jobId: string): UseCandidateListReturn {
 
   // Handle status change - call API to update
   const updateStatus = useCallback(
-    async (candidateId: string, status: ApplicationStatus) => {
+    async (candidateId: string, status: ApplicationStatus, notes?: string) => {
       setUpdatingStatusId(candidateId);
       try {
-        await api.applications.updateApplicationStatus(candidateId, status);
+        await api.applications.updateApplicationStatus(
+          candidateId,
+          status,
+          notes
+        );
         // Update local state after success
         setCandidates((prev) =>
           prev.map((c) =>

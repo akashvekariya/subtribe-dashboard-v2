@@ -15,10 +15,10 @@ import { companyAPI } from "./company";
 import { jobsAPI } from "./jobs";
 import { applicationsAPI } from "./applications";
 import { dashboardAPI } from "./dashboard";
-import { emailAPI } from "./email";
 import { invitesAPI } from "./invites";
 import { aiAPI } from "./ai";
 import { aiResumeEvalAPI } from "./ai-resume-eval";
+import { bulkUploadAPI } from "./bulk-upload";
 
 // Unified API object (same structure as before)
 export const api = {
@@ -27,10 +27,10 @@ export const api = {
   jobs: jobsAPI,
   applications: applicationsAPI,
   dashboard: dashboardAPI,
-  email: emailAPI,
   invites: invitesAPI,
   ai: aiAPI,
   aiResumeEval: aiResumeEvalAPI,
+  bulkUpload: bulkUploadAPI,
   checkAuth,
 };
 
@@ -42,7 +42,7 @@ export { companyAPI } from "./company";
 export { jobsAPI } from "./jobs";
 export { applicationsAPI } from "./applications";
 export { dashboardAPI } from "./dashboard";
-export { emailAPI } from "./email";
 export { invitesAPI } from "./invites";
 export { aiAPI } from "./ai";
 export { aiResumeEvalAPI } from "./ai-resume-eval";
+export { bulkUploadAPI } from "./bulk-upload";

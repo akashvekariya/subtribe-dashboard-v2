@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { onboardingSchema, type OnboardingInput } from "@/lib/validations";
 import { api, APIError } from "@/lib/api-client";
 import { getCurrentUser } from "@/lib/auth";
@@ -352,10 +353,13 @@ export default function OnboardingPage() {
                 <div className="bg-gray-50 rounded-lg p-4 space-y-4">
                   <div className="flex items-center space-x-4">
                     {formValues.logo_url ? (
-                      <img
+                      <Image
                         src={formValues.logo_url}
                         alt="Logo preview"
+                        width={64}
+                        height={64}
                         className="h-16 w-16 object-contain rounded"
+                        unoptimized
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = "none";
                         }}

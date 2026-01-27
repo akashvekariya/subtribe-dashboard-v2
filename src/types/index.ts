@@ -31,6 +31,7 @@ export interface Company {
   website_url?: string;
   tagline?: string;
   about?: string;
+  plan?: string;
   onboarding_completed?: boolean;
   created_at: string;
   updated_at: string;
@@ -191,83 +192,6 @@ export interface ApplicationStatusHistory {
   };
   notes?: string;
   created_at: string;
-}
-
-// Scheduled email for tracking automated emails
-export interface ScheduledEmail {
-  id: string;
-  template_type: string;
-  recipient_email: string;
-  recipient_name: string;
-  subject: string;
-  scheduled_for: string;
-  status: "pending" | "sent" | "failed" | "cancelled";
-  sent_at: string | null;
-  provider_message_id: string | null;
-  error_message: string | null;
-  created_at: string;
-}
-
-// Email Template interface
-export interface EmailTemplate {
-  id: string;
-  company_id: string;
-  name: string;
-  template_type: string;
-  category: "system" | "custom";
-  subject: string;
-  body: string;
-  wildcards: string[];
-  is_default: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-// Email Wildcard metadata
-export interface EmailWildcard {
-  name: string;
-  description: string;
-}
-
-// Email sending request
-export interface SendEmailRequest {
-  template_id?: string;
-  subject: string;
-  body: string;
-  send_immediately?: boolean;
-  scheduled_for?: string;
-}
-
-// Bulk email sending request
-export interface BulkEmailRequest {
-  application_ids: string[];
-  template_id?: string;
-  subject: string;
-  body: string;
-  send_immediately?: boolean;
-  scheduled_for?: string;
-}
-
-// Email send response
-export interface SendEmailResponse {
-  success: boolean;
-  email_id: string;
-  status: "sent" | "scheduled";
-  scheduled_for?: string;
-}
-
-// Bulk email response
-export interface BulkEmailResponse {
-  success: boolean;
-  emails_created: number;
-  status: "sent" | "scheduled";
-  scheduled_for?: string;
-}
-
-// Email preview response
-export interface EmailPreviewResponse {
-  subject: string;
-  body: string;
 }
 
 // API response types
@@ -683,3 +607,44 @@ export function createInitialCalibrationData(): CalibrationData {
 
 // Re-export evaluation types for convenience
 export type { EvaluationJSON, EvaluationTier } from "./evaluation";
+
+// ============================================================================
+// Bulk Upload Types
+// ============================================================================
+
+export type BulkUploadBatchStatus =
+  | "pending"
+  | "extracting"
+  | "processing"
+  | "completed"
+  | "failed";
+
+export interface BulkUploadBatch {
+  id: string;
+  job_id: string;
+  status: BulkUploadBatchStatus;
+  original_filename: string;
+  total_files: number;
+  valid_pdfs: number;
+  skipped_count: number;
+  duplicate_count: number;
+  processed_count: number;
+  failed_count: number;
+  progress_percent: number;
+  last_error: string | null;
+  created_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export interface BulkUploadHistoryItem {
+  id: string;
+  original_filename: string;
+  status: BulkUploadBatchStatus;
+  valid_pdfs: number;
+  processed_count: number;
+  failed_count: number;
+  duplicate_count: number;
+  created_at: string;
+  completed_at: string | null;
+}

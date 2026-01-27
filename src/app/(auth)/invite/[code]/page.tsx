@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { api, APIError, InviteValidationResponse } from "@/lib/api-client";
 import { Button } from "@/components/ui/Button";
 
@@ -226,10 +227,13 @@ export default function InvitePage() {
             <>
               {/* Team member invite - company logo or building icon */}
               {inviteData?.company_logo ? (
-                <img
+                <Image
                   src={inviteData.company_logo}
                   alt={inviteData.company_name || "Company"}
+                  width={64}
+                  height={64}
                   className="mx-auto h-16 w-auto object-contain"
+                  unoptimized
                 />
               ) : (
                 <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100">
